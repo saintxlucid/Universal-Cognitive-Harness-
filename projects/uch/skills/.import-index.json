@@ -1,0 +1,291 @@
+{
+    "version":  1,
+    "skills":  {
+                   "code-reviewer":  {
+                                         "sourceRepo":  "portable-skill-library",
+                                         "sourcePath":  "",
+                                         "installedAt":  "2026-07-31T03:13:43.044Z",
+                                         "files":  [
+                                                       "references",
+                                                       "SKILL.md",
+                                                       "references/common-issues.md",
+                                                       "references/feedback-examples.md",
+                                                       "references/receiving-feedback.md",
+                                                       "references/report-template.md",
+                                                       "references/review-checklist.md",
+                                                       "references/spec-compliance-review.md"
+                                                   ],
+                                         "force":  false
+                                     },
+                   "architecture-designer":  {
+                                                 "sourceRepo":  "portable-skill-library",
+                                                 "sourcePath":  "",
+                                                 "installedAt":  "2026-07-31T03:13:43.045Z",
+                                                 "files":  [
+                                                               "references",
+                                                               "SKILL.md",
+                                                               "references/adr-template.md",
+                                                               "references/architecture-patterns.md",
+                                                               "references/database-selection.md",
+                                                               "references/nfr-checklist.md",
+                                                               "references/system-design.md"
+                                                           ],
+                                                 "force":  false
+                                             },
+                   "api-designer":  {
+                                        "sourceRepo":  "portable-skill-library",
+                                        "sourcePath":  "",
+                                        "installedAt":  "2026-07-31T03:13:43.045Z",
+                                        "files":  [
+                                                      "references",
+                                                      "SKILL.md",
+                                                      "references/error-handling.md",
+                                                      "references/openapi.md",
+                                                      "references/pagination.md",
+                                                      "references/rest-patterns.md",
+                                                      "references/versioning.md"
+                                                  ],
+                                        "force":  false
+                                    },
+                   "database-optimizer":  {
+                                              "sourceRepo":  "portable-skill-library",
+                                              "sourcePath":  "",
+                                              "installedAt":  "2026-07-31T03:13:43.046Z",
+                                              "files":  [
+                                                            "references",
+                                                            "SKILL.md",
+                                                            "references/index-strategies.md",
+                                                            "references/monitoring-analysis.md",
+                                                            "references/mysql-tuning.md",
+                                                            "references/postgresql-tuning.md",
+                                                            "references/query-optimization.md"
+                                                        ],
+                                              "force":  false
+                                          },
+                   "devops-engineer":  {
+                                           "sourceRepo":  "portable-skill-library",
+                                           "sourcePath":  "",
+                                           "installedAt":  "2026-07-31T03:13:43.046Z",
+                                           "files":  [
+                                                         "references",
+                                                         "SKILL.md",
+                                                         "references/deployment-strategies.md",
+                                                         "references/docker-patterns.md",
+                                                         "references/github-actions.md",
+                                                         "references/incident-response.md",
+                                                         "references/kubernetes.md",
+                                                         "references/platform-engineering.md",
+                                                         "references/release-automation.md",
+                                                         "references/terraform-iac.md"
+                                                     ],
+                                           "force":  false
+                                       },
+                   "security-reviewer":  {
+                                             "sourceRepo":  "portable-skill-library",
+                                             "sourcePath":  "",
+                                             "installedAt":  "2026-07-31T03:13:43.047Z",
+                                             "files":  [
+                                                           "references",
+                                                           "SKILL.md",
+                                                           "references/infrastructure-security.md",
+                                                           "references/penetration-testing.md",
+                                                           "references/report-template.md",
+                                                           "references/sast-tools.md",
+                                                           "references/secret-scanning.md",
+                                                           "references/vulnerability-patterns.md"
+                                                       ],
+                                             "force":  false
+                                         },
+                   "test-master":  {
+                                       "sourceRepo":  "portable-skill-library",
+                                       "sourcePath":  "",
+                                       "installedAt":  "2026-07-31T03:13:43.048Z",
+                                       "files":  [
+                                                     "references",
+                                                     "SKILL.md",
+                                                     "references/automation-frameworks.md",
+                                                     "references/e2e-testing.md",
+                                                     "references/integration-testing.md",
+                                                     "references/performance-testing.md",
+                                                     "references/qa-methodology.md",
+                                                     "references/security-testing.md",
+                                                     "references/tdd-iron-laws.md",
+                                                     "references/test-reports.md",
+                                                     "references/testing-anti-patterns.md",
+                                                     "references/unit-testing.md"
+                                                 ],
+                                       "force":  false
+                                   },
+                   "code-documenter":  {
+                                           "sourceRepo":  "portable-skill-library",
+                                           "sourcePath":  "",
+                                           "installedAt":  "2026-07-31T03:13:43.049Z",
+                                           "files":  [
+                                                         "references",
+                                                         "SKILL.md",
+                                                         "references/api-docs-fastapi-django.md",
+                                                         "references/api-docs-nestjs-express.md",
+                                                         "references/coverage-reports.md",
+                                                         "references/documentation-systems.md",
+                                                         "references/interactive-api-docs.md",
+                                                         "references/python-docstrings.md",
+                                                         "references/typescript-jsdoc.md",
+                                                         "references/user-guides-tutorials.md"
+                                                     ],
+                                           "force":  false
+                                       },
+                   "debugging-wizard":  {
+                                            "sourceRepo":  "portable-skill-library",
+                                            "sourcePath":  "",
+                                            "installedAt":  "2026-07-31T03:13:43.050Z",
+                                            "files":  [
+                                                          "references",
+                                                          "SKILL.md",
+                                                          "references/common-patterns.md",
+                                                          "references/debugging-tools.md",
+                                                          "references/quick-fixes.md",
+                                                          "references/strategies.md",
+                                                          "references/systematic-debugging.md"
+                                                      ],
+                                            "force":  false
+                                        },
+                   "prompt-engineer":  {
+                                           "sourceRepo":  "portable-skill-library",
+                                           "sourcePath":  "",
+                                           "installedAt":  "2026-07-31T03:13:43.050Z",
+                                           "files":  [
+                                                         "references",
+                                                         "SKILL.md",
+                                                         "references/context-management.md",
+                                                         "references/evaluation-frameworks.md",
+                                                         "references/prompt-optimization.md",
+                                                         "references/prompt-patterns.md",
+                                                         "references/structured-outputs.md",
+                                                         "references/system-prompts.md"
+                                                     ],
+                                           "force":  false
+                                       },
+                   "spec-miner":  {
+                                      "sourceRepo":  "portable-skill-library",
+                                      "sourcePath":  "",
+                                      "installedAt":  "2026-07-31T03:13:43.051Z",
+                                      "files":  [
+                                                    "references",
+                                                    "SKILL.md",
+                                                    "references/analysis-checklist.md",
+                                                    "references/analysis-process.md",
+                                                    "references/ears-format.md",
+                                                    "references/specification-template.md"
+                                                ],
+                                      "force":  false
+                                  },
+                   "feature-forge":  {
+                                         "sourceRepo":  "portable-skill-library",
+                                         "sourcePath":  "",
+                                         "installedAt":  "2026-07-31T03:13:43.051Z",
+                                         "files":  [
+                                                       "references",
+                                                       "SKILL.md",
+                                                       "references/acceptance-criteria.md",
+                                                       "references/ears-syntax.md",
+                                                       "references/interview-questions.md",
+                                                       "references/pre-discovery-subagents.md",
+                                                       "references/specification-template.md"
+                                                   ],
+                                         "force":  false
+                                     },
+                   "fullstack-guardian":  {
+                                              "sourceRepo":  "portable-skill-library",
+                                              "sourcePath":  "",
+                                              "installedAt":  "2026-07-31T03:13:43.052Z",
+                                              "files":  [
+                                                            "references",
+                                                            "SKILL.md",
+                                                            "references/api-design-standards.md",
+                                                            "references/architecture-decisions.md",
+                                                            "references/backend-patterns.md",
+                                                            "references/common-patterns.md",
+                                                            "references/deliverables-checklist.md",
+                                                            "references/design-template.md",
+                                                            "references/error-handling.md",
+                                                            "references/frontend-patterns.md",
+                                                            "references/integration-patterns.md",
+                                                            "references/security-checklist.md"
+                                                        ],
+                                              "force":  false
+                                          },
+                   "mcp-developer":  {
+                                         "sourceRepo":  "portable-skill-library",
+                                         "sourcePath":  "",
+                                         "installedAt":  "2026-07-31T03:13:43.053Z",
+                                         "files":  [
+                                                       "references",
+                                                       "SKILL.md",
+                                                       "references/protocol.md",
+                                                       "references/python-sdk.md",
+                                                       "references/resources.md",
+                                                       "references/tools.md",
+                                                       "references/typescript-sdk.md"
+                                                   ],
+                                         "force":  false
+                                     },
+                   "monitoring-expert":  {
+                                             "sourceRepo":  "portable-skill-library",
+                                             "sourcePath":  "",
+                                             "installedAt":  "2026-07-31T03:13:43.054Z",
+                                             "files":  [
+                                                           "references",
+                                                           "SKILL.md",
+                                                           "references/alerting-rules.md",
+                                                           "references/application-profiling.md",
+                                                           "references/capacity-planning.md",
+                                                           "references/dashboards.md",
+                                                           "references/opentelemetry.md",
+                                                           "references/performance-testing.md",
+                                                           "references/prometheus-metrics.md",
+                                                           "references/structured-logging.md"
+                                                       ],
+                                             "force":  false
+                                         },
+                   "postgres-pro":  {
+                                        "sourceRepo":  "portable-skill-library",
+                                        "sourcePath":  "",
+                                        "installedAt":  "2026-07-31T03:13:43.054Z",
+                                        "files":  [
+                                                      "references",
+                                                      "SKILL.md",
+                                                      "references/extensions.md",
+                                                      "references/jsonb.md",
+                                                      "references/maintenance.md",
+                                                      "references/performance.md",
+                                                      "references/replication.md"
+                                                  ],
+                                        "force":  false
+                                    },
+                   "playwright-expert":  {
+                                             "sourceRepo":  "portable-skill-library",
+                                             "sourcePath":  "",
+                                             "installedAt":  "2026-07-31T03:13:43.055Z",
+                                             "files":  [
+                                                           "references",
+                                                           "SKILL.md",
+                                                           "references/api-mocking.md",
+                                                           "references/configuration.md",
+                                                           "references/debugging-flaky.md",
+                                                           "references/page-object-model.md",
+                                                           "references/selectors-locators.md"
+                                                       ],
+                                             "force":  false
+                                         },
+                   "karpathy-guidelines":  {
+                                               "sourceRepo":  "andrej-karpathy-skills-main",
+                                               "sourcePath":  "X:\\Onyx Pyramis\\Github downloads\\Github downloads\\andrej-karpathy-skills-main",
+                                               "installedAt":  "2026-07-31T03:27:50.702Z",
+                                               "files":  [
+                                                             "SKILL.md",
+                                                             "EXAMPLES.md"
+                                                         ],
+                                               "force":  true
+                                           }
+               }
+}

@@ -19,8 +19,11 @@ build/
 # UCH project exclusions
 projects/uch/graphify-out/
 projects/uch/src/graphify-out/
+projects/uch/.uccp/
 projects/uch/.uccp-test/
 projects/uch/.uccp-test-persist/
+projects/uch/.uch/
+projects/uch/lint*.json
 
 # IDE
 .vs/

@@ -182,6 +182,40 @@ prefrontal_cortex/
   cognitive_control.ts  # Top-down attention modulation
 ```
 
+## Cognitive Protocol (CP)
+
+CP is the stable semantic instruction set of the Cognitive OS — the
+syscall ABI. It is transport-agnostic (MCP, HTTP, gRPC, in-process are
+bindings), model-agnostic, and agent-agnostic. Versioned contract:
+`spec/CP.md`; implementation: `src/protocol/`.
+
+- Envelope: `{ protocol, version, op, requestId, timestamp, payload }`
+  with a mirrored response envelope carrying `success`, `data`/`error`,
+  and `meta.durationMs`.
+- 17 ops in v1: observe, think, retrieve, remember, learn, reflect,
+  consolidate, dream, plan, predict, simulate, evaluate, critique,
+  execute, status, list, ping.
+- Version gating is major-only: any `1.x.y` client is served; anything
+  else is rejected with `UNSUPPORTED_VERSION`.
+- A conformance suite (`src/protocol/conformance.ts`) exercises the
+  contract against any server; green conformance defines "speaks CP v1."
+- Bindings: MCP STDIO (`cp.list`, `cp.invoke` tools), UCCP HTTP
+  (`GET /cp/v1`, `POST /cp/v1/<op>`), in-process (`server.invoke`).
+
+## Driver Layer
+
+The Cognitive OS never knows what an IDE, an agent runtime, or a model
+vendor is — everything external enters through drivers.
+
+- **Driver registry** (`src/drivers/`): unified `Driver` interface
+  (id, name, start, stop, optional handleEvent) with lifecycle
+  management, fan-out event dispatch, and registration over the existing
+  7 drivers: filesystem, git, runtime, agent, acp, ide, mcp.
+- **LLM drivers** (`src/llm/drivers/`): `LLMDriver` interface
+  (complete, completeStream, optional completeMultiModal, optional
+  embed) with OpenAI, Anthropic, and Google implementations. The kernel
+  speaks to the interface; vendors churn behind it.
+
 ## NeuralFS (Cognitive Filesystem)
 
 Instead of files and directories, NeuralFS stores:

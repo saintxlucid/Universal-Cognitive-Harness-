@@ -2,7 +2,7 @@
 
 **Level I — Immutable. Never changes. No component may violate.**
 
-These 13 laws define what is *impossible* in the Cognitive Exoskeleton, not just what is allowed. They are mathematically invariant. Any component, organ, plugin, or interface that violates them is malformed and must be rejected.
+These 16 laws define what is *impossible* in the Cognitive Exoskeleton, not just what is allowed. They are mathematically invariant. Any component, organ, plugin, or interface that violates them is malformed and must be rejected.
 
 ---
 
