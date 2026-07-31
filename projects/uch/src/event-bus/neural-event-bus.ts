@@ -76,7 +76,14 @@ export type EventType =
   | 'runtime:cpu_spike'
   | 'runtime:health_check'
   | 'connectome:link'
-  | 'governance:event_denied';
+  | 'governance:event_denied'
+  | 'productivity:task_captured'
+  | 'productivity:day_planned'
+  | 'signal:fused'
+  | 'governance:code_reviewed'
+  | 'framework:selected'
+  | 'framework:completed'
+  | 'framework:error';
 
 export interface NeuralEvent {
   id: string;
