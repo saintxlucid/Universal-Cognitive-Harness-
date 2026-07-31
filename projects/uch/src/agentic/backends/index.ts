@@ -1,0 +1,26 @@
+export {
+  createPermission,
+  compileGlobToRegex,
+  normalizeForMatch,
+  matchesAnyPermission,
+  resolvePermission,
+  isSandboxBackend,
+  type BackendProtocol,
+  type SandboxBackendProtocol,
+  type FilesystemPermission,
+  type FileInfo,
+  type FileData,
+  type FileOperationError,
+  type ReadResult,
+  type WriteResult,
+  type EditResult,
+  type LsResult,
+  type GrepMatch,
+  type GrepResult,
+  type GlobResult,
+  type UploadResult,
+  type DownloadResult,
+  type ExecuteResult,
+} from './protocol.js';
+export { StateBackend, compileGlob, countOccurrences, base64ToBytes, type StateBackendSnapshot } from './state-backend.js';
+export { FilesystemBackend } from './filesystem-backend.js';
