@@ -57,8 +57,6 @@ export class BudgetTracker {
   check(agentId: string, sessionId: string, estimatedTokens: number, estimatedCost: number): BudgetCheckResult {
     this.maybeResetDaily();
 
-    const now = new Date().toISOString().split('T')[0]!;
-
     const daily = this.dailyUsage.get(agentId) ?? { tokens: 0, cost: 0 };
     const session = this.sessionUsage.get(sessionId) ?? { tokens: 0, cost: 0, toolCalls: 0 };
 
@@ -84,7 +82,6 @@ export class BudgetTracker {
   }
 
   record(record: UsageRecord): void {
-    const now = new Date().toISOString().split('T')[0]!;
     this.maybeResetDaily();
 
     const daily = this.dailyUsage.get(record.agentId) ?? { tokens: 0, cost: 0 };

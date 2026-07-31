@@ -2,8 +2,6 @@ import type { BiologicalFunctions } from '../../harness-api/biological-functions
 import type { CognitiveKernel } from '../../kernel/cognitive-kernel.js';
 import type { NeuralEventBus } from '../../event-bus/neural-event-bus.js';
 
-const SSE_HEADER = 'Content-Type: text/event-stream\r\nCache-Control: no-cache\r\nConnection: keep-alive\r\n\r\n';
-
 export type TransportMessage = { jsonrpc: '2.0'; id?: string | number; method?: string; result?: unknown; error?: { code: number; message: string }; params?: Record<string, unknown> };
 
 export class MCPSSETransport {
@@ -86,8 +84,8 @@ export class MCPSSETransport {
         return JSON.stringify({ jsonrpc: '2.0', id: msg.id, result: { tools: toolList } });
       }
       case 'tools/call': {
-        const toolName = (msg.params as any)?.name as string;
-        const args = ((msg.params as any)?.arguments ?? {}) as Record<string, unknown>;
+        const toolName = msg.params?.name as string;
+        const args = (msg.params?.arguments ?? {}) as Record<string, unknown>;
         const tool = this.tools.get(toolName);
         if (!tool) {
           return JSON.stringify({ jsonrpc: '2.0', id: msg.id, error: { code: -32602, message: `Unknown tool: ${toolName}` } });
@@ -106,7 +104,7 @@ export class MCPSSETransport {
         });
       }
       case 'resources/read': {
-        const uri = (msg.params as any)?.uri as string;
+        const uri = msg.params?.uri as string;
         if (uri === 'uccp://cognitive/state') {
           const stats = this.kernel.getStats();
           return JSON.stringify({ jsonrpc: '2.0', id: msg.id, result: { contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(stats, null, 2) }] } });
@@ -120,7 +118,7 @@ export class MCPSSETransport {
         });
       }
       case 'prompts/get': {
-        const promptName = (msg.params as any)?.name as string;
+        const promptName = msg.params?.name as string;
         if (promptName === 'cognitive-status') {
           const stats = this.kernel.getStats();
           const text = `Cognitive System Status:\n- Episodes: ${stats.episodes}\n- Concepts: ${stats.concepts}\n- Relationships: ${stats.relationships}\n- Beliefs: ${stats.beliefs}\n- Sleep Cycles: ${stats.sleep_cycles}`;

@@ -1,70 +1,50 @@
-import { writeSnapshot, readSnapshot, mapToRecord, recordToMap } from '../../cognitive-plane/persistence/persistence-engine.js';
-import type { CognitiveSignal, SignalType } from '../../cognitive-plane/signals/signal-store.js';
-
 export interface WebhookConfig {
-  id: string;
   url: string;
-  signalTypes: SignalType[];
-  headers?: Record<string, string>;
+  secret?: string;
+  events: string[];
   retryCount?: number;
   retryDelayMs?: number;
-  enabled: boolean;
+  timeoutMs?: number;
+  enabled?: boolean;
 }
 
 export interface WebhookDelivery {
   id: string;
-  webhookId: string;
-  signalId: string;
-  url: string;
-  status: 'pending' | 'success' | 'failed';
-  statusCode?: number;
+  webhookUrl: string;
+  event: string;
+  payload: unknown;
+  status: 'pending' | 'delivered' | 'failed';
   attempts: number;
-  error?: string;
-  timestamp: Date;
+  lastAttempt: number | null;
+  error: string | null;
 }
 
 export class WebhookDispatcher {
   private webhooks: Map<string, WebhookConfig> = new Map();
   private deliveries: WebhookDelivery[] = [];
-  private maxDeliveries: number;
+  private maxDeliveries = 10000;
 
-  constructor(maxDeliveries = 1000) {
-    this.maxDeliveries = maxDeliveries;
+  register(id: string, config: WebhookConfig): void {
+    this.webhooks.set(id, {
+      ...config,
+      enabled: config.enabled ?? true,
+      retryCount: config.retryCount ?? 3,
+      retryDelayMs: config.retryDelayMs ?? 1000,
+      timeoutMs: config.timeoutMs ?? 5000,
+    });
   }
 
-  register(config: WebhookConfig): void {
-    this.webhooks.set(config.id, config);
-  }
-
-  unregister(id: string): boolean {
-    return this.webhooks.delete(id);
+  unregister(id: string): void {
+    this.webhooks.delete(id);
   }
 
   getWebhooks(): WebhookConfig[] {
     return [...this.webhooks.values()];
   }
 
-  async dispatch(signal: CognitiveSignal): Promise<WebhookDelivery[]> {
-    const results: WebhookDelivery[] = [];
-    const matching = [...this.webhooks.values()].filter(
-      (w) => w.enabled && w.signalTypes.includes(signal.type),
-    );
-
-    for (const webhook of matching) {
-      const delivery = await this.deliver(webhook, signal);
-      results.push(delivery);
-    }
-
-    return results;
-  }
-
-  getDeliveries(limit = 50): WebhookDelivery[] {
-    return this.deliveries.slice(-limit);
-  }
-
   getStats(): { webhooks: number; totalDeliveries: number; successRate: number } {
     const total = this.deliveries.length;
-    const succeeded = this.deliveries.filter((d) => d.status === 'success').length;
+    const succeeded = this.deliveries.filter((d) => d.status === 'delivered').length;
     return {
       webhooks: this.webhooks.size,
       totalDeliveries: total,
@@ -72,99 +52,105 @@ export class WebhookDispatcher {
     };
   }
 
-  private async deliver(webhook: WebhookConfig, signal: CognitiveSignal): Promise<WebhookDelivery> {
-    const id = crypto.randomUUID();
-    const maxRetries = webhook.retryCount ?? 3;
-    const delayMs = webhook.retryDelayMs ?? 1000;
+  async dispatch(event: string, payload: unknown): Promise<WebhookDelivery[]> {
+    const results: WebhookDelivery[] = [];
+    const matching = [...this.webhooks.values()].filter(
+      (w) => w.enabled !== false && (w.events.includes('*') || w.events.includes(event)),
+    );
 
-    let lastError: string | undefined;
-    let statusCode: number | undefined;
+    for (const wh of matching) {
+      const delivery = await this.sendWithRetry(wh, event, payload);
+      results.push(delivery);
+      this.deliveries.push(delivery);
+    }
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    if (this.deliveries.length > this.maxDeliveries) {
+      this.deliveries = this.deliveries.slice(-this.maxDeliveries);
+    }
+
+    return results;
+  }
+
+  private async sendWithRetry(wh: WebhookConfig, event: string, payload: unknown): Promise<WebhookDelivery> {
+    const delivery: WebhookDelivery = {
+      id: `wh-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      webhookUrl: wh.url, event, payload,
+      status: 'pending', attempts: 0, lastAttempt: null, error: null,
+    };
+
+    for (let attempt = 0; attempt < wh.retryCount!; attempt++) {
+      delivery.attempts++;
+      delivery.lastAttempt = Date.now();
       try {
-        const response = await fetch(webhook.url, {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), wh.timeoutMs);
+        const body = wh.secret
+          ? { event, payload, signature: await this.sign(payload, wh.secret) }
+          : { event, payload };
+
+        const response = await fetch(wh.url, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...webhook.headers,
-          },
-          body: JSON.stringify({
-            event: 'cognitive_signal',
-            id: signal.id,
-            type: signal.type,
-            source: signal.source,
-            timestamp: signal.timestamp.toISOString(),
-            importance: signal.importance,
-            payload: signal.payload,
-          }),
+          headers: { 'Content-Type': 'application/json', 'User-Agent': 'UCH-Webhook/1.0' },
+          body: JSON.stringify(body),
+          signal: controller.signal,
         });
+        clearTimeout(timeout);
 
-        statusCode = response.status;
-
-        const delivery: WebhookDelivery = {
-          id,
-          webhookId: webhook.id,
-          signalId: signal.id,
-          url: webhook.url,
-          status: 'success',
-          statusCode,
-          attempts: attempt,
-          timestamp: new Date(),
-        };
-
-        this.recordDelivery(delivery);
-        return delivery;
-      } catch (err) {
-        lastError = err instanceof Error ? err.message : String(err);
-        if (attempt < maxRetries) {
-          await new Promise((resolve) => setTimeout(resolve, delayMs * attempt));
+        if (response.ok) {
+          delivery.status = 'delivered';
+          return delivery;
         }
+        delivery.error = `HTTP ${response.status}`;
+      } catch (err) {
+        delivery.error = err instanceof Error ? err.message : String(err);
+      }
+
+      if (attempt < wh.retryCount! - 1) {
+        await new Promise(r => setTimeout(r, wh.retryDelayMs! * Math.pow(2, attempt)));
       }
     }
 
-    const delivery: WebhookDelivery = {
-      id,
-      webhookId: webhook.id,
-      signalId: signal.id,
-      url: webhook.url,
-      status: 'failed',
-      statusCode,
-      attempts: maxRetries,
-      error: lastError,
-      timestamp: new Date(),
-    };
-
-    this.recordDelivery(delivery);
+    delivery.status = 'failed';
     return delivery;
   }
 
+  private async sign(payload: unknown, secret: string): Promise<string> {
+    const data = typeof payload === 'string' ? payload : JSON.stringify(payload);
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
+    return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  getDeliveries(event?: string): WebhookDelivery[] {
+    if (event) return this.deliveries.filter(d => d.event === event);
+    return [...this.deliveries];
+  }
+
+  getFailedDeliveries(): WebhookDelivery[] {
+    return this.deliveries.filter(d => d.status === 'failed');
+  }
+
+  storeNames(): string[] {
+    return [...this.webhooks.keys()];
+  }
+
   async persist(filePath: string): Promise<void> {
-    const data = {
-      webhooks: mapToRecord(this.webhooks),
+    const { writeSnapshot } = await import('../../cognitive-plane/persistence/persistence-engine.js');
+    writeSnapshot(filePath, {
+      webhooks: Object.fromEntries(this.webhooks),
       deliveries: this.deliveries,
       maxDeliveries: this.maxDeliveries,
-    };
-    writeSnapshot(filePath, data);
+    });
   }
 
   async load(filePath: string): Promise<number> {
-    const data = readSnapshot<{
-      webhooks: Record<string, WebhookConfig>;
-      deliveries: WebhookDelivery[];
-      maxDeliveries: number;
-    }>(filePath);
+    const { readSnapshot } = await import('../../cognitive-plane/persistence/persistence-engine.js');
+    const data = readSnapshot<{ webhooks: Record<string, WebhookConfig>; deliveries: WebhookDelivery[]; maxDeliveries: number }>(filePath);
     if (!data) return 0;
-
-    if (data.maxDeliveries !== undefined) this.maxDeliveries = data.maxDeliveries;
-    this.webhooks = recordToMap(data.webhooks ?? {});
-    this.deliveries = data.deliveries ?? [];
+    this.webhooks = new Map(Object.entries(data.webhooks));
+    this.deliveries = data.deliveries;
+    this.maxDeliveries = data.maxDeliveries;
     return this.webhooks.size;
-  }
-
-  private recordDelivery(delivery: WebhookDelivery): void {
-    this.deliveries.push(delivery);
-    if (this.deliveries.length > this.maxDeliveries) {
-      this.deliveries.shift();
-    }
   }
 }

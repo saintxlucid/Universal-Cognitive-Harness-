@@ -5,7 +5,6 @@ import * as path from 'node:path';
 const ALGORITHM = 'aes-256-gcm';
 const KEY_LENGTH = 32;
 const IV_LENGTH = 16;
-const TAG_LENGTH = 16;
 
 export interface SecretEntry {
   key: string;
