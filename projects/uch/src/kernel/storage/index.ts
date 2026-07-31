@@ -4,3 +4,7 @@ export { PersistentStore } from './persistent-store.js';
 export type { PersistentStoreConfig, StoreSnapshot } from './persistent-store.js';
 export { Journal, initJournal } from './journal.js';
 export type { JournalEntry, JournalOperation } from './journal.js';
+export { VectorStore } from './vector-store.js';
+export type { VectorRecord, SearchResult } from './vector-store.js';
+export { GraphStore } from './graph-store.js';
+export type { GraphNode, GraphEdge } from './graph-store.js';

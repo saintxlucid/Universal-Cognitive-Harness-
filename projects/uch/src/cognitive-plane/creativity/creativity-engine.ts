@@ -194,7 +194,7 @@ export class CreativityEngine {
     };
   }
 
-  private getTemplates(domain: IdeaDomain, technique: CreativeTechnique): Array<{ title: string; description: string; elaboration: string; risks: string[]; prerequisites: string[] }> {
+  private getTemplates(domain: IdeaDomain, _technique: CreativeTechnique): Array<{ title: string; description: string; elaboration: string; risks: string[]; prerequisites: string[] }> {
     const shared = [
       { title: 'New abstraction layer', description: `Introduce an abstraction layer in ${domain}`, elaboration: 'Separate concerns and reduce coupling.', risks: ['Over-engineering'], prerequisites: ['Understanding of current abstractions'] },
       { title: 'Inversion of control', description: `Invert control flow in ${domain}`, elaboration: 'Let the framework call your code.', risks: ['Increased complexity'], prerequisites: ['Clear interface boundaries'] },

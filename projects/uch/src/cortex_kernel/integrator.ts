@@ -7,6 +7,7 @@ import { ExecutiveCortex } from './executive-cortex.js';
 import { MetaBrain } from './meta-brain.js';
 import { ExecutiveBrain } from '../executive-brain/executive-brain.js';
 import type { InformationMetrics } from '../shared/branded-types.js';
+import { entropy, novelty } from '../shared/branded-types.js';
 
 export interface IntegrationInsight {
   layer: ConsciousnessLayer;
@@ -161,7 +162,7 @@ export class CortexKernel {
         if (pattern) {
           const infoValue = pattern.confidence * 0.6 + (reflexThoughts.filter(t => t.priority >= 0.9).length / 10) * 0.4;
           if (this.consciousnessGate.shouldReachConsciousness(
-            { entropy: 0 as any, novelty: infoValue as any, informationGain: infoValue, predictionError: 0 },
+            { entropy: entropy(0), novelty: novelty(infoValue), informationGain: infoValue, predictionError: 0 },
             this.cognitiveLoad,
             this.userActive,
           )) {
@@ -187,7 +188,7 @@ export class CortexKernel {
     const reflections = this.metaBrain.reflect();
     for (const r of reflections) {
       produced.push({
-        layer: 'meta' as any,
+        layer: 'meta',
         content: r.content,
         confidence: r.significance,
         timestamp: r.timestamp,

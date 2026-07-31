@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { CognitiveKernel } from '../cognitive-kernel.js';
 import { EpisodicStore } from '../storage/episodic-store.js';
 import { SemanticGraph } from '../storage/semantic-graph.js';
-import { createConcept, createEpisode, createEdge } from '../types/index.js';
+import { createConcept, createEdge } from '../types/index.js';
 import { createProvenance } from '../types/provenance.js';
 import { revise, createBeliefSet, classifyEpistemicStatus, assessTruth, type Proposition } from '../constitution/epistemology.js';
 import { RetrievalFusion } from '../retrieval/fusion.js';
@@ -44,9 +44,9 @@ describe('CognitiveKernel', () => {
     const c1 = kernel.addConcept({ name: 'Alice', concept_type: 'entity', definition: 'A person' });
     const c2 = kernel.addConcept({ name: 'Email', concept_type: 'entity', definition: 'Communication tool' });
 
-    const ep = kernel.remember({ content: { type: 'text', text: 'Alice prefers email' } });
+    kernel.remember({ content: { type: 'text', text: 'Alice prefers email' } });
 
-    const e1 = kernel.addRelationship({ source: c1.id, target: c2.id, relationship: 'prefers', source_episode: '' });
+    kernel.addRelationship({ source: c1.id, target: c2.id, relationship: 'prefers', source_episode: '' });
 
     const rels = kernel.getRelationships(c1.id);
     expect(rels.length).toBeGreaterThan(0);

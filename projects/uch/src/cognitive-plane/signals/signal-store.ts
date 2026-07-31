@@ -1,6 +1,5 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import type { CognitiveTrace } from '../trace-engine/cognitive-trace.js';
 import { TraceLedger } from '../trace-engine/trace-ledger.js';
 
 export type SignalType =

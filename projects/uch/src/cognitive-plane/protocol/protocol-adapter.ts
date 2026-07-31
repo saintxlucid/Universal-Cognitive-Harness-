@@ -1,4 +1,4 @@
-import { type CapabilityProtocol, type CapabilityHandler, type CapabilityResult, CognitiveProtocolRegistry, capabilityID } from './capability-protocol.js';
+import { type CapabilityProtocol, type CapabilityHandler, CognitiveProtocolRegistry, capabilityID } from './capability-protocol.js';
 
 export function createProtocolAdapter(
   registry: CognitiveProtocolRegistry,

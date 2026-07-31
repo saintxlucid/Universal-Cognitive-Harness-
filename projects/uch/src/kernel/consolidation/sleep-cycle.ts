@@ -90,7 +90,7 @@ export class SleepCycle {
     report.patterns_found = patterns.length;
 
     // 3. Build abstractions
-    for (const pattern of patterns) {
+    for (const _pattern of patterns) {
       // In a full implementation, this would create abstract concepts
       report.abstractions_created++;
     }

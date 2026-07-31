@@ -1,4 +1,4 @@
-import { Consciousness, type ConsciousnessLayer } from '../aether/consciousness.js';
+import { Consciousness } from '../aether/consciousness.js';
 import { CognitiveKernel } from '../kernel/cognitive-kernel.js';
 
 export interface ExtractedConcept {

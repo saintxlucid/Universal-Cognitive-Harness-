@@ -1,7 +1,5 @@
-import type { CognitiveTrace } from '../trace-engine/cognitive-trace.js';
-import type { CognitiveSignal } from '../signals/signal-store.js';
 import { TraceLedger } from '../trace-engine/trace-ledger.js';
-import { DecisionLog, type DecisionEntry } from '../decisions/decision-log.js';
+import { DecisionLog } from '../decisions/decision-log.js';
 import { SignalStore } from '../signals/signal-store.js';
 
 export interface SearchOptions {

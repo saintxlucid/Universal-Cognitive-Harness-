@@ -117,7 +117,7 @@ export class MutationEngine {
     return this.mutations.filter((m) => m.applied && !m.rollbacked && (m.score ?? 0) >= threshold);
   }
 
-  generateProposals(metrics: Record<string, number>): MutationProposal[] {
+  generateProposals(_metrics: Record<string, number>): MutationProposal[] {
     const proposals: MutationProposal[] = [];
     for (const [name, sub] of this.subsystems) {
       const config = sub.getConfig();

@@ -1,5 +1,5 @@
 import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
-import { Planner, type Plan, type PlanStep } from './planner.js';
+import { Planner, type Plan } from './planner.js';
 import { DecisionEngine, type Decision, type DecisionOption } from './decision-engine.js';
 import { Critic, type Critique, type CritiqueIssue } from './critic.js';
 import {

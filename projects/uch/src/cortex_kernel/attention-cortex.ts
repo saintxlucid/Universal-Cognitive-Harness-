@@ -1,5 +1,5 @@
 import { ConsciousnessGate } from './integrator.js';
-import { Consciousness, type ConsciousnessLayer } from '../aether/consciousness.js';
+import { Consciousness } from '../aether/consciousness.js';
 import { entropy, novelty } from '../shared/branded-types.js';
 
 export interface ImportanceSignal {

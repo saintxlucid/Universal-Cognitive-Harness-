@@ -18,15 +18,25 @@ export {
   createTrace,
   endTrace,
   addTraceEvent,
+  generateTraceId,
+  generateSpanId,
+  normalizeTraceId,
+  normalizeSpanId,
+  OtelBridge,
+  hasRegisteredTracerProvider,
+  parseTraceparent,
+  serializeTraceparent,
 } from './trace-engine/index.js';
 export type {
   TraceLedgerStats,
+  TraceRecorderOptions,
   CognitiveTrace,
   TraceEvent,
   TraceEventType,
   TraceAttribute,
   SpanKind,
   TraceStatus,
+  ParsedTraceparent,
 } from './trace-engine/index.js';
 export {
   Conscience,
@@ -62,4 +72,31 @@ export {
 export type {
   ReplaySnapshot,
   ReplayOptions,
+  ReplayEventEntry,
+  ResumeContext,
 } from './replay/index.js';
+
+  // -- Takes / Calibration --------------------
+export {
+  TakeFence,
+  QUALITY_VALUES,
+  computeCalibrationProfile,
+  brierForTake,
+  gateVoice,
+  gateWithFallback,
+  fallbackTemplate,
+  CalibrationStore,
+} from './calibration/index.js';
+export type {
+  Take,
+  TakeQuality,
+  AddTakeInput,
+  ResolveTakeInput,
+  CalibrationProfile,
+  ScorecardRow,
+  ConvictionBucket,
+  CalibrationOptions,
+  VoiceGateResult,
+  VoiceGateOptions,
+  VoiceMode,
+} from './calibration/index.js';

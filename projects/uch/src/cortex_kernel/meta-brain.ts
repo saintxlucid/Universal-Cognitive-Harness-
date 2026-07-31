@@ -1,5 +1,5 @@
-import { Consciousness, type ConsciousnessLayer } from '../aether/consciousness.js';
-import { ConsciousnessGate, type IntegrationInsight } from './integrator.js';
+import { Consciousness } from '../aether/consciousness.js';
+import { ConsciousnessGate } from './integrator.js';
 import { entropy, novelty } from '../shared/branded-types.js';
 
 export interface SelfObservation {
@@ -213,7 +213,7 @@ export class MetaBrain {
       pattern.observations.reduce((s, o) => s + o.arousal, 0) / pattern.observations.length;
 
     let content: string;
-    let recommendations: string[] = [];
+    let recommendations: string[];
 
     if (avgValence < -0.3) {
       content = `Recurring ${pattern.category} issue in '${pattern.aspect}': ${pattern.count} occurrences, negatively valenced (${avgValence.toFixed(2)})`;

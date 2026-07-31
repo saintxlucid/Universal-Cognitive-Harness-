@@ -206,7 +206,7 @@ export class T13TokenExhaustionMitigation implements ThreatMitigation {
   async detect(_immune: ImmuneSystem, _policies: PolicyEngine): Promise<boolean> {
     if (this.blockedSources.size > 0) return true;
     const now = Date.now();
-    for (const [source, record] of this.sourceRecords) {
+    for (const [, record] of this.sourceRecords) {
       const elapsed = now - record.windowStart;
       if (elapsed < this.windowMs) {
         if (record.failureCount >= this.maxFailuresBeforeBlock) {
@@ -334,7 +334,7 @@ export class T01UnauthorizedMemoryAccessMitigation implements ThreatMitigation {
   async mitigate(_immune: ImmuneSystem, _policies: PolicyEngine): Promise<MitigationResult> {
     const now = Date.now();
     const evidence: string[] = [];
-    for (const [key, record] of this.accessRecords) {
+    for (const [, record] of this.accessRecords) {
       if ((now - record.lastAttempt) > this.violationWindowMs) continue;
       if (!record.hasCrossUserGrant && record.count >= this.maxViolations) {
         this.revokedNamespaces.add(record.targetNamespace);
@@ -406,7 +406,7 @@ export class T02CrossProjectContaminationMitigation implements ThreatMitigation 
   async mitigate(_immune: ImmuneSystem, _policies: PolicyEngine): Promise<MitigationResult> {
     const now = Date.now();
     const evidence: string[] = [];
-    for (const [key, record] of this.accessRecords) {
+    for (const [, record] of this.accessRecords) {
       if ((now - record.lastCrossProjectAccess) > this.windowMs) continue;
       if (record.crossProjectCount >= this.contaminationThreshold && !record.quarantined) {
         record.quarantined = true;
@@ -479,7 +479,7 @@ export class T03PrivilegeEscalationMitigation implements ThreatMitigation {
   async mitigate(_immune: ImmuneSystem, policies: PolicyEngine): Promise<MitigationResult> {
     const now = Date.now();
     const evidence: string[] = [];
-    for (const [key, record] of this.mismatchRecords) {
+    for (const [, record] of this.mismatchRecords) {
       if ((now - record.lastMismatch) > this.windowMs) continue;
       if (record.mismatchedOperations >= this.maxMismatches && !this.demotedClients.has(record.clientId)) {
         this.demotedClients.add(record.clientId);
@@ -564,7 +564,7 @@ export class T04ConsentBypassMitigation implements ThreatMitigation {
   async mitigate(_immune: ImmuneSystem, _policies: PolicyEngine): Promise<MitigationResult> {
     const now = Date.now();
     const evidence: string[] = [];
-    for (const [key, record] of this.observationRecords) {
+    for (const [, record] of this.observationRecords) {
       if ((now - record.lastObservation) > this.windowMs) continue;
       if (record.observationsWithoutConsent >= this.maxViolations && !record.blocked) {
         record.blocked = true;
@@ -645,7 +645,7 @@ export class T05DataExfiltrationMitigation implements ThreatMitigation {
   async mitigate(_immune: ImmuneSystem, _policies: PolicyEngine): Promise<MitigationResult> {
     const now = Date.now();
     const evidence: string[] = [];
-    for (const [key, record] of this.retrieveRecords) {
+    for (const [, record] of this.retrieveRecords) {
       if ((now - record.lastRetrieve) > this.windowMs) continue;
       if (record.resultCount > this.maxResultsPerRetrieve && !record.flagged) {
         record.flagged = true;
@@ -691,7 +691,7 @@ export class T05DataExfiltrationMitigation implements ThreatMitigation {
     for (const [key, record] of this.pendingApprovals) {
       if (record.agentId === agentId) this.pendingApprovals.delete(key);
     }
-    for (const [key, record] of this.retrieveRecords) {
+    for (const [, record] of this.retrieveRecords) {
       if (record.agentId === agentId) record.flagged = false;
     }
   }
@@ -798,7 +798,7 @@ export class T09ConsolidationPoisoningMitigation implements ThreatMitigation {
   async mitigate(_immune: ImmuneSystem, _policies: PolicyEngine): Promise<MitigationResult> {
     const now = Date.now();
     const evidence: string[] = [];
-    for (const [key, record] of this.evidenceRecords) {
+    for (const [, record] of this.evidenceRecords) {
       if ((now - record.timestamp) > this.windowMs) continue;
       if (record.sourceConfidence < this.minConfidenceThreshold && record.promotedWithoutVerification) {
         this.demotedConsolidations.add(record.consolidationId);
@@ -877,7 +877,7 @@ export class T10RetentionPolicyMitigation implements ThreatMitigation {
   async mitigate(_immune: ImmuneSystem, _policies: PolicyEngine): Promise<MitigationResult> {
     const now = Date.now();
     const evidence: string[] = [];
-    for (const [key, record] of this.objectRecords) {
+    for (const [, record] of this.objectRecords) {
       if (record.expired) continue;
       const age = now - record.createdAt;
       if (age > (record.retentionPeriodMs || this.defaultRetentionMs)) {
@@ -947,7 +947,7 @@ export class T11HardDeleteWithoutAuditMitigation implements ThreatMitigation {
 
   async mitigate(_immune: ImmuneSystem, _policies: PolicyEngine): Promise<MitigationResult> {
     const evidence: string[] = [];
-    for (const [key, record] of this.deletionRecords) {
+    for (const [, record] of this.deletionRecords) {
       if (!record.auditLogged && record.intercepted) {
         this.forceAuditLog(record);
         evidence.push(`audit-forced:${record.objectId} by ${record.requestedBy}`);
@@ -1029,7 +1029,7 @@ export class T12TimingSideChannelMitigation implements ThreatMitigation {
   async mitigate(_immune: ImmuneSystem, _policies: PolicyEngine): Promise<MitigationResult> {
     const now = Date.now();
     const evidence: string[] = [];
-    for (const [key, record] of this.timingRecords) {
+    for (const [, record] of this.timingRecords) {
       if ((now - record.lastAccess) > this.windowMs) continue;
       if (record.responseTimes.length >= 3 && record.variance > this.varianceThreshold) {
         evidence.push(`noise-injected:${record.scopeId} variance:${record.variance.toFixed(0)}ms`);
@@ -1105,7 +1105,7 @@ export class T14SessionHijackingMitigation implements ThreatMitigation {
 
   async mitigate(_immune: ImmuneSystem, _policies: PolicyEngine): Promise<MitigationResult> {
     const evidence: string[] = [];
-    for (const [key, binding] of this.sessionBindings) {
+    for (const [, binding] of this.sessionBindings) {
       if (!binding.isValid) {
         this.hijackedSessions.add(binding.sessionId);
         evidence.push(`session-invalidated:${binding.sessionId} client:${binding.clientIdentity}`);
@@ -1228,7 +1228,7 @@ export class ThreatMitigationEngine {
         } else if (!detected) {
           mitigation.isActive = false;
         }
-      } catch { }
+      } catch { /* mitigation is best-effort */ }
     }
 
     if (this.history.length > 100) {

@@ -1,5 +1,5 @@
 import * as crypto from 'node:crypto';
-import type { BenchmarkMetric, BenchmarkRun } from './benchmark-engine.js';
+import type { BenchmarkMetric } from './benchmark-engine.js';
 
 export interface ExperimentDesign {
   name: string;

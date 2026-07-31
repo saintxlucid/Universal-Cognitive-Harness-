@@ -1,7 +1,6 @@
-import * as crypto from 'node:crypto';
-import { BenchmarkEngine, type BenchmarkMetric, type BenchmarkRun, type Benchmarkable } from './benchmark-engine.js';
+import { BenchmarkEngine, type Benchmarkable, type BenchmarkRun } from './benchmark-engine.js';
 import { ExperimentEngine, type ExperimentDesign, type ExperimentResult } from './experiment-engine.js';
-import { MutationEngine, type MutationProposal, type MutationResult, type MutableSubsystem, type Mutation } from './mutation-engine.js';
+import { MutationEngine, type MutationResult, type MutableSubsystem } from './mutation-engine.js';
 
 export class EvolutionEngine {
   benchmark: BenchmarkEngine;

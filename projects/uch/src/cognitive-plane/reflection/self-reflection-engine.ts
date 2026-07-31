@@ -1,6 +1,5 @@
 import { writeSnapshot, readSnapshot } from '../persistence/persistence-engine.js';
 import { ScientificMemory } from '../memory/scientific-memory.js';
-import type { CompilationArtifact } from '../compiler/knowledge-compiler.js';
 
 export type ReflectionPhase =
   | 'dawn' | 'morning' | 'afternoon' | 'evening' | 'dusk';

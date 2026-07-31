@@ -183,14 +183,14 @@ describe('Critic — edge cases', () => {
   });
 
   it('getIssuesBySeverity returns empty for unmatching severity', () => {
-    const c = critic.createCritique('t', 'code', [
+    critic.createCritique('t', 'code', [
       { severity: 'major', category: 'safety', description: 'x', evidence: '', recommendation: '' },
     ]);
     expect(critic.getIssuesBySeverity('critical')).toHaveLength(0);
   });
 
   it('getIssuesByCategory returns empty for unmatching category', () => {
-    const c = critic.createCritique('t', 'code', [
+    critic.createCritique('t', 'code', [
       { severity: 'major', category: 'safety', description: 'x', evidence: '', recommendation: '' },
     ]);
     expect(critic.getIssuesByCategory('style')).toHaveLength(0);

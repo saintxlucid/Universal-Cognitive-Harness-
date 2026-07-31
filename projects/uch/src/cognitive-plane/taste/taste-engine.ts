@@ -111,7 +111,7 @@ export class TasteEngine {
     return pref;
   }
 
-  private generateSuggestions(dimension: TasteDimension, score: number, candidate: string): string[] {
+  private generateSuggestions(dimension: TasteDimension, score: number, _candidate: string): string[] {
     const suggestions: string[] = [];
     if (score < 0.4) {
       switch (dimension) {

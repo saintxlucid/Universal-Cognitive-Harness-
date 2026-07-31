@@ -1,6 +1,5 @@
 import type { Edge } from '../types/edge.js';
 import type { Concept } from '../types/concept.js';
-import type { Provenance, Confidence } from '../types/provenance.js';
 
 export class SemanticGraph {
   private concepts: Map<string, Concept> = new Map();
@@ -24,6 +23,26 @@ export class SemanticGraph {
 
   getAllConcepts(): Concept[] {
     return [...this.concepts.values()];
+  }
+
+  /** Rebinds a concept and its edges to a new stable id (used by snapshot restore). */
+  renameConcept(oldId: string, newId: string): boolean {
+    const concept = this.concepts.get(oldId);
+    if (!concept || this.concepts.has(newId)) return false;
+    this.concepts.delete(oldId);
+    concept.id = newId;
+    this.concepts.set(newId, concept);
+    this.concept_by_name.set(concept.name.toLowerCase(), newId);
+    for (const [, edge] of this.edges) {
+      if (edge.source === oldId) edge.source = newId;
+      if (edge.target === oldId) edge.target = newId;
+    }
+    const adjacency = this.adjacency.get(oldId);
+    if (adjacency) {
+      this.adjacency.delete(oldId);
+      this.adjacency.set(newId, adjacency);
+    }
+    return true;
   }
 
   addEdge(edge: Edge): void {

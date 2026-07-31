@@ -1,7 +1,6 @@
 import { EventLedger } from '../cognitive-recorder/event-ledger.js';
 import type { CognitiveActivity } from '../cognitive-recorder/cognitive-activity.js';
 import { CognitiveKernel } from '../kernel/cognitive-kernel.js';
-import { createProvenance } from '../kernel/types/provenance.js';
 
 export interface ReflectionReport {
   timestamp: Date;
@@ -27,7 +26,7 @@ export class Conscience {
     this.kernel = kernel;
   }
 
-  async reflect(sessionId: string, agentId: string): Promise<ReflectionReport> {
+  async reflect(sessionId: string, _agentId: string): Promise<ReflectionReport> {
     const activities = this.ledger.getBySession(sessionId);
     const stats = this.kernel.getStats();
     const recent = this.ledger.getRecent(10);

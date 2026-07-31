@@ -6,6 +6,7 @@ import { EpisodicStore } from './episodic-store.js';
 import { SemanticGraph } from './semantic-graph.js';
 import type { SourceType } from '../types/provenance.js';
 import type { EpisodeContent } from '../types/episode.js';
+import type { ConceptType } from '../types/concept.js';
 
 export interface PersistentStoreConfig {
   basePath: string;
@@ -232,7 +233,7 @@ export class PersistentStore {
         const { createProvenance } = await import('../types/provenance.js');
         const concept = createConcept({
           name: c.name,
-          concept_type: c.concept_type as any,
+          concept_type: c.concept_type as ConceptType,
           definition: c.definition,
           provenance: createProvenance('system_log', 'restored'),
           importance: c.importance,

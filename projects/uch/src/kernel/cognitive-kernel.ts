@@ -2,13 +2,16 @@ import { EpisodicStore } from './storage/episodic-store.js';
 import { SemanticGraph } from './storage/semantic-graph.js';
 import { PersistentStore } from './storage/persistent-store.js';
 import { RetrievalFusion, type FusionQuery, type ScoredResult } from './retrieval/fusion.js';
+import { ContextCompressor, type CompressOptions } from './retrieval/context-compressor.js';
 import { SleepCycle, type SleepReport } from './consolidation/sleep-cycle.js';
 import { Neuromodulation, type ContextState, type NeuromodulationState } from './cortex/neuromodulation.js';
-import { createProvenance, createConfidence } from './types/provenance.js';
+import { createProvenance } from './types/provenance.js';
 import { createConcept, type Concept, type ConceptType } from './types/concept.js';
-import { createEpisode, type Episode, type EpisodeContent } from './types/episode.js';
+import { type Episode, type EpisodeContent } from './types/episode.js';
 import { createEdge, type Edge } from './types/edge.js';
-import { revise, integrateEvidence, createBeliefSet, type BeliefSet } from './constitution/epistemology.js';
+import { integrateEvidence, createBeliefSet, type BeliefSet } from './constitution/epistemology.js';
+import { ActivationField, type ActivationFieldConfig, type FieldStats } from './activation/activation-field.js';
+import { WorldModelEngine } from './world-model/world-model.js';
 
 export interface CognitiveKernelConfig {
   agent_id: string;
@@ -16,6 +19,7 @@ export interface CognitiveKernelConfig {
   project_id: string;
   sleep_interval_ms?: number;
   persistence_path?: string;
+  activation?: Partial<ActivationFieldConfig>;
 }
 
 export class CognitiveKernel {
@@ -28,12 +32,15 @@ export class CognitiveKernel {
   private neuromodulation: Neuromodulation;
   private beliefs: BeliefSet;
   private session_id: string;
+  private activationField: ActivationField;
+  private worldModels: WorldModelEngine | null = null;
 
   constructor(config: CognitiveKernelConfig) {
     this.config = config;
     this.session_id = crypto.randomUUID();
     this.episodic = new EpisodicStore();
     this.graph = new SemanticGraph();
+    this.activationField = new ActivationField(config.activation);
     this.neuromodulation = new Neuromodulation();
     this.retrieval = new RetrievalFusion(this.graph, this.episodic);
     this.sleep = new SleepCycle(this.episodic, this.graph, this.neuromodulation, {
@@ -111,18 +118,47 @@ export class CognitiveKernel {
       });
     }
 
+    this.activationField.register({
+      id: episode.id,
+      label: this.episodeLabel(params.content),
+      kind: 'episode',
+      activation: 0.3,
+    });
+    for (const conceptId of params.concepts ?? []) {
+      const concept = this.graph.getConcept(conceptId);
+      this.activationField.register({
+        id: conceptId,
+        label: concept?.name ?? conceptId,
+        kind: 'concept',
+      });
+      this.activationField.spike(conceptId, 0.4);
+    }
+
     return episode;
   }
 
   async recall(query: FusionQuery): Promise<ScoredResult[]> {
     const results = this.retrieval.search(query);
-    return this.retrieval.mmrRerank(results, 0.5, 10);
+    const reranked = this.retrieval.mmrRerank(results, 0.5, 10);
+    for (const result of reranked.slice(0, 3)) {
+      this.activationField.spike(result.id, 0.3);
+    }
+    return reranked;
   }
 
   recallFormatted(query: FusionQuery): string {
     const results = this.retrieval.search(query);
     const reranked = this.retrieval.mmrRerank(results, 0.5, 10);
     return this.retrieval.formatContext(reranked);
+  }
+
+  recallCompressed(query: FusionQuery, options?: CompressOptions): {
+    text: string;
+    stats: ReturnType<ContextCompressor['compress']>['stats'];
+  } {
+    const results = this.retrieval.search(query);
+    const reranked = this.retrieval.mmrRerank(results, 0.5, 10);
+    return new ContextCompressor(options).compress(reranked, query);
   }
 
   // === Concept Management ===
@@ -149,6 +185,13 @@ export class CognitiveKernel {
     }
 
     this.graph.addConcept(concept);
+    this.activationField.register({
+      id: concept.id,
+      label: concept.name,
+      kind: `concept:${concept.concept_type}`,
+      activation: 0.2,
+      utility: params.importance,
+    });
     if (this.persistence) {
       this.persistence.addConcept(concept).catch(() => {});
     }
@@ -180,6 +223,7 @@ export class CognitiveKernel {
     });
 
     this.graph.addEdge(edge);
+    this.activationField.link(params.source, params.target, params.confidence);
     if (this.persistence) {
       this.persistence.addEdge(edge).catch(() => {});
     }
@@ -252,6 +296,11 @@ export class CognitiveKernel {
 
   getEpisodicStore(): EpisodicStore { return this.episodic; }
   getSemanticGraph(): SemanticGraph { return this.graph; }
+  getActivationField(): ActivationField { return this.activationField; }
+  getWorldModels(): WorldModelEngine {
+    this.worldModels ??= new WorldModelEngine({ field: this.activationField });
+    return this.worldModels;
+  }
   getPersistence(): PersistentStore | null { return this.persistence; }
   async setPersistencePath(path: string): Promise<void> {
     this.config.persistence_path = path;
@@ -259,7 +308,20 @@ export class CognitiveKernel {
     await this.persistence.init();
   }
 
+  // === Activation Field ===
+
+  tickField(deltaMs: number): void {
+    this.activationField.tick(deltaMs);
+  }
+
   // === Stats ===
+
+  private episodeLabel(content: EpisodeContent): string {
+    if (content.type === 'text') return content.text.slice(0, 60);
+    if (content.type === 'observation') return content.observation.slice(0, 60);
+    if (content.type === 'tool_call') return `tool:${content.tool}`;
+    return 'structured';
+  }
 
   getStats(): CognitiveKernelStats {
     return {
@@ -271,6 +333,7 @@ export class CognitiveKernel {
       sleep_active: this.sleep.isRunning(),
       sleep_cycles: this.sleep.getCycleCount(),
       neuromodulation: this.neuromodulation.getState(),
+      activation: this.activationField.getStats(),
     };
   }
 }
@@ -284,4 +347,5 @@ export interface CognitiveKernelStats {
   sleep_active: boolean;
   sleep_cycles: number;
   neuromodulation: NeuromodulationState;
+  activation: FieldStats;
 }

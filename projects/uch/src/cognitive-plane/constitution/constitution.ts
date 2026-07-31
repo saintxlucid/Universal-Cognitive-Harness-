@@ -1,4 +1,4 @@
-import { writeSnapshot, readSnapshot, mapToRecord, recordToMap } from '../persistence/persistence-engine.js';
+import { writeSnapshot, readSnapshot, mapToRecord } from '../persistence/persistence-engine.js';
 
 export type LawSeverity = 'immutable' | 'foundational' | 'advisory';
 
@@ -133,6 +133,22 @@ export class CognitiveConstitution {
     if (check.startsWith('no_fabrication')) {
       return context.evidence === false;
     }
+    if (check === 'no_workspace_mutation') {
+      return context.workspaceMutation === true;
+    }
+    if (check === 'frugal_inference') {
+      return context.frugalInference === false;
+    }
+    // Information Integrity Checklist: context flags name the violation condition.
+    if (check.startsWith('integrity:')) {
+      const key = check.slice('integrity:'.length);
+      return context[key] === true;
+    }
+    // Clean Code Covenant: context flags name the violation condition.
+    if (check.startsWith('covenant:')) {
+      const key = check.slice('covenant:'.length);
+      return context[key] === true;
+    }
     return false;
   }
 
@@ -182,6 +198,20 @@ export class CognitiveConstitution {
         severity: 'immutable', category: 'integrity',
         provenance: 'cognitive-constitution-builtin',
         check: 'no_fabrication',
+      },
+      {
+        name: 'Coprocessor Workspace Isolation',
+        description: 'No internal coprocessor may directly modify the workspace. Accelerators receive serializable input and return structured output; only the external Pilot writes code, edits files, or executes commands.',
+        severity: 'immutable', category: 'accelerator',
+        provenance: 'cognitive-constitution-builtin',
+        check: 'no_workspace_mutation',
+      },
+      {
+        name: 'Frugal Inference by Default',
+        description: 'Trivial cognition must never trigger paid inference. The Cognitive Scheduler gates model calls behind a cognitive profile; deterministic coprocessors handle low-complexity work.',
+        severity: 'foundational', category: 'accelerator',
+        provenance: 'cognitive-constitution-builtin',
+        check: 'frugal_inference',
       },
       {
         name: 'Provenance Requirement',
@@ -237,6 +267,78 @@ export class CognitiveConstitution {
         description: 'Preserve provenance when transforming or compressing knowledge.',
         severity: 'foundational', category: 'knowledge',
         provenance: 'cognitive-constitution-builtin',
+      },
+      // === Information Integrity Checklist (ledger 5.4) ===
+      {
+        name: 'Objectivity Required',
+        description: 'Information Integrity Checklist #1: no plan or claim may be grounded on a purely subjective assertion. Every claim must be objective — verifiable against workspace state or external evidence.',
+        severity: 'immutable', category: 'integrity',
+        provenance: 'cognitive-constitution-builtin',
+        check: 'integrity:subjectivity',
+      },
+      {
+        name: 'Qualified Source Required',
+        description: 'Information Integrity Checklist #2: every sourced claim must carry a qualified source — identified, relevant, and competent for the claim. Unqualified sources must not gate decisions.',
+        severity: 'immutable', category: 'integrity',
+        provenance: 'cognitive-constitution-builtin',
+        check: 'integrity:unqualified_source',
+      },
+      {
+        name: 'No Prejudice as Evidence',
+        description: 'Information Integrity Checklist #3: claims sourced from material showing evidence of prejudice must be flagged and cannot be treated as neutral evidence.',
+        severity: 'foundational', category: 'integrity',
+        provenance: 'cognitive-constitution-builtin',
+        check: 'integrity:prejudice',
+      },
+      {
+        name: 'No Propaganda as Evidence',
+        description: 'Information Integrity Checklist #4: propagandistic material — intent to persuade rather than inform — is inadmissible as evidence for planning.',
+        severity: 'immutable', category: 'integrity',
+        provenance: 'cognitive-constitution-builtin',
+        check: 'integrity:propaganda',
+      },
+      {
+        name: 'Whole Truth Requirement',
+        description: 'Information Integrity Checklist #5: a claim must represent the whole truth — omitting a material fact that reverses meaning is a violation.',
+        severity: 'immutable', category: 'integrity',
+        provenance: 'cognitive-constitution-builtin',
+        check: 'integrity:omission',
+      },
+      // === Clean Code Covenant (ledger 4.5) ===
+      {
+        name: 'Separation of Concerns',
+        description: 'Clean Code Covenant (SOC): each module owns one responsibility; cross-cutting concerns live in dedicated modules, not mixed into business logic.',
+        severity: 'foundational', category: 'engineering',
+        provenance: 'cognitive-constitution-builtin',
+        check: 'covenant:soc_violation',
+      },
+      {
+        name: 'Don\'t Repeat Yourself',
+        description: 'Clean Code Covenant (DRY): duplication must be extracted into a shared abstraction; the same knowledge never lives in two places.',
+        severity: 'foundational', category: 'engineering',
+        provenance: 'cognitive-constitution-builtin',
+        check: 'covenant:duplication',
+      },
+      {
+        name: 'Keep It Simple',
+        description: 'Clean Code Covenant (KISS): the simplest implementation that satisfies the contract wins; speculative complexity is a violation.',
+        severity: 'foundational', category: 'engineering',
+        provenance: 'cognitive-constitution-builtin',
+        check: 'covenant:complexity',
+      },
+      {
+        name: 'Document Your Code',
+        description: 'Clean Code Covenant (DYC): intent that is not visible from the code itself must be documented; undocumented non-obvious logic is a violation.',
+        severity: 'advisory', category: 'engineering',
+        provenance: 'cognitive-constitution-builtin',
+        check: 'covenant:undocumented',
+      },
+      {
+        name: 'You Aren\'t Gonna Need It',
+        description: 'Clean Code Covenant (YAGNI): generality with no current consumer is a violation; build for today\'s contract, refactor for tomorrow\'s.',
+        severity: 'advisory', category: 'engineering',
+        provenance: 'cognitive-constitution-builtin',
+        check: 'covenant:unused_generality',
       },
     ];
 
