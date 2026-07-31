@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import type { ReflexGateLike, WriteProposal } from '../reflex/types.js';
 
 export interface ReadOptions {
   startLine?: number;
@@ -17,6 +18,7 @@ export interface EditResult {
 export interface FileBackup {
   file: string;
   content: string;
+  existed: boolean;
   timestamp: Date;
 }
 
@@ -24,11 +26,13 @@ export interface FileEditorConfig {
   root?: string;
   maxBackupPerFile?: number;
   allowOutsideRoot?: boolean;
+  gate?: ReflexGateLike;
 }
 
 export class FileEditor {
-  private config: Required<FileEditorConfig>;
+  private config: Required<Omit<FileEditorConfig, 'gate'>>;
   private backups: Map<string, FileBackup[]> = new Map();
+  private gate?: ReflexGateLike;
 
   constructor(config?: FileEditorConfig) {
     this.config = {
@@ -36,25 +40,60 @@ export class FileEditor {
       maxBackupPerFile: config?.maxBackupPerFile ?? 10,
       allowOutsideRoot: config?.allowOutsideRoot ?? false,
     };
+    this.gate = config?.gate;
   }
 
   private resolve(filePath: string): string {
-    const resolved = path.resolve(this.config.root, filePath);
     const rootResolved = path.resolve(this.config.root);
-    if (!this.config.allowOutsideRoot && !resolved.startsWith(rootResolved)) {
+    const resolved = path.resolve(rootResolved, filePath);
+    if (!this.config.allowOutsideRoot && !this.isContained(rootResolved, resolved)) {
       throw new Error(`Path escapes workspace root: ${filePath}`);
     }
     return resolved;
   }
 
-  read(filePath: string, options?: ReadOptions): { content: string; totalLines: number; file: string } {
+  private isContained(rootResolved: string, resolved: string): boolean {
+    const rel = path.relative(rootResolved, resolved);
+    if (rel === '') return true;
+    if (rel.startsWith('..') || path.isAbsolute(rel)) return false;
+    const rootSep = rootResolved.endsWith(path.sep) ? rootResolved : rootResolved + path.sep;
+    if (!resolved.toLowerCase().startsWith(rootSep.toLowerCase())) return false;
+    let probe = resolved;
+    const tail: string[] = [];
+    while (!fs.existsSync(probe)) {
+      const parent = path.dirname(probe);
+      if (parent === probe) return true;
+      tail.unshift(path.basename(probe));
+      probe = parent;
+    }
+    try {
+      const rootReal = fs.realpathSync(rootResolved);
+      const probeReal = fs.realpathSync(probe);
+      let rebuilt = probeReal;
+      for (const part of tail) rebuilt = path.join(rebuilt, part);
+      const relReal = path.relative(rootReal, rebuilt);
+      return relReal === '' || (!relReal.startsWith('..') && !path.isAbsolute(relReal));
+    } catch {
+      return true;
+    }
+  }
+
+
+
+
+
+  read(
+    filePath: string,
+    options?: ReadOptions,
+  ): { content: string; totalLines: number; file: string } {
     const resolved = this.resolve(filePath);
     if (!fs.existsSync(resolved)) {
       throw new Error(`File not found: ${filePath}`);
     }
     const content = fs.readFileSync(resolved, 'utf-8');
     const lines = content.split('\n');
-    const totalLines = lines.length > 0 && lines[lines.length - 1] === '' ? lines.length - 1 : lines.length;
+    const totalLines =
+      lines.length > 0 && lines[lines.length - 1] === '' ? lines.length - 1 : lines.length;
 
     if (options?.startLine !== undefined || options?.endLine !== undefined) {
       const start = Math.max(1, options?.startLine ?? 1);
@@ -70,6 +109,9 @@ export class FileEditor {
   }
 
   write(filePath: string, content: string): EditResult {
+    const gate = this.consultGate(filePath, content);
+    if (gate.verdict !== 'allow') return this.gateResult(filePath, gate.verdict, gate.reason);
+
     const resolved = this.resolve(filePath);
     const dir = path.dirname(resolved);
     if (!fs.existsSync(dir)) {
@@ -79,9 +121,8 @@ export class FileEditor {
     const previous = fs.existsSync(resolved) ? fs.readFileSync(resolved, 'utf-8') : null;
     this.backup(resolved, previous);
 
-    const linesChanged = previous === null
-      ? content.split('\n').length
-      : this.countChangedLines(previous, content);
+    const linesChanged =
+      previous === null ? content.split('\n').length : this.countChangedLines(previous, content);
 
     fs.writeFileSync(resolved, content, 'utf-8');
     return {
@@ -94,6 +135,9 @@ export class FileEditor {
   }
 
   edit(filePath: string, startLine: number, endLine: number, replacement: string): EditResult {
+    const gate = this.consultGate(filePath, replacement);
+    if (gate.verdict !== 'allow') return this.gateResult(filePath, gate.verdict, gate.reason);
+
     const resolved = this.resolve(filePath);
     if (!fs.existsSync(resolved)) {
       throw new Error(`File not found: ${filePath}`);
@@ -103,7 +147,9 @@ export class FileEditor {
     const lines = content.split('\n');
 
     if (startLine < 1 || endLine > lines.length || startLine > endLine) {
-      throw new Error(`Invalid line range ${startLine}-${endLine} for file with ${lines.length} lines`);
+      throw new Error(
+        `Invalid line range ${startLine}-${endLine} for file with ${lines.length} lines`,
+      );
     }
 
     this.backup(resolved, content);
@@ -124,6 +170,9 @@ export class FileEditor {
   }
 
   insert(filePath: string, afterLine: number, content: string): EditResult {
+    const gate = this.consultGate(filePath, content);
+    if (gate.verdict !== 'allow') return this.gateResult(filePath, gate.verdict, gate.reason);
+
     const resolved = this.resolve(filePath);
     if (!fs.existsSync(resolved)) {
       throw new Error(`File not found: ${filePath}`);
@@ -135,7 +184,11 @@ export class FileEditor {
     }
 
     this.backup(resolved, original);
-    const newLines = [...lines.slice(0, afterLine), ...content.split('\n'), ...lines.slice(afterLine)];
+    const newLines = [
+      ...lines.slice(0, afterLine),
+      ...content.split('\n'),
+      ...lines.slice(afterLine),
+    ];
     fs.writeFileSync(resolved, newLines.join('\n'), 'utf-8');
 
     return {
@@ -148,11 +201,14 @@ export class FileEditor {
   }
 
   append(filePath: string, content: string): EditResult {
+    const gate = this.consultGate(filePath, content);
+    if (gate.verdict !== 'allow') return this.gateResult(filePath, gate.verdict, gate.reason);
+
     const resolved = this.resolve(filePath);
-    const original = fs.existsSync(resolved) ? fs.readFileSync(resolved, 'utf-8') : '';
+    const original = fs.existsSync(resolved) ? fs.readFileSync(resolved, 'utf-8') : null;
     this.backup(resolved, original);
-    const separator = original.length > 0 && !original.endsWith('\n') ? '\n' : '';
-    fs.writeFileSync(resolved, original + separator + content + '\n', 'utf-8');
+    const separator = original && original.length > 0 && !original.endsWith('\n') ? '\n' : '';
+    fs.writeFileSync(resolved, (original ?? '') + separator + content + '\n', 'utf-8');
     return {
       file: resolved,
       applied: true,
@@ -167,6 +223,9 @@ export class FileEditor {
   }
 
   delete(filePath: string): boolean {
+    const gate = this.consultGate(filePath);
+    if (gate.verdict !== 'allow') return false;
+
     const resolved = this.resolve(filePath);
     if (!fs.existsSync(resolved)) return false;
     this.backup(resolved, fs.readFileSync(resolved, 'utf-8'));
@@ -193,10 +252,16 @@ export class FileEditor {
     const resolved = this.resolve(filePath);
     const history = this.backups.get(resolved) ?? [];
     if (history.length === 0) {
-      return { file: resolved, applied: false, linesChanged: 0, message: 'No undo history', undoAvailable: false };
+      return {
+        file: resolved,
+        applied: false,
+        linesChanged: 0,
+        message: 'No undo history',
+        undoAvailable: false,
+      };
     }
     const backup = history.pop()!;
-    if (backup.content === null) {
+    if (!backup.existed) {
       fs.rmSync(resolved, { force: true });
     } else {
       fs.writeFileSync(resolved, backup.content, 'utf-8');
@@ -218,9 +283,38 @@ export class FileEditor {
     this.backups.clear();
   }
 
+  private consultGate(
+    filePath: string,
+    content?: string,
+  ): { verdict: 'allow' } | { verdict: 'block' | 'defer'; reason: string } {
+    if (!this.gate) return { verdict: 'allow' };
+    const proposal: WriteProposal = { tool: 'file-editor', target: filePath, content };
+    const result = this.gate.evaluate(proposal);
+    if (result.verdict === 'allow') return { verdict: 'allow' };
+    return { verdict: result.verdict, reason: result.evidence[0]?.reason ?? result.verdict };
+  }
+
+  private gateResult(filePath: string, verdict: 'block' | 'defer', reason: string): EditResult {
+    return {
+      file: this.resolve(filePath),
+      applied: false,
+      linesChanged: 0,
+      message:
+        verdict === 'block'
+          ? `blocked by reflex gate: ${reason}`
+          : `deferred by reflex gate: ${reason}`,
+      undoAvailable: false,
+    };
+  }
+
   private backup(filePath: string, content: string | null): void {
     const history = this.backups.get(filePath) ?? [];
-    history.push({ file: filePath, content: content ?? '', timestamp: new Date() });
+    history.push({
+      file: filePath,
+      content: content ?? '',
+      existed: content !== null,
+      timestamp: new Date(),
+    });
     if (history.length > this.config.maxBackupPerFile) {
       history.shift();
     }
