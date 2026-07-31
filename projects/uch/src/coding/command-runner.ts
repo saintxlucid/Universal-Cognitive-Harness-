@@ -74,7 +74,7 @@ export function tokenize(command: string): string[] {
   return tokens;
 }
 
-const DEFAULT_DENYLIST: RegExp[] = [
+export const DEFAULT_DENYLIST: RegExp[] = [
   /\brm\s+-(?:[a-z]*[rf][a-z]*)\b/i,
   /\bformat\s+c:\s*\/?/i,
   /\bshutdown\b/i,
@@ -92,15 +92,17 @@ function escapeRegExp(text: string): string {
 }
 
 function compileDenylist(entries: (string | RegExp)[]): RegExp[] {
-  return entries.map((entry) => (
-    entry instanceof RegExp ? entry : new RegExp(escapeRegExp(normalizeCommand(entry)), 'i')
-  ));
+  return entries.map((entry) =>
+    entry instanceof RegExp ? entry : new RegExp(escapeRegExp(normalizeCommand(entry)), 'i'),
+  );
 }
 
 export class CommandRunner {
-  private config: Required<Pick<CommandRunnerConfig, 'defaultTimeoutMs' | 'maxOutputBytes' | 'shell'>>;
+  private config: Required<
+    Pick<CommandRunnerConfig, 'defaultTimeoutMs' | 'maxOutputBytes' | 'shell'>
+  >;
   private allowlist: string[] | undefined;
-  private denylist: string[];
+  private denylist: RegExp[];
 
   constructor(config?: CommandRunnerConfig) {
     this.config = {
@@ -168,7 +170,12 @@ export class CommandRunner {
       let outputBytes = 0;
       let settled = false;
 
-      const child = spawn(command, { cwd, env: { ...process.env, ...options?.env }, shell, windowsHide: true });
+      const child = spawn(command, {
+        cwd,
+        env: { ...process.env, ...options?.env },
+        shell,
+        windowsHide: true,
+      });
 
       const timer = setTimeout(() => {
         if (settled) return;
