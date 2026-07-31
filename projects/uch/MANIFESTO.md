@@ -22,6 +22,32 @@ This position is already formalized in [ADR-001](design/ADR-001-workspace-owned-
 
 This manifesto is the public declaration of that decision, and the discipline it implies.
 
+### Substrate, not harness
+
+The name UCH is retained, but the architecture is explicitly layered
+([ADR-005](design/ADR-005-universal-cognitive-protocol.md)):
+
+```text
+Universal Cognitive Substrate   — the persistent runtime. Always alive.
+running Cognitive Drivers (Universal Cognitive Harnesses) — per-ecosystem adapters. Disposable.
+```
+
+> **Terminology (ADR-005 Amendment A, 2026-08-01).** *Driver* is the engineering
+> term for the per-ecosystem adapter — the same word the driver plane already uses
+> (IDE Driver · Agent Driver · Git Driver · …, §5 below). *Universal Cognitive
+> Harness* remains the product name (UCH) and the umbrella term for the wearable
+> contract. The substrate runs drivers; the discipline builds harnesses.
+
+The substrate never knows a host — it only understands signals, thoughts, plans,
+actions, evidence, memory, skills, identity, and genome. Each driver understands exactly
+one ecosystem's APIs and nothing more. Everything is translated into one format — the
+Episode ([UNIVERSAL-INTEGRATION.md](design/UNIVERSAL-INTEGRATION.md)) — so the brain never
+cares where an episode originated. Every platform participates at the level it actually
+exposes, per rail, degrading gracefully ([INTEGRATION-LEVELS.md](design/INTEGRATION-LEVELS.md)).
+Any agent joining a workspace reads the organism's current cognition — its Live
+Cognitive State ([LIVE-COGNITIVE-STATE.md](design/LIVE-COGNITIVE-STATE.md)) — and is
+current instantly. The agent is ephemeral; the cognition is persistent.
+
 ---
 
 ## 2. The Discipline
@@ -106,7 +132,7 @@ The user never says "load memory." The workspace wakes up:
 ```text
 Workspace Opened
   → Identify Workspace
-  → Locate Harness Manifest
+  → Locate Driver Manifest
   → Load Workspace Brain
   → Initialize Drivers
   → Load Skills
@@ -164,7 +190,7 @@ Biological vocabulary is permitted — **required** — but only under an engine
 | Energy Budget | Metabolism | Resource allocation | `src/metabolism/` | Budget compliance, overspend rate |
 | Governance | Constitution | Rules, separation of powers | `src/cognitive-plane/constitution/`, `spec/CONSTITUTION.md` | Policy violation rate, review latency |
 
-The physiology is specified in [COGNITIVE_BIOLOGY.md](spec/COGNITIVE_BIOLOGY.md) (plasticity, homeostasis, metabolism, development, healing, sleep, evolution, immune response, endocrine regulation, thalamic gating). The invariants are specified in [LAWS_OF_COGNITIVE_PHYSICS.md](spec/LAWS_OF_COGNITIVE_PHYSICS.md) — sixteen laws, enforced by static analysis, runtime auditing, and constitutional review. The identity that outlives every organ is specified in [GENOME.md](spec/GENOME.md).
+The physiology is specified in [COGNITIVE_BIOLOGY.md](spec/COGNITIVE_BIOLOGY.md) (plasticity, homeostasis, metabolism, development, healing, sleep, evolution, immune response, endocrine regulation, thalamic gating). The invariants are specified in [LAWS_OF_COGNITIVE_PHYSICS.md](spec/LAWS_OF_COGNITIVE_PHYSICS.md) — nineteen laws, enforced by static analysis, runtime auditing, and constitutional review. The identity that outlives every organ is specified in [GENOME.md](spec/GENOME.md).
 
 This discipline already exists in this repository: every organ above has source, most have tests, and the whole corpus is verified by 100 test files / 1,738 test cases. What the manifesto adds is the public claim: this is a field, not a feature.
 
@@ -204,7 +230,7 @@ runs `uch attach` (or calls `attach()` from `src/workspace-manifest/`) and the
 lifecycle runs: discover → negotiate version → negotiate capabilities and
 drivers → issue a per-agent scoped grant → materialize an authorized
 projection → emit `workspace:opened` and `agent:attached`. The workspace wakes
-up the harness; the harness does not need to be pointed at the workspace. Full
+up the driver; the driver does not need to be pointed at the workspace. Full
 contract: [WORKSPACE-MANIFEST.md](design/WORKSPACE-MANIFEST.md).
 
 **ADR-001 Phase-I criterion #2 implemented 2026-07-31.** The capability

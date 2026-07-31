@@ -42,8 +42,8 @@ UCH (**Universal Cognitive Harness**, a.k.a. **COS — Cognitive Operating Syste
 - A full **agentic runtime** (ported Claude Code architecture): tool registry, permission engine, query loop, token budgets, compaction, history, tasks, skills — `src/agentic/`
 - **CLI + MCP STDIO server (24 tools) + HTTP/SSE UCCP server + 5 transports** (MCP, SSE, HTTP, IPC, A2A, CLI) — `src/cli/`, `src/mcp/`, `src/interface/`, `src/control-plane/`
 - **67 test files / 1,251 test cases** (Vitest), all deterministic (no live LLM calls)
-- A **governed specification corpus**: 16 Laws of Cognitive Physics, Cognitive Constitution, Cognitive Biology, Ontology, Genome (three-layer identity), Formal Foundations (set theory + information theory + economics + protocol theory)
-- **15 research documents** under a governance protocol, plus **7 design documents** (ADR, threat model, conformance, failure/retry, privacy/erasure, CIC spec, architecture vision)
+- A **governed specification corpus**: 18 Laws of Cognitive Physics, Cognitive Constitution, Cognitive Biology, Ontology, Genome (three-layer identity), Formal Foundations (set theory + information theory + economics + protocol theory)
+- **15 research documents** under a governance protocol, plus **17 design documents** (ADR-001..005, threat model, conformance, failure/retry, privacy/erasure, CIC spec, architecture vision, EXOSYMBIOSIS, UNIVERSAL-INTEGRATION, INTEGRATION-LEVELS, LIVE-COGNITIVE-STATE, EVENT-GOVERNANCE, PROJECTIONS, WORKSPACE-MANIFEST)
 
 **Notable tensions found:** README says "37 test files / 215+ modules" while reality is 67 test files / 244 source modules; package-lock.json (v0.1.0) is stale vs package.json (v0.2.0); the Laws doc header says "13 laws" but defines 16; the `graphify-out/` AST artifacts (~4 MB) were untracked and have been removed. *(Resolved 2026-07-31: README stats, Laws header, and package-lock synced; chunkers/hippocampus/neural-fs now covered; vitest config + coverage thresholds added.)*
 
@@ -54,7 +54,7 @@ UCH (**Universal Cognitive Harness**, a.k.a. **COS — Cognitive Operating Syste
 | Name | Where used | Meaning |
 |---|---|---|
 | **COS** | SPEC.md, design/ARCHITECTURE.md, research/ | Cognitive Operating System — the platform vision |
-| **UCH** | package.json, src/harness-api/, README, boot module | Universal Cognitive Harness — the runtime-attachment layer |
+| **UCH** | package.json, src/harness-api/, README, boot module | Universal Cognitive Harness — the runtime-attachment layer; per ADR-005: the **Universal Cognitive Substrate** (persistent runtime) running **Universal Cognitive Harnesses** (per-ecosystem adapters) |
 | **ACE / "The Suit"** | src/index.ts header, spec/GENOME.md | Artificial Cognitive Exoskeleton — "the model is the pilot, the suit is the exoskeleton" |
 | **UCCP** | src/cli/uccp.ts, docs/organism-*.md, `.uccp/` dir, tests | Organism-era codename for the server/persistence layer |
 
@@ -100,7 +100,7 @@ projects/uch/
 │   ├── index.ts                      # Main barrel: ~200 exports across 35 subsystems
 │   ├── __tests__/                    # 42 test files (see §15)
 │   │
-│   ├── accelerators/                 # "Cognitive Computer" Level 2: inference fabric + scheduler
+│   ├── accelerators/                 # "Cognitive Computer" Level 2-4: inference fabric, scheduler, 10 virtual processors + routing
 │   ├── aether/                       # AetherCore (persistent executive) + Consciousness
 │   ├── agent/                        # boot.ts + UCHAgentPlugin (auto-load for any AI agent)
 │   ├── agentic/                      # Full agentic engine (tools, permissions, query loop, tasks...)
@@ -152,10 +152,13 @@ projects/uch/
 ├── dist/                             # Compiled output (tsc): 244 JS + 244 .d.ts + maps
 ├── docs/                             # organism-architecture, organism-implementation,
 │                                     #   extraction-map, memory-filing-rules
-├── design/                           # ADR-001, ADR-002, ARCHITECTURE, CIC-SPECIFICATION,
-│                                     #   CONFORMANCE, CONNECTOME, EVENT-GOVERNANCE,
-│                                     #   FAILURE-RETRY, PRIVACY-ERASURE, PROJECTIONS,
-│                                     #   RETRIEVAL-SCALING, THREAT-MODEL,
+├── design/                           # ADR-001..ADR-005, ARCHITECTURE, CIC-SPECIFICATION,
+│                                     #   COGNITIVE-TRACE, COGNITIVE-MIDDLEWARE,
+│                                     #   COGNITIVE-PACKAGES, CONFORMANCE, CONNECTOME,
+│                                     #   EVENT-GOVERNANCE, EXOSYMBIOSIS, FAILURE-RETRY,
+│                                     #   INTEGRATION-LEVELS, LIVE-COGNITIVE-STATE,
+│                                     #   PRIVACY-ERASURE, PROJECTIONS, RETRIEVAL-SCALING,
+│                                     #   THREAT-MODEL, UNIVERSAL-INTEGRATION,
 │                                     #   WORKSPACE-MANIFEST
 ├── graphify-out/                     # .graphify_ast.json (1.9 MB code graph — untracked, removed)
 ├── research/                         # 15 governed research docs (see §12)
@@ -270,7 +273,7 @@ The entire public API (~200 exports). Sections: Control Plane → Cognitive Plan
 |---|---|
 | `organism/organism.ts` | ★ `CognitiveOrganism`: `MemoryOrgans` (8 organs — sensory PerceptionGrid [4 modalities], working, episodic=kernel, semantic, procedural, emotional, social, evolutionary) + 9 engines (AttentionEngine, PredictionEngine→Conscience, CuriosityEngine, DoubtEngine, WisdomEngine, CounterfactualEngine, IdentityEngine→WorkspaceIdentity, ImmuneSystem, EvolutionEngine). `initialize()` subscribes to `file:saved`/`git:commit`/`error:occurred`. |
 | `constitution/constitution.ts` | `CognitiveConstitution`: immutable laws (severity immutable/foundational/advisory), `addLaw`, `checkCompliance`, `getViolations`, builtin laws (no fabrication, provenance, immutable history), `persist/load` (skips builtin laws). |
-| `genome/species-genome.ts` | `SpeciesGenome`: NEVER-changing identity — philosophy, 16 laws, 10 commitments. |
+| `genome/species-genome.ts` | `SpeciesGenome`: NEVER-changing identity — philosophy, 18 laws, 10 commitments. |
 | `genome/workspace-genome.ts` | `WorkspaceGenome`: per-workspace conventions/sections, `persist/load`. |
 | `genome/adaptive-genome.ts` | `AdaptiveGenome`: skill proficiencies, confidence distributions. |
 | `memory/scientific-memory.ts` | `ScientificMemory`: evidence-backed entries (certainty confirmed/likely/uncertain/speculative/contradicted, confidence, source, contradictions), `persist/load`, stats. |
@@ -493,7 +496,7 @@ Applications → Cognitive Personalities → Skill Ecosystem → Cognitive Runti
 5. **Evolution** — BenchmarkEngine, ExperimentEngine, MutationEngine, EvolutionEngine
 Plus 4 cross-cutting pillars: **Constitution, Trust, Science, Taste**.
 
-### 6.5 The 16 Laws of Cognitive Physics (spec/LAWS_OF_COGNITIVE_PHYSICS.md)
+### 6.5 The 19 Laws of Cognitive Physics (spec/LAWS_OF_COGNITIVE_PHYSICS.md)
 1. **Signal Universality** — everything is an immutable signal
 2. **Conservation of Energy** — no computation is free; declared metabolic costs
 3. **Causality** — every state change causally attributable; no orphan causal graph
@@ -510,6 +513,9 @@ Plus 4 cross-cutting pillars: **Constitution, Trust, Science, Taste**.
 14. **Economic Rationality** — every operation justifies its energy cost; ROI < 0.1 never scheduled (homeostasis exempt)
 15. **Information Conservation** — ≈0 information-gain signals must not propagate past classifying layer
 16. **Interrupt Hierarchy** — priority preemption with deadlines (peripheral 100 ms → executive 10 ms)
+17. **Signal Fusion** — no action on a single weak signal; decisions require fused, risk-flagged evidence (Cortex Kernel)
+18. **Governance Before Landing** — no workspace change lands without passing the governance gate (Constitution)
+19. **Cognition Ownership** — the organism owns every cognitive artifact; drivers/packages/hosts hold grants, never ownership (added 2026-08-01, ADR-005 Amendment A; enforced at trace boundary, image cache, package gate; Constitution Art. III §6)
 
 ### 6.6 Normative Hierarchy
 **Formal Foundations (L0)** → **Laws (L1, immutable)** → **Cognitive Biology (L2)** → **Constitution (L3, amendment-only)** → Legislature Policies → Executive Orders → Component Specs (L4). The Constitution defines separation of powers (Executive/Legislature/Judiciary), Triadic Validation (Reflex/Routine/Significant/Constitutional action classes), Rights of Components, amendment process (¾ supermajority), supremacy, judicial review, and 3 emergency levels (Watch/Lockdown/Survival).
@@ -578,8 +584,9 @@ Every claim carries: source type (6 kinds), source_id, reliability (0–1), time
 | **Forgetting / consolidation** | `kernel/memory/cognitive-memory-system.ts`, memory-evolution | Multi-factor score = 0.35·importance + 0.25·freq + 0.2·recency + 0.2·cross-refs; promote ≥0.55, archive <0.3; episodic prune older than 24 h; SPEC: knapsack `max Σ KD·IG s.t. storage ≤ B` |
 | **Sleep cycle (kernel)** | `kernel/consolidation/sleep-cycle.ts` | Interval 300 s; consolidation report; SPEC 9-step: prioritize (novelty .4/recency .3/importance .2/uncertainty .1) → replay 10–20× → pattern discovery → abstraction → contradiction invalidation → merge (0.95) → prune (prediction value <0.1) → ontology refine → insights |
 | **Neuromodulation** | `kernel/cortex/neuromodulation.ts` | learning_rate (ACh), exploration_rate (NE), discount_factor (5-HT), reward_sensitivity (DA) modulated by context |
-| **Cognitive scheduler** | `accelerators/scheduler.ts` | Profile (complexity/reasoning/creativity/verification/risk) → strategy: human_approval (risk ≥0.8), deterministic (frugality ≤0.25), cached, multi_model (verification ≥0.6), large_model (reasoning ≥0.6), small_model; FNV-1a cache keys, 200 entries, 60 s TTL |
-| **Inference fabric** | `accelerators/fabric.ts` | 8 accelerator kinds (semantic, compression, reasoning, prediction, memory, ontology, classification + code-scorer), provider health/reroute, `skipInference` deterministic fallbacks, coprocessor isolation |
+| **Cognitive scheduler** | `accelerators/scheduler.ts` | Profile (complexity/reasoning/creativity/verification/risk) → strategy: human_approval (risk ≥0.8), deterministic (frugality ≤0.25), cached, multi_model (verification ≥0.6), large_model (reasoning ≥0.6), small_model; FNV-1a cache keys, 200 entries, 60 s TTL; every strategy carries `virtualCpu`/`tier`/`preferredProviderId`/`model`/`providerCount` |
+| **Virtual processors (L4)** | `accelerators/virtual-processors.ts` | 10-CPU namespace (reasoning/memory/engineering/security/creativity/planning/research/reflection/classification/embedding) with affinity vectors + min/default tiers; `resolveVirtualCpu` (weighted affinity; empty profile → classification.cpu frugal home), `requiredTier` (tiny/standard/deep mirroring scheduler thresholds), `resolveProvider` (cheapest healthy exact-tier provider; failures → cost → latency; ≥3 providers for verification) |
+| **Inference fabric** | `accelerators/fabric.ts` | 8 accelerator kinds (semantic, compression, reasoning, prediction, memory, ontology, classification + code-scorer), provider health/reroute, preferred-provider + per-call model override (L4), `skipInference` deterministic fallbacks, coprocessor isolation |
 | **Litmus code scoring** | `suit/litmus/code-scorer.ts` | 16-dimension profile with penalties (missing tests, nesting, security, size, duplicates, TODOs), threshold + history |
 | **Reflex engine** | `suit/instinct/reflex-engine.ts` | 6 built-in zero-LLM reflexes: duplicate-abstraction, architecture-violation, complexity-gate, security, naming (+1); severity block/warn/info; error isolation |
 | **Calibration (takes)** | `cognitive-plane/calibration/` | Brier score, accuracy, conviction buckets (0.05 increments, no false precision), bias tags, voice gate |
@@ -648,8 +655,8 @@ MCP transport passes 9/10 fixtures (F10 pending); REST/CLI/A2A/IPC unimplemented
 | File | Contents |
 |---|---|
 | `FORMAL_FOUNDATIONS.md` | Level 0 axioms: typed set theory (𝕊ℂ𝕄𝔼ℙ𝕂𝔹𝔾𝕍𝕋ℕ), exactly-3-graphs (causal DAG / connectome / semantic), hybrid time (τ + Lamport λ + version vectors), Shannon entropy + 5 mandatory metrics, entropy-reduction pipeline (classification ↓20% → dedup ↓40% → aggregation ↓20% → compression ↓10% → importance ↓5% → priority ↓5%), economic calculus (ROI, 5 decision rules, 6 economic agents, Metabolism as market maker), 7-layer protocol stack, execution model (5 interrupt levels), consciousness threshold `IG(s)·N(s,M) > θ_conscious`, branded-type enforcement, three-genome identity |
-| `LAWS_OF_COGNITIVE_PHYSICS.md` | 16 laws (see §6.5). *Note: header says "13 laws" but defines 16.* Dual naming table (16 organs: engineering name first, biological in parens). Enforcement: static analysis (L1/L8/L11), Judiciary (L2/L3/L4/L7/L14), Metabolism (L14), Nervous System (L15) |
-| `CONSTITUTION.md` | 8 articles: Separation of Powers, Triadic Validation, Rights of Components, Amendment Process, Supremacy, Judicial Review, Emergency Powers (Watch 24 h / Lockdown 1 h / Survival 15 min), amendability |
+| `LAWS_OF_COGNITIVE_PHYSICS.md` | 19 laws (see §6.5). Dual naming table (19 organs: engineering name first, biological in parens). Enforcement: static analysis (L1/L8/L11/L18), Judiciary (L2/L3/L4/L7/L14), Metabolism (L14), Nervous System (L15), constitutional review (L9/L10/L12/L13/L17/L19) |
+| `CONSTITUTION.md` | 8 articles: Separation of Powers, Triadic Validation, Rights of Components (6 sections incl. §6 Session Privacy / consolidation-only visibility, added 2026-08-01), Amendment Process, Supremacy, Judicial Review, Emergency Powers (Watch 24 h / Lockdown 1 h / Survival 15 min), amendability |
 | `COGNITIVE_BIOLOGY.md` | 10 physiological processes: Plasticity, Homeostasis, Metabolism (7 cost dims incl. attention), Development (8 stages), Healing, Sleep (8 activities), Evolution (micro/meso/macro), Immune Response, Endocrine Regulation (7 signals), Thalamic Gating |
 | `COGNITIVE_ONTOLOGY.md` | Shared vocabulary: ~50 signal types in 6 families, entity taxonomy (Thought 5 layers, Memory, Evidence, Threat, Policy), 8-stage lifecycle transition table, component taxonomy (cells/tissues/organs/systems), priority 0–4 |
 | `GENOME.md` | ACE identity: philosophy (5), engineering principles (5), design values (7), pilot relationship + handoff package, 3 genomes (Species immutable / Workspace amendable / Adaptive learned), 10 Immutable Commitments |
@@ -669,7 +676,7 @@ MCP transport passes 9/10 fixtures (F10 pending); REST/CLI/A2A/IPC unimplemented
 | `foundations/02-cognitive-biology.md` | Organ as design unit; 15-organ system table; Cognitive Bus; scoped activation field |
 | `foundations/03-cognitive-physics.md` | Quantities-separation table; activation hypothesis (8-term sigmoid); claim confidence logit; VoC economics; 8 disorder rates; governed evolution fitness |
 | `foundations/04-cognitive-protocol.md` | Events for observation, commands for effects; 17 event families; 16-field event envelope; 7 interaction semantics; **no `Think` command**; 5 protocol tests |
-| `interfaces/universal-cognitive-harness.md` | Driver→UCH facade→CIC→COS layering; 16-op surface with authority boundaries; compatibility ladder T0–T4 |
+| `interfaces/universal-cognitive-harness.md` | Driver→UCH facade→CIC→COS layering; 16-op surface with authority boundaries; compatibility ladder T0–T4 (transport axis — capability axis L0–L4 is `design/INTEGRATION-LEVELS.md`) |
 | `interfaces/universal-cognitive-interoperability.md` | Contract-first, transport-second; CIC operation families; driver model; multi-agent namespaces; 4 falsifiable hypotheses |
 | `knowledge/knowledge-compiler.md` | 8 compilation stages with diagnostics; Concept Genome minimum portable record; 7 safeguards; 3 evaluation hypotheses |
 | `ai-memory/2026-memory-systems.md` | 7-system comparison table; 4 COS inferences; 3 falsifiable hypotheses + counterevidence |
@@ -686,19 +693,30 @@ MCP transport passes 9/10 fixtures (F10 pending); REST/CLI/A2A/IPC unimplemented
 - `extraction-map.md` — provenance record of adapted patterns (skill-pack, progressive search, coding principles, synthesis/gap analysis); CLI wiring table; 10 native + 17 imported skills; verification: 60 files/1138 tests
 - `memory-filing-rules.md` — mandatory filing rules: Concept/Episode/Edge destinations, notability gate, citation requirements, 6 takes-attribution rules
 
-**design/ (11 files):**
+**design/ (20 files):**
 | Doc | Status | Summary |
 |---|---|---|
 | `ADR-001-workspace-owned-cognitive-runtime.md` | Accepted | UCH = workspace-owned cognitive runtime; COS substrate; 4 rejected alternatives; 6 acceptance criteria — all 6 implemented |
 | `ADR-002-otel-trace-engine.md` | Accepted | OTel trace data model as canonical trace schema; OtelBridge; W3C traceparent propagation |
+| `ADR-003-engineering-intelligence-layer.md` | Accepted | Engineering Judgment organ (Cerebellum): 10 tier domain stores, laws as reasoning primitives, EngineeringEvaluator gates, judgment-pack enrichment, learning loop |
+| `ADR-004-cognitive-compute-fabric.md` | Accepted | Cognitive Compute Fabric — virtual processor namespace, affinity routing, provider resolution, dispatch contract (Level 4) |
+| `ADR-005-universal-cognitive-protocol.md` | Accepted | Universal Cognitive Protocol — substrate-runs-drivers naming, 3-layer split, Episode canonicalization (episode_id + episode hash), L0–L4 ladder, Live Cognitive State, driver triad + Cognitive Coprocessor, Cognitive Virtual Memory; Amendment A (2026-08-01): harness→driver terminology + Cognitive Trace/Middleware/Packages |
+| `COGNITIVE-TRACE.md` | Approved design | Cognitive Trace `uch.cognitive-trace.v1` — OTel-shaped schema, span kinds, uccp.* attributes, organ ownership table, 8-point driver contract, lifecycle, verification |
+| `COGNITIVE-MIDDLEWARE.md` | Approved design | Cognitive Middleware — 9-stage governed pipeline (ingress→…→augment) + Cognitive Image cache: per-grant, regenerable, TTL-coherent read-optimized projection (attach = O(1)) |
+| `COGNITIVE-PACKAGES.md` | Approved design | Cognitive Packages `uch.package.v1` — 4 kinds (driver/skill/policy/instrument), manifest contract, package governance gate (signed, scoped, intersected, vetoable, revocable) |
+| `ENGINEERING-INTELLIGENCE.md` | Proposed (Phase A) | Full design: tier map vs live code, gaps, architecture, success criteria, delivery phases A–E |
 | `ARCHITECTURE.md` | Vision | 5 interface surfaces, `CognitiveModule` contract, 7 design principles, 13-term constitution vocabulary, module directory |
-| `CIC-SPECIFICATION.md` | Draft | Cognitive Interchange Contract v0.1: capability grants, scope cascade, 8 operation families, authorization flow |
+| `CIC-SPECIFICATION.md` | Draft | Cognitive Interchange Contract v0.1: capability grants, scope cascade, 8 operation families, authorization flow, cognitive state document (§3.3) |
 | `CONFORMANCE.md` | Approved v1.0 | 10 fixtures F01–F10; compatibility matrix (MCP 9/10) |
 | `EVENT-GOVERNANCE.md` | Implemented | Provenance-linked, idempotent, policy-checked driver event gate; audit ledger; denial observability |
+| `EXOSYMBIOSIS.md` | Design v0.1 | The UCH wearable: 5C cognition capture contract, COT tier ladder, sync planes, capture rails per host, hive-mind topology, driver triad, Episode mapping |
 | `FAILURE-RETRY.md` | Approved v1.0 | 13 error codes, retry policies, full-jitter backoff, circuit breaker, crash recovery, rollback/timeout tables |
+| `INTEGRATION-LEVELS.md` | Approved design | L0–L4 capability ladder: per-rail levels, 4 rules, conformance criteria, verified per-platform level map, roadmap mapping |
+| `LIVE-COGNITIVE-STATE.md` | Approved design | Mind-state artifact `uch.cognitive-state.v1`: schema, lifecycle, source map, projection + privacy rules |
 | `PRIVACY-ERASURE.md` | Draft | 6 sensitivity classes, consent lifecycle, soft/hard delete, orphaned-object policy, GDPR/CCPA/SOC2 mapping |
 | `PROJECTIONS.md` | Implemented | Scope-contained workspace-state projections: containment cascade, capability authority intersection, attach wiring |
 | `THREAT-MODEL.md` | Approved v1.0 | 14 threats T01–T14 with risk/mitigation/status; 3 trust boundaries |
+| `UNIVERSAL-INTEGRATION.md` | Proposal (design) | Hive Mind: capture-surface matrix, HiveEvent schema v1 (incl. `cognitive.state`), Episode identity, integration-level mapping, M0–M3 roadmap |
 | `WORKSPACE-MANIFEST.md` | Implemented | Versioned workspace manifest + discovery/negotiation/attach lifecycle; conformance to all 6 ADR-001 criteria |
 
 ---

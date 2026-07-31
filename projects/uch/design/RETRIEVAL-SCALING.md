@@ -69,3 +69,44 @@ benchmarks (retrieval precision, latency) stable across tiers.
   specific model's hidden states at hundreds-of-billions-of-tokens scale; UCH
   embeddings are sparse hashes at workspace scale — only the quantization
   techniques transfer, not the scale assumptions.
+
+## 6. Cognitive Virtual Memory — working-set paging (ADR-005 §7)
+
+Human brains don't keep everything loaded. Neither should UCH. **Cognitive Virtual
+Memory** is the scaling model for long-horizon cognition: only the current working set
+is resident in active cognition; everything else is *paged* — exactly like RAM.
+Design-level guidance, not v1 architecture; implementation is deferred until the trigger
+metrics below fire.
+
+### 6.1 The mapping
+
+| OS concept | Cognitive equivalent |
+|---|---|
+| RAM (resident set) | The context window / working set handed to the Executive and Integration layers (post-`recallCompressed`) |
+| Virtual address space | The entire cognitive store: episodic + semantic + connectome + graphs + ledger |
+| Page-in | `recall`/`recallCompressed` from the index (kernel API unchanged) |
+| Page-out | Compression, consolidation, sleep-cycle distillation, forgetting |
+| Page table | Residency map: what is resident, when it was last touched, why it is resident |
+| Working set | Active files + concepts + hypotheses + decisions (see `LIVE-COGNITIVE-STATE.md`) |
+| Eviction | LRU × importance (connectome activation) × policy (retention, privacy erasure) |
+
+### 6.2 Trigger metrics (all measurable, all pre-deferred)
+
+- **Context pressure**: resident set routinely exceeds the context budget after
+  compression → enable residency management.
+- **Page-in latency**: `recall()` p95 breach despite retrieval-ladder escalation
+  (§3 tier 2–4) → the residency map becomes the hot path.
+- **Reconstruction churn**: the same evidence is recalled, compressed, and re-recalled
+  across consecutive turns → explicit page-in/page-out events with residency tracking.
+
+### 6.3 Design rules
+
+1. The kernel API does not change: `recall` / `recallFormatted` / `recallCompressed`
+   become the page-in path; compression, consolidation, and sleep are the page-out path.
+2. Eviction never loses provenance: paged-out evidence leaves an addressable stub
+   (id + summary + retention policy) — reversible per Law 12 (Reversibility).
+3. The residency map is a first-class ledger structure; page-in/out are observable
+   events on the neural event bus, so the Live Cognitive State can report the current
+   working set honestly.
+4. COT vault contents are never paged into the working set by default (privacy:
+   `PRIVACY-ERASURE.md`, EXOSYMBIOSIS §9).

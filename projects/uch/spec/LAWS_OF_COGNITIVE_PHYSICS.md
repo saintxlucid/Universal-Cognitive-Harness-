@@ -2,7 +2,7 @@
 
 **Level I — Immutable. Never changes. No component may violate.**
 
-These 16 laws define what is *impossible* in the Cognitive Exoskeleton, not just what is allowed. They are mathematically invariant. Any component, organ, plugin, or interface that violates them is malformed and must be rejected.
+These 19 laws define what is *impossible* in the Cognitive Exoskeleton, not just what is allowed. They are mathematically invariant. Any component, organ, plugin, or interface that violates them is malformed and must be rejected.
 
 ---
 
@@ -296,6 +296,87 @@ The interrupted operation's causal chain is preserved. The interrupt becomes a p
 
 ---
 
+## Law 17 — Signal Fusion
+
+> No action is taken on a single weak signal; decisions require fused evidence from multiple independently-sourced signals.
+
+A single signal carries noise, bias, and incomplete coverage. Before an
+executive decision is made from scored evidence, the underlying signals MUST
+pass through a fusion stage that:
+
+- normalizes each signal to a comparable 0-1 scale,
+- weights and composites the set into a ranked aggregate,
+- flags structural risk (few factors, low liquidity, high volatility),
+- bands the outcome (buy/watch/avoid style recommendation), and
+- records the fusion run with its evidence identifiers for replay.
+
+The fusion stage is deterministic and LLM-free in the default path. A
+component that acts on a single signal without fusion — when multiple
+weak signals are available — violates this law (Cortex Kernel / Integration
+Kernel responsibility).
+
+**Rationale:** Without fusion, the organism's decisions inherit the noise of
+whichever signal arrived last. Weak signals are only robust in aggregate —
+Law 7 (Triadic Validation) governs who validates; this law governs how
+evidence is combined before validation.
+
+---
+
+## Law 18 — Governance Before Landing
+
+> No change to the workspace lands without passing the governance gate.
+
+Every code change, plan, or policy mutation MUST be reviewed against the
+enacted constitution before it is committed:
+
+- **Clean changes** pass (allow).
+- **Moderate violations** are deferred to the judgment tier (review) — never
+  auto-landed.
+- **Hard violations** (a principle scoring below the constitutional floor)
+  block the change outright.
+
+The gate records evidence as principle ids + flags only — never change
+content — and its verdicts are observable as governed events
+(`governance:*` on the neural event bus). A bypass path may exist only as a
+recorded override that still emits the denial event with the override noted
+(Law 4: Evidence Over Assertion).
+
+**Rationale:** Without a pre-landing gate, violations enter the workspace
+after the fact and can only be repaired, never prevented. Governance is a
+filter on the way in, not a cleanup on the way out.
+
+---
+
+## Law 19 — Cognition Ownership
+
+> The organism owns every cognitive artifact it produces. No host, driver,
+> package, or external client may claim ownership of the cognition it
+> observed, translated, or augmented.
+
+Cognition — episodes, traces, memories, decisions, lessons, and derived
+knowledge — belongs to the organism, not to the channel that carried it.
+An attached driver (Universal Cognitive Harness) holds:
+
+- a time-limited **grant** to observe and translate within its scope,
+- a **projection** of state filtered through that grant,
+- **no ownership** of what it reads, and no right to copy, fork, export,
+  or re-claim it beyond the grant.
+
+This law is enforced at the trace boundary (the ledger records the emitter,
+never the owner — `COGNITIVE-TRACE.md` §3), at the middleware image boundary
+(images are per-grant projections, `COGNITIVE-MIDDLEWARE.md` §3), and at the
+package gate (a package that attempts to claim cognition is malformed and its
+install is vetoed — `COGNITIVE-PACKAGES.md` §4 rule 6). Constitutional
+implementation: Article III §6 (Session Privacy / consolidation-only
+visibility).
+
+**Rationale:** Ownership is what makes cognition persistent across pilots
+and platforms. If the adapter that observed cognition could own it, then
+when the adapter is replaced the cognition leaves with it — the exact
+failure this project exists to prevent (ADR-001, MANIFESTO §1).
+
+---
+
 ## Dual Naming Convention
 
 All organs and systems carry both an **engineering name** and a **biological metaphor**:
@@ -318,6 +399,9 @@ All organs and systems carry both an **engineering name** and a **biological met
 | Concept Store | Connectome | Relationship graph |
 | Energy Budget | Metabolism | Resource allocation |
 | Governance | Constitution | Rules, separation of powers |
+| Productivity Kernel | Basal Ganglia (extended) | Goal-to-execution scheduling, MIT tracking |
+| Signal Fusion Engine | Cortex Kernel (sub-organ) | Multi-signal ranked composite, risk controls |
+| Code Governance Gate | Constitution (sub-organ) | Pre-landing Clean Code Covenant audit |
 
 *Documentation must use the engineering name first, with the biological name in parentheses on first reference: "The Executive System (Prefrontal Cortex) formulates plans."*
 
@@ -330,4 +414,4 @@ These laws are not aspirational. They are enforced by:
 2. **Runtime auditing** — the Judiciary monitors for violations of Laws 2, 3, 4, 7, 14
 3. **Economic auditing** — Metabolism monitors Law 14 compliance across all scheduled operations
 4. **Information auditing** — the Nervous System monitors Law 15 compliance per signal
-5. **Constitutional review** — new organ specifications are reviewed against all 16 laws before implementation begins
+5. **Constitutional review** — new organ specifications are reviewed against all 19 laws before implementation begins

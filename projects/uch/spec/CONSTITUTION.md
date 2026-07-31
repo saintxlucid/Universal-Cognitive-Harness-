@@ -115,6 +115,32 @@ Every component has read access to its own causal history. No component may be d
 
 Any component affected by an Executive action or Legislature policy may appeal to the Judiciary. The Judiciary must issue a written opinion within one sleep cycle.
 
+### Section 6: Right to Session Privacy (consolidation-only visibility)
+
+Every component's session cognition — its trace, reasoning, and conversation
+content — is **private by default** and owned by the organism (Law 19 — Cognition
+Ownership). No other component, including the Executive, may inspect another
+component's raw session cognition.
+
+What other organs may see of a session is **only what consolidation published**:
+memory filings, lessons, decisions, summaries, and distilled patterns produced by
+the owning organ, the Sleep Cycle, or the synthesis pipeline. Raw session traces
+are visible to another component only when:
+
+1. The owning component consents, or
+2. The Judiciary orders it (per Section 5 appeal), or
+3. The user explicitly requests it.
+
+Consolidation outputs are governed by the same laws as all evidence (Law 4 —
+Evidence Over Assertion) and never include hidden chain-of-thought
+(ADR-002 §5, MANIFESTO commitment #6). The Cognitive Middleware enforces this
+boundary at the image cache (COGNITIVE-MIDDLEWARE.md §3.2 rule 5) and the trace
+ledger enforces it at write time (COGNITIVE-TRACE.md §3).
+
+**Rationale:** Consolidation-only visibility is what makes the organism's
+learning possible without turning it into a surveillance system. Organs learn
+from each other's wisdom, not each other's transcripts.
+
 ---
 
 ## Article IV — Amendment Process

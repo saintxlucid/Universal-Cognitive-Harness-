@@ -30,11 +30,28 @@ node dist/cli/index.js             # MCP STDIO server (default)
 | Doc | Contents |
 | --- | --- |
 | `../design/ADR-001-workspace-owned-cognitive-runtime.md` | Architecture decision record |
+| `../design/ADR-002-otel-trace-engine.md` | OTel trace engine + cognitive replay decision record |
+| `../design/ADR-003-engineering-intelligence-layer.md` | Engineering Intelligence Layer decision record (Phase A) |
+| `../design/ADR-004-cognitive-compute-fabric.md` | Cognitive Compute Fabric — virtual processors + routing contract (Level 4) |
+| `../design/ADR-005-universal-cognitive-protocol.md` | Universal Cognitive Protocol — substrate/driver naming, Episode canonicalization, L0–L4 ladder, Live Cognitive State, driver triad (+ Amendment A: terminology reconciliation, cognitive trace/middleware/packages) |
+| `../design/ADR-006-cognitive-microkernel.md` | Cognitive Microkernel — kernel/service boundary, 12 kernel primitives (status-verified), Cognitive Process model, cognitive vmem, organism versioning, transactional cognition, standards strategy |
+| `../design/COGNITIVE-TRACE.md` | Cognitive Trace — schema (`uch.cognitive-trace.v1`), organ ownership, driver contract |
+| `../design/COGNITIVE-MIDDLEWARE.md` | Cognitive Middleware — the governed pipeline + the Cognitive Image cache (per-grant, regenerable) |
+| `../design/COGNITIVE-PACKAGES.md` | Cognitive Packages — package format (`uch.package.v1`) + the package governance gate |
+| `../design/ENGINEERING-INTELLIGENCE.md` | Engineering Intelligence Layer design — 10 tier domain stores, evaluator, wiring, phases |
+| `../design/EXOSYMBIOSIS.md` | The UCH wearable — driver triad (observe/translate/augment), 5C cognition capture contract, sync planes, capture rails, hive-mind topology |
+| `../design/INTEGRATION-LEVELS.md` | The L0–L4 integration ladder — per-rail capability levels, conformance criteria, verified per-platform map |
+| `../design/LIVE-COGNITIVE-STATE.md` | Live Cognitive State — the mind-state artifact (schema, lifecycle, sources) |
+| `../design/UNIVERSAL-INTEGRATION.md` | Hive Mind — universal integration across VS Code/Copilot, OpenCode, Claude Code, Codex (capture matrix, HiveEvent schema, roadmap) |
+| `../design/integrations/VSCODE.md` | Standalone VS Code + Copilot Chat integration (extension: chat participant, LM tools, MCP provider, passive chat-journal ingest) |
+| `../design/integrations/OPENCODE.md` | Standalone OpenCode integration (plugin hooks incl. reasoning parts, custom tools, storage/SQLite ingest) |
+| `../design/integrations/CLAUDE-CODE.md` | Standalone Claude Code integration (hooks, transcript tail + COT, OTel export, MCP, SDK drive) |
+| `../design/integrations/CODEX.md` | Standalone Codex integration (config.toml hooks, rollout tail + COT, OTel exporter, MCP, `codex exec` drive) |
 | `../design/WORKSPACE-MANIFEST.md` | Workspace manifest + discovery contract (implemented) |
 | `../design/PROJECTIONS.md` | Workspace-state projections — scope containment + authority intersection (implemented) |
 | `../design/EVENT-GOVERNANCE.md` | Provenance-linked, policy-checked driver event gate (implemented) |
 | `../design/ARCHITECTURE.md` | System architecture |
-| `../design/CIC-SPECIFICATION.md` | Cognitive Information Cycle specification |
+| `../design/CIC-SPECIFICATION.md` | Cognitive Interchange Contract specification (v0.1: capability grants, scope cascade, operation families, cognitive state document) |
 | `../design/CONFORMANCE.md` | Conformance criteria |
 | `../design/FAILURE-RETRY.md` | Failure and retry model |
 | `../design/PRIVACY-ERASURE.md` | Privacy and erasure guarantees |

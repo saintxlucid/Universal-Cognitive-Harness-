@@ -2,7 +2,10 @@
 
 ## Status and boundary
 
-**Research specification v0.1.** The Universal Cognitive Harness (UCH) is a proposed compatibility and runtime-attachment layer. The Cognitive Operating System (COS) is the governed cognitive substrate and organism model beneath it. The Cognitive Interchange Contract (CIC) is the semantic contract between them and their drivers.
+**Research specification v0.1.** The Universal Cognitive Harness (UCH) is the
+compatibility and runtime-attachment layer (research origin; implemented as a
+workspace-owned cognitive runtime per [ADR-001](../../design/ADR-001-workspace-owned-cognitive-runtime.md)).
+The Cognitive Operating System (COS) is the governed cognitive substrate and organism model beneath it. The Cognitive Interchange Contract (CIC) is the semantic contract between them and their drivers.
 
 UCH must not be described as consciousness, a hidden omniscient observer, or a way to intercept every IDE or model request. An integration deliberately attaches, negotiates permissions, and selects a scope. "One brain" means a permissioned, namespace-isolated cognitive-state fabric, not unrestricted shared data.
 
@@ -55,6 +58,14 @@ discover -> negotiate capabilities -> bind session to authorized scope
 File saves, commits, test failures, deployments, and user feedback may be published as normalized events only after the attached driver has permission to emit them. Future delivery should evaluate a transactional-outbox and idempotency design for reliable event publication; this is an implementation hypothesis, not a present guarantee.
 
 ## Compatibility ladder
+
+This ladder is the **transport axis** — *how* a compatible runtime reaches UCH. The
+**capability axis** — *what cognition* a host can reach (L0 workspace events, L1
+session, L2 tooling, L3 cognition traces + Live Cognitive State, L4 native) — is
+defined in [design/INTEGRATION-LEVELS.md](../../design/INTEGRATION-LEVELS.md) per
+[ADR-005](../../design/ADR-005-universal-cognitive-protocol.md). The two axes are
+orthogonal: a host can reach UCH via MCP (tier 1) while contributing cognition traces
+(level 3). Both ladders follow the same principle: progressive, graceful degradation.
 
 | Tier | Integration | Intended coverage |
 | --- | --- | --- |

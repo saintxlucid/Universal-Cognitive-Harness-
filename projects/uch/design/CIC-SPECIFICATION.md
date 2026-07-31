@@ -121,6 +121,28 @@ Every CIC response must include:
 }
 ```
 
+### 3.3 The Cognitive State Document
+
+Attachment returns the organism's **Live Cognitive State** — mind state, not chat
+history: the current goal, intent, confidence, obstacles, active files, working set,
+hypotheses, pending decisions, decisions made, risks, verification status, energy, and
+focus, with a continuation traceparent. Full schema (`uch.cognitive-state.v1`) and
+lifecycle: [LIVE-COGNITIVE-STATE.md](LIVE-COGNITIVE-STATE.md) ([ADR-005](ADR-005-universal-cognitive-protocol.md)).
+
+```text
+negotiation_response = {
+  ... §7 fields,
+  cognitive_state?: CognitiveStateV1,   // projected through the grant
+}
+```
+
+- The state document is **always a projection** — filtered by the requester's grant via
+  the scope cascade (§2.2) and the projection engine ([PROJECTIONS.md](PROJECTIONS.md));
+  no unfiltered dumps.
+- It is refreshed on demand via `retrieve` with `input.target = "cognitive-state"` (§4.2).
+- It is derived exclusively from observable artifacts (plans, tool calls, decisions,
+  verification, health metrics) and **never contains hidden chain-of-thought**.
+
 ## 4. Operation Families
 
 ### 4.1 observe
@@ -140,6 +162,8 @@ Request a bounded, scoped evidence packet.
 - **Side effect**: None (read-only)
 - **Required**: `input.query` (text or structured query), `input.purpose`
 - **Optional**: `input.max_results`, `input.min_confidence`, `input.time_range`
+- **Special target**: `input.target = "cognitive-state"` returns the Live Cognitive
+  State document (§3.3), projected through the requester's grant.
 
 ### 4.3 propose
 

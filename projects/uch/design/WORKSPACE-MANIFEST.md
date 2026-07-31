@@ -12,7 +12,7 @@ cognitive runtime. It answers the question every client asks on open:
 
 > "What is this workspace, what does it know, and what may I attach to?"
 
-Discovery is the mechanism by which a workspace *wakes up* the harness — the
+Discovery is the mechanism by which a workspace *wakes up* the driver — the
 inversion of every agent reconstructing the workspace from scratch.
 
 ## 2. Manifest location and format
@@ -59,7 +59,7 @@ the workspace root.
 | No manifest | `null` — the workspace is not cognitively configured |
 
 **A workspace without a manifest is not an error.** Clients operate normally;
-the harness simply has nothing to attach to.
+the driver simply has nothing to attach to.
 
 ## 4. Attachment lifecycle (ADR-001 §Attachment lifecycle)
 
