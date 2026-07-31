@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+.turbo/
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# UCH project exclusions
+projects/uch/graphify-out/
+projects/uch/src/graphify-out/
+projects/uch/.uccp-test/
+projects/uch/.uccp-test-persist/
+
+# IDE
+.vs/
+*.swp
+*.swo
+*~
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Agent artifacts
+.agent/vendor/repos/
+.agent/vendor/.git/
