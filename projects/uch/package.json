@@ -1,0 +1,32 @@
+{
+  "name": "uch",
+  "version": "0.2.0",
+  "description": "Universal Cognitive Harness — persistent cognitive runtime any IDE, agent, or AI runtime can plug into",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "uch": "dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli/index.js",
+    "start:server": "node dist/cli/index.js serve",
+    "start:mcp": "node dist/cli/index.js mcp",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "uch": "node dist/cli/index.js",
+    "ingest": "node dist/cli/index.js ingest"
+  },
+  "dependencies": {
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0",
+    "eslint": "^9.0.0"
+  }
+}

@@ -1,4 +1,9 @@
-import { writeSnapshot, readSnapshot, mapToRecord, recordToMap } from '../persistence/persistence-engine.js';
+import {
+  writeSnapshot,
+  readSnapshot,
+  mapToRecord,
+  recordToMap,
+} from '../persistence/persistence-engine.js';
 
 export type MemoryCertainty = 'confirmed' | 'likely' | 'uncertain' | 'speculative' | 'contradicted';
 
@@ -45,7 +50,8 @@ export class ScientificMemory {
       existing.value = params.value;
       existing.certainty = params.certainty ?? existing.certainty;
       existing.confidence = params.confidence ?? existing.confidence;
-      if (params.evidence) existing.evidence = [...new Set([...existing.evidence, ...params.evidence])];
+      if (params.evidence)
+        existing.evidence = [...new Set([...existing.evidence, ...params.evidence])];
       existing.updatedAt = new Date();
       existing.sourceTimestamp = new Date();
       if (params.tags) existing.tags = [...new Set([...existing.tags, ...params.tags])];
@@ -91,7 +97,11 @@ export class ScientificMemory {
   query(query: string): ScientificMemoryEntry[] {
     const lower = query.toLowerCase();
     return [...this.entries.values()]
-      .filter((e) => e.key.toLowerCase().includes(lower) || e.tags.some((t) => t.toLowerCase().includes(lower)))
+      .filter(
+        (e) =>
+          e.key.toLowerCase().includes(lower) ||
+          e.tags.some((t) => t.toLowerCase().includes(lower)),
+      )
       .sort((a, b) => b.confidence - a.confidence);
   }
 
@@ -134,7 +144,7 @@ export class ScientificMemory {
     if (!entry) return;
     const prevAccuracy = entry.predictionAccuracy;
     const prevCount = entry.usageCount > 0 ? entry.usageCount : 1;
-    entry.predictionAccuracy = ((prevAccuracy * prevCount) + (accurate ? 1 : 0)) / (prevCount + 1);
+    entry.predictionAccuracy = (prevAccuracy * prevCount + (accurate ? 1 : 0)) / (prevCount + 1);
   }
 
   getByMemoryType(type: string): ScientificMemoryEntry[] {
@@ -164,9 +174,12 @@ export class ScientificMemory {
   }
 
   getStats(): {
-    total: number; byCertainty: Record<string, number>;
-    byType: Record<string, number>; avgConfidence: number;
-    contradictions: number; verifiedCount: number;
+    total: number;
+    byCertainty: Record<string, number>;
+    byType: Record<string, number>;
+    avgConfidence: number;
+    contradictions: number;
+    verifiedCount: number;
   } {
     const byCertainty: Record<string, number> = {};
     const byType: Record<string, number> = {};
@@ -183,9 +196,12 @@ export class ScientificMemory {
     }
 
     return {
-      total: this.entries.size, byCertainty, byType,
+      total: this.entries.size,
+      byCertainty,
+      byType,
       avgConfidence: this.entries.size > 0 ? totalConfidence / this.entries.size : 0,
-      contradictions, verifiedCount,
+      contradictions,
+      verifiedCount,
     };
   }
 
@@ -209,9 +225,24 @@ export class ScientificMemory {
     return this.entries.size;
   }
 
+  record(params: {
+    key: string;
+    value: unknown;
+    memoryType?: string;
+    certainty?: MemoryCertainty;
+    confidence?: number;
+    evidence?: string[];
+    source: string;
+    tags?: string[];
+  }): ScientificMemoryEntry {
+    return this.store(params);
+  }
+
   private enforceLimit(): void {
     if (this.entries.size > this.maxEntries) {
-      const oldest = [...this.entries.values()].sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime())[0];
+      const oldest = [...this.entries.values()].sort(
+        (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime(),
+      )[0];
       if (oldest) this.entries.delete(oldest.id);
     }
   }

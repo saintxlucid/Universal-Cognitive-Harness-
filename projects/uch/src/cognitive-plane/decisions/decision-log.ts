@@ -35,15 +35,53 @@ export class DecisionLog {
     this.maxEntries = maxEntries;
   }
 
-  record(entry: Omit<DecisionEntry, 'id' | 'timestamp'>): DecisionEntry {
+  record(entry: Omit<DecisionEntry, 'id' | 'timestamp'>): DecisionEntry;
+  record(
+    title: string,
+    description: string,
+    rationale: string,
+    outcome: string,
+    alternatives: DecisionAlternative[],
+    traceIds: string[],
+    tags: string[],
+    metadata?: Record<string, unknown>,
+  ): DecisionEntry;
+  record(
+    entryOrTitle: Omit<DecisionEntry, 'id' | 'timestamp'> | string,
+    description?: string,
+    rationale?: string,
+    outcome?: string,
+    alternatives?: DecisionAlternative[],
+    traceIds?: string[],
+    tags?: string[],
+    metadata: Record<string, unknown> = {},
+  ): DecisionEntry {
+    const entryData: Omit<DecisionEntry, 'id' | 'timestamp'> =
+      typeof entryOrTitle === 'string'
+        ? {
+            title: entryOrTitle,
+            description: description ?? '',
+            rationale: rationale ?? '',
+            outcome: outcome ?? '',
+            alternatives: alternatives ?? [],
+            traceIds: traceIds ?? [],
+            tags: tags ?? [],
+            metadata,
+          }
+        : entryOrTitle;
+
     const created: DecisionEntry = {
-      ...entry,
+      ...entryData,
       id: crypto.randomUUID(),
       timestamp: new Date(),
     };
     this.entries.push(created);
     if (this.entries.length > this.maxEntries) this.entries.shift();
     return created;
+  }
+
+  query(_query?: unknown): DecisionEntry[] {
+    return this.getAll();
   }
 
   get(id: string): DecisionEntry | undefined {
@@ -57,22 +95,26 @@ export class DecisionLog {
   }
 
   getByTag(tag: string): DecisionEntry[] {
-    return this.entries.filter((e) => e.tags.includes(tag))
+    return this.entries
+      .filter((e) => e.tags.includes(tag))
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
   getByOutcome(outcome: string): DecisionEntry[] {
-    return this.entries.filter((e) => e.outcome === outcome)
+    return this.entries
+      .filter((e) => e.outcome === outcome)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
   getByTimeRange(start: Date, end: Date): DecisionEntry[] {
-    return this.entries.filter((e) => e.timestamp >= start && e.timestamp <= end)
+    return this.entries
+      .filter((e) => e.timestamp >= start && e.timestamp <= end)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
   getByTraceId(traceId: string): DecisionEntry[] {
-    return this.entries.filter((e) => e.traceIds.includes(traceId))
+    return this.entries
+      .filter((e) => e.traceIds.includes(traceId))
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 

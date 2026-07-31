@@ -3,10 +3,18 @@ import { TraceLedger } from '../trace-engine/trace-ledger.js';
 import { DecisionLog } from '../decisions/decision-log.js';
 import { PatternLibrary } from '../patterns/pattern-library.js';
 import type { CognitiveTrace } from '../trace-engine/cognitive-trace.js';
+import { MistakeLogger } from '../../shared/mistake-logger.js';
 
 export interface Suggestion {
   id: string;
-  type: 'action' | 'review' | 'consolidation' | 'investigation' | 'optimization';
+  type:
+    | 'action'
+    | 'review'
+    | 'consolidation'
+    | 'investigation'
+    | 'optimization'
+    | 'remediation'
+    | 'risk';
   title: string;
   description: string;
   priority: 'low' | 'normal' | 'high';
@@ -15,6 +23,8 @@ export interface Suggestion {
   traceIds: string[];
   createdAt: Date;
   dismissed: boolean;
+  dismissedAt?: Date;
+  dismissedReason?: string;
 }
 
 export interface SuggestionConfig {
@@ -29,12 +39,14 @@ export class SuggestionEngine {
   private patternLibrary: PatternLibrary;
   private suggestions: Suggestion[] = [];
   private config: Required<SuggestionConfig>;
+  private mistakeLogger?: MistakeLogger;
 
   constructor(
     ledger: TraceLedger,
     decisionLog: DecisionLog,
     patternLibrary: PatternLibrary,
     config?: Partial<SuggestionConfig>,
+    mistakeLogger?: MistakeLogger,
   ) {
     this.ledger = ledger;
     this.decisionLog = decisionLog;
@@ -44,6 +56,7 @@ export class SuggestionEngine {
       minConfidence: config?.minConfidence ?? 0.3,
       enableAutoConsolidation: config?.enableAutoConsolidation ?? true,
     };
+    this.mistakeLogger = mistakeLogger;
   }
 
   generate(): Suggestion[] {
@@ -53,6 +66,8 @@ export class SuggestionEngine {
     this.suggestions.push(...this.suggestConsolidations());
     this.suggestions.push(...this.suggestInvestigations());
     this.suggestions.push(...this.suggestOptimizations());
+    this.suggestions.push(...this.suggestRemediations());
+    this.suggestions.push(...this.suggestRisks());
 
     this.suggestions.sort((a, b) => {
       const rank = { high: 0, normal: 1, low: 2 };
@@ -70,10 +85,16 @@ export class SuggestionEngine {
     return this.suggestions.filter((s) => !s.dismissed);
   }
 
-  dismiss(id: string): boolean {
+  getRecentSuggestions(limit = 20): Suggestion[] {
+    return [...this.suggestions].slice(-limit);
+  }
+
+  dismiss(id: string, reason?: string): boolean {
     const sug = this.suggestions.find((s) => s.id === id);
     if (!sug) return false;
     sug.dismissed = true;
+    sug.dismissedAt = new Date();
+    if (reason) sug.dismissedReason = reason;
     return true;
   }
 
@@ -211,8 +232,7 @@ export class SuggestionEngine {
 
   private suggestOptimizations(): Suggestion[] {
     const results: Suggestion[] = [];
-    const recent = this.ledger.getRecent(200);
-
+    const recent = this.ledger.getRecent(100);
     const errorCount = recent.filter((t) => t.status === 'error').length;
     const errorRate = recent.length > 0 ? errorCount / recent.length : 0;
     if (errorRate > 0.2) {
@@ -251,6 +271,60 @@ export class SuggestionEngine {
     return results;
   }
 
+  private suggestRemediations(): Suggestion[] {
+    if (!this.mistakeLogger) return [];
+    const results: Suggestion[] = [];
+    const repeated = this.mistakeLogger.getTopMistakes(10).filter((m) => m.occurrences > 1);
+
+    for (const mistake of repeated) {
+      results.push({
+        id: crypto.randomUUID(),
+        type: 'remediation',
+        title: `Remediate repeated mistake: ${mistake.intent}`,
+        description: `The mistake "${mistake.message}" has occurred ${mistake.occurrences} times. Investigate root cause and add protective validation or retry logic.`,
+        priority: 'high',
+        confidence: Math.min(0.5 + mistake.occurrences * 0.1, 0.95),
+        context: {
+          source: mistake.source,
+          severity: mistake.severity,
+          occurrences: mistake.occurrences,
+        },
+        traceIds: [],
+        createdAt: new Date(),
+        dismissed: false,
+      });
+    }
+
+    return results;
+  }
+
+  private suggestRisks(): Suggestion[] {
+    const results: Suggestion[] = [];
+    const decisions = this.decisionLog.getAll(100);
+    const risky = decisions.filter((d) => d.outcome === 'rejected' || d.outcome === 'superseded');
+
+    for (const decision of risky) {
+      results.push({
+        id: crypto.randomUUID(),
+        type: 'risk',
+        title: `Review decision risk: ${decision.title}`,
+        description: `Decision "${decision.title}" was ${decision.outcome}. Re-evaluate assumptions and ensure the choice is aligned with current project risks.`,
+        priority: 'normal',
+        confidence: 0.5,
+        context: {
+          decisionId: decision.id,
+          outcome: decision.outcome,
+          rationale: decision.rationale,
+        },
+        traceIds: [],
+        createdAt: new Date(),
+        dismissed: false,
+      });
+    }
+
+    return results;
+  }
+
   async persist(filePath: string): Promise<void> {
     const data = {
       suggestions: this.suggestions,
@@ -271,7 +345,9 @@ export class SuggestionEngine {
     return this.suggestions.length;
   }
 
-  private detectRepeatFailures(traces: CognitiveTrace[]): Array<{ name: string; count: number; traceIds: string[] }> {
+  private detectRepeatFailures(
+    traces: CognitiveTrace[],
+  ): Array<{ name: string; count: number; traceIds: string[] }> {
     const failures = new Map<string, { count: number; traceIds: string[] }>();
     for (const t of traces) {
       if (t.status === 'error') {

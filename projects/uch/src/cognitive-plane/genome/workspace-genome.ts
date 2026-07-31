@@ -1,4 +1,6 @@
 import { writeSnapshot, readSnapshot, mapToRecord, recordToMap } from '../persistence/persistence-engine.js';
+import { SpeciesGenome } from './species-genome.js';
+import { AdaptiveGenome } from './adaptive-genome.js';
 
 export type GenomeSection =
   | 'mission' | 'vision' | 'architecture' | 'principles'
@@ -29,11 +31,18 @@ export class WorkspaceGenome {
   private entries: Map<string, GenomeEntry> = new Map();
   private config: WorkspaceGenomeConfig;
   private readonly builtinKeys: Set<string> = new Set();
+  private readonly species: SpeciesGenome;
+  private readonly adaptive: AdaptiveGenome;
 
-  constructor(config: WorkspaceGenomeConfig) {
+  constructor(config: WorkspaceGenomeConfig, species?: SpeciesGenome, adaptive?: AdaptiveGenome) {
     this.config = config;
+    this.species = species ?? new SpeciesGenome();
+    this.adaptive = adaptive ?? new AdaptiveGenome();
     this.initializeBuiltinSections();
   }
+
+  getSpecies(): SpeciesGenome { return this.species; }
+  getAdaptive(): AdaptiveGenome { return this.adaptive; }
 
   get workspaceId(): string { return this.config.workspaceId; }
   get projectName(): string { return this.config.projectName; }

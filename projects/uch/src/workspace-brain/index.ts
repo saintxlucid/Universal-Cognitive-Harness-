@@ -1,0 +1,12 @@
+export { createGenome, genomeSummary } from './genome.js';
+export type { WorkspaceGenome } from './genome.js';
+export { createWorkspaceIdentity } from './identity.js';
+export type { WorkspaceIdentity } from './identity.js';
+export { createWorldModel, addDecision, addSubsystem, worldModelSummary } from './world-model.js';
+export type { WorkspaceWorldModel, Subsystem, DecisionRecord, CodingStandard } from './world-model.js';
+export { ArchitectureGraph } from './architecture-graph.js';
+export type { ArchitectureNode, ArchitectureEdge } from './architecture-graph.js';
+export { WorkspaceTimeline } from './timeline.js';
+export type { TimelineEvent, TimelineEventType } from './timeline.js';
+export { WorkspaceHealth } from './health.js';
+export type { HealthMetric } from './health.js';
