@@ -550,6 +550,76 @@ Identity is not atomic. It is a stack of three genomes:
 
 ---
 
+## Part VIII: Cognitive Physics (DRAFT — proposed by RFC-0005, not yet normative)
+
+> **Status:** Draft. This part is proposed text, not normative. It does not
+> bind any implementation until RFC-0005 passes Acceptance. Content mirrors
+> rfc/ideas/IDEA-0001/0003/0004/0005. Until acceptance, the numbers below are
+> candidates, not constants.
+
+### §8.1 Measured Quantities and Units
+
+The runtime defines first-class measured quantities over the §2 primitives.
+A quantity is a value with a unit basis; quantities are typed (branded per
+§6.2) and never bare numbers in organ logic.
+
+| Quantity | Symbol | Definition | Unit basis |
+| --- | --- | --- | --- |
+| Signal momentum | `p(s)` | `IG(s) · salience(s)` | entropy · priority |
+| Knowledge velocity | `v(K)` | belief-revision rate per episode | Δconfidence / episode |
+| Memory half-life | `t½` | decay parameter (Law 5) | time |
+| Trust gradient | `∇T` | Δtrust per interaction hop | trust / hop |
+| Attention density | `A(t)` | signals reaching cortex per tick | signal / tick |
+| Learning rate | `L` | convergence speed of prediction error | ΔPE / episode |
+| Evidence mass | `m(b)` | verified evidence weight of belief `b` | evidence × verification |
+| Cognitive pressure | `P` | demand / available energy | energy-demand / energy-budget |
+| Uncertainty field | `U(r)` | confidence dispersion over region `r` | std(confidence) |
+
+### §8.2 Conservation Laws (candidate set)
+
+| Law | Statement | Legal transforms |
+| --- | --- | --- |
+| C1 | Experience is never destroyed | compress, forget, archive, generalize — each recorded in the ledger |
+| C2 | Every decision retains a provenance chain | trace linkage never severed (Law 3) |
+| C3 | Knowledge requires evidence | confidence may decay; evidence is retained (Law 4) |
+| C4 | Signal information is conserved under lawful transformation | replayable ledger (Law 12) |
+
+"Forgotten" means a recorded transition to a lower-fidelity form with a trace
+entry — never a silent deletion. Auditing a transform pathway means checking
+it against this table.
+
+### §8.3 Failure Physics (candidate)
+
+Instability of a belief:
+
+```
+I(b) = confidence(b) − m(b)        // m(b) = evidence mass, §8.1
+```
+
+| Failure | Physical framing | Stability condition |
+| --- | --- | --- |
+| Hallucination | instability: confidence exceeds evidence mass | `I(b) ≤ θ` |
+| Knowledge drift | entropy: belief moved from evidence without a recorded cause | drift attributable in ledger |
+| Contradiction | potential energy: stored tension between beliefs | resolvable via revision (Law 4) |
+| Dead memory | mass: storage with zero access and zero predictive value | eligibility for C1 transform |
+
+Verification is stabilization: energy invested to reduce `I(b)`. Veto gates
+(organic-score, constitution) are stability conditions, not policy opinions.
+
+### §8.4 Cognitive Calculus (candidate closed forms — to be researched)
+
+| Quantity | Candidate form | Research base |
+| --- | --- | --- |
+| Confidence update | `p' = p + α · (m(b) − p)` | Bayesian / AGM belief revision |
+| Trust decay | `t(τ) = t₀ · 2^(−τ/t½)` | Law 5 exponential decay |
+| Learning convergence | `PE(n) = PE₀ · n^(−β)` | power-law skill acquisition |
+| Memory strength | spacing-based retention | Ebbinghaus forgetting curve |
+
+No closed form enters the specification without a research evidence register
+and a benchmark (RFC-0005 open items).
+
+---
+
 ## Appendix A: Formal Notation Reference
 
 | Notation | Meaning |
