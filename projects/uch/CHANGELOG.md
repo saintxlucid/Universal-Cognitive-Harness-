@@ -8,36 +8,36 @@ All notable changes to UCH are documented here. Format follows
 
 ### Added
 
-- **Takes / Calibration system** (`src/cognitive-plane/calibration/`) —
-  gradeable claims with conviction (`takes.ts`), Brier scorecards and
-  bias tags (`calibration.ts`), voice guardrails (`voice-gate.ts`),
-  JSON persistence (`store.ts`). CLI: `uch takes add|resolve|list`,
-  `uch calibration`.
-- **Synthesis engine with citations** (`src/kernel/retrieval/synthesis.ts`) —
-  every claim carries a resolvable `[id]`/`[id#N]` marker; unresolved
-  markers become warnings, unattributable claims become gaps. CLI:
-  `uch synthesize`.
-- **Recency decay** (`src/kernel/retrieval/recency-decay.ts`) — per-prefix
-  half-life map (evergreen concepts vs decaying episodes), env-var and
-  per-call overrides, composed multiplicatively into `RetrievalFusion`
-  as a post-fusion boost stage.
-- **Memory filing rules** (`docs/memory-filing-rules.md`) — mandatory
-  filing protocol (concept/episode/edge surfaces, notability gate,
-  cross-linking iron law, citation provenance, takes attribution).
-- **Skill catalog + importer** (`src/skills/skill-catalog.ts`) — catalog
-  external skill repos, import with provenance index
-  (`.import-index.json`), BOM-tolerant parsing. CLI: `uch skill catalog`,
-  `uch skill import`, `uch skill provenance`.
-- **Imported skill library** — 17 skills from the portable skill
-  library plus `karpathy-guidelines` (with `EXAMPLES.md` reference)
-  from the andrej-karpathy-skills collection.
-- **Coding principles with plan verification** — `CodingPrinciplesInput`
-  accepts an optional `context.plan`; steps containing
-  verify/test/check markers satisfy the goal-driven-execution check.
-- **MCP tools** — `principles-check` and `gap-analysis` registered on
-  the MCP STDIO server.
-- **Documentation suite** — docs hub, CLI reference, MCP reference,
-  skill system guide, changelog, contributing guide.
+- **Workspace attachment governance (ADR-001 criteria 1–4)** —
+  `src/workspace-manifest/` (discover/negotiate/attach/detach, `uch.manifest.v1`),
+  `GrantEngine` (`src/cognitive-runtime/grants.ts`), `EventGovernance` gate
+  (`src/control-plane/event-governance.ts`), `ProjectionEngine`
+  (`src/control-plane/projections.ts`).
+- **OTel trace engine (ADR-002)** — `src/cognitive-plane/trace-engine/`:
+  W3C 32-hex trace ids + 16-hex span ids, `traceparent` propagation,
+  `OtelBridge` (mirrors ledger traces to OTel providers), `TraceRecorder`
+  remote-parent continuation.
+- **Cognitive Replay** (`src/cognitive-plane/replay/`) — `replayEvents`,
+  `resumeContext` (continuation traceparent), `hydrate` (re-publishes traces
+  with lineage metadata).
+- **Phase 01 organism organs** (`src/workspace-graphs/`) — KnowledgeGraph,
+  DecisionGraph, TaskGraph, EvolutionHistory, WorkspaceDNA; wired into
+  `WorkspaceBrain` via 7 neural-event-bus subscriptions; persisted under
+  `.uccp/persist/`.
+- **Agentic resilience suite** (`src/agentic/`) — middleware pipeline,
+  backends + permissions, tool-call-repair, compaction-engine, credential
+  pool, failover chain, lane-queue, subagent + async registries,
+  prompt-assembly profiles, TTL availability probes, fast-path router.
+- **Mnemosyne** (`src/mnemosyne/`) — memory supremacy brain: sensory +
+  retrieval cortices, context compiler, economy, sleep cycle.
+- **Kernel physiology** — `OrganicScoreEngine` (15 metrics, constitutional
+  vetoes), integrity checklist, calibration (Brier scorecards, takes),
+  context-compressor, synthesis-with-citations, recency-decay, gap-analysis,
+  evidence, graph/vector stores, world-model, concept-genome, memory-evolution.
+- **CP v1 protocol** (`src/protocol/`) — versioned cognitive contract +
+  conformance runner; WebSocket transport; driver registry.
+- **Planning corpus** — Phase 02 (Digital Twin + Cognitive Observatory) and
+  Phase 03 (Engineering Physiology) contexts/research/validation.
 
 ### Fixed
 
@@ -46,6 +46,9 @@ All notable changes to UCH are documented here. Format follows
 - `.import-index.json` reads are BOM-tolerant (previously a BOM written
   by PowerShell broke `JSON.parse`).
 - `CalibrationStore.load()` is BOM-tolerant.
+- 3 pre-existing test failures (`e2e-server-flow`, `neural-fs`) resolved —
+  suite at 100 files / 1,738 tests green.
+- `package-lock.json` re-synced with 0.2.0 dependency set.
 
 ## [0.2.0] — 2026-07-31
 

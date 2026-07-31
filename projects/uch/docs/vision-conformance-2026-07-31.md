@@ -139,8 +139,8 @@ All 16 events exist as typed, priority-scored signals on the 5-layer nervous sys
 
 ### 2.3 Known project debt (pre-existing, unrelated)
 
-- `package-lock.json` stale (v0.1.0 vs v0.2.0)
-- 3 pre-existing test failures (`e2e-server-flow`, `neural-fs`)
+- `package-lock.json` stale (v0.1.0 vs v0.2.0) — fixed 2026-07-31 (lockfile re-synced with 0.2.0 deps)
+- 3 pre-existing test failures (`e2e-server-flow`, `neural-fs`) — **all fixed 2026-07-31; suite is 100 files / 1,738 tests, 0 failures**
 - Layer 7 (Dream Engine) scaffolded only
 
 ---

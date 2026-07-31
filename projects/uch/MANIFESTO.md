@@ -166,7 +166,7 @@ Biological vocabulary is permitted — **required** — but only under an engine
 
 The physiology is specified in [COGNITIVE_BIOLOGY.md](spec/COGNITIVE_BIOLOGY.md) (plasticity, homeostasis, metabolism, development, healing, sleep, evolution, immune response, endocrine regulation, thalamic gating). The invariants are specified in [LAWS_OF_COGNITIVE_PHYSICS.md](spec/LAWS_OF_COGNITIVE_PHYSICS.md) — sixteen laws, enforced by static analysis, runtime auditing, and constitutional review. The identity that outlives every organ is specified in [GENOME.md](spec/GENOME.md).
 
-This discipline already exists in this repository: every organ above has source, most have tests, and the whole corpus is verified by 91 test files / 1,638 test cases. What the manifesto adds is the public claim: this is a field, not a feature.
+This discipline already exists in this repository: every organ above has source, most have tests, and the whole corpus is verified by 100 test files / 1,738 test cases. What the manifesto adds is the public claim: this is a field, not a feature.
 
 ---
 
@@ -191,7 +191,7 @@ Every interaction between components is an immutable, causally attributed signal
 
 ## 8. Current State and the Immediate Gap
 
-**Implemented:** workspace-owned runtime topology ([ADR-001](design/ADR-001-workspace-owned-cognitive-runtime.md)), driver plane, control plane (auth, policies, budgets, limits, telemetry, event governance), capability registry with scopes/authority/cost/retention, grant engine (issue/authorize/revoke per agent), governed driver event path (provenance, idempotency, policy + grant checks, audit ledger), event bus, exoskeleton orchestrator with 20+ organs, workspace brain, kernel memory (episodic + semantic), 15 cognitive-plane stores, agentic runtime (tools, permissions, query loop, subagents), CLI + MCP STDIO (24 tools) + HTTP/SSE server + 5 transports, 91 test files / 1,600+ tests passing, and a governed specification corpus (Laws, Constitution, Biology, Ontology, Genome, Formal Foundations, CIC, Conformance).
+**Implemented:** workspace-owned runtime topology ([ADR-001](design/ADR-001-workspace-owned-cognitive-runtime.md)), driver plane, control plane (auth, policies, budgets, limits, telemetry, event governance), capability registry with scopes/authority/cost/retention, grant engine (issue/authorize/revoke per agent), governed driver event path (provenance, idempotency, policy + grant checks, audit ledger), event bus, exoskeleton orchestrator with 20+ organs, workspace brain, kernel memory (episodic + semantic), 15 cognitive-plane stores, agentic runtime (tools, permissions, query loop, subagents), CLI + MCP STDIO (25 tools) + HTTP/SSE server + 6 transports, 100 test files / 1,738 tests passing, and a governed specification corpus (Laws, Constitution, Biology, Ontology, Genome, Formal Foundations, CIC, Conformance).
 
 **The defining gap — ADR-001 Phase-I criterion #1:**
 
