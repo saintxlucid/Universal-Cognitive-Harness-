@@ -16,6 +16,7 @@ export interface ToolPropertySchema {
 
 export interface ToolUseContext {
   cwd: string;
+  roots?: string[];
   abortController: AbortController;
   requestPrompt?: (prompt: string, options?: { isRequired?: boolean }) => Promise<string>;
   getSessionId: () => string;
@@ -131,6 +132,20 @@ export function buildTool<D extends ToolDef>(def: D): Tool {
   };
 }
 
+interface TypeCheck {
+  type: string;
+  invalid: (value: unknown) => boolean;
+  message: (key: string) => string;
+}
+
+const TYPE_CHECKS: TypeCheck[] = [
+  { type: 'string', invalid: (v) => typeof v !== 'string', message: (key) => `Input ${key} must be a string` },
+  { type: 'number', invalid: (v) => typeof v !== 'number', message: (key) => `Input ${key} must be a number` },
+  { type: 'boolean', invalid: (v) => typeof v !== 'boolean', message: (key) => `Input ${key} must be a boolean` },
+  { type: 'array', invalid: (v) => !Array.isArray(v), message: (key) => `Input ${key} must be an array` },
+  { type: 'object', invalid: (v) => typeof v !== 'object' || Array.isArray(v), message: (key) => `Input ${key} must be an object` },
+];
+
 export function validateInputAgainstSchema(
   input: Record<string, unknown>,
   schema: ToolInputSchema,
@@ -144,20 +159,9 @@ export function validateInputAgainstSchema(
   for (const [key, prop] of Object.entries(schema.properties)) {
     const value = input[key];
     if (value === undefined || value === null) continue;
-    if (prop.type === 'string' && typeof value !== 'string') {
-      return `Input ${key} must be a string`;
-    }
-    if (prop.type === 'number' && typeof value !== 'number') {
-      return `Input ${key} must be a number`;
-    }
-    if (prop.type === 'boolean' && typeof value !== 'boolean') {
-      return `Input ${key} must be a boolean`;
-    }
-    if (prop.type === 'array' && !Array.isArray(value)) {
-      return `Input ${key} must be an array`;
-    }
-    if (prop.type === 'object' && (typeof value !== 'object' || Array.isArray(value))) {
-      return `Input ${key} must be an object`;
+    const typeCheck = TYPE_CHECKS.find((check) => check.type === prop.type);
+    if (typeCheck && typeCheck.invalid(value)) {
+      return typeCheck.message(key);
     }
     if (prop.enum && typeof value === 'string' && !prop.enum.includes(value)) {
       return `Input ${key} must be one of: ${prop.enum.join(', ')}`;

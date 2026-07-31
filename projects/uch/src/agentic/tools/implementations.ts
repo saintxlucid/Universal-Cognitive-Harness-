@@ -1,9 +1,52 @@
 import { exec } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import * as path from 'node:path';
+import { DEFAULT_DENYLIST, normalizeCommand } from '../../coding/command-runner.js';
 import { buildTool, type ToolUseContext } from './types.js';
 
 const isWindows = process.platform === 'win32';
+
+export const MAX_BASH_TIMEOUT_MS = 600_000;
+
+const BASH_DENYLIST: RegExp[] = [
+  ...DEFAULT_DENYLIST,
+  /\b(?:curl|wget|iwr|Invoke-WebRequest)\b[^\r\n]*(?:&&|\|\||;)[^\r\n]*(?:\bsh\b|\bbash\b|\bpowershell\b|\bcmd\b)/i,
+  /\b(?:iwr|Invoke-WebRequest)\b[^\r\n;|&<>]*\|\s*(?:powershell|cmd)\b/i,
+  /\bremove-item\b[^\r\n]*\b(?:recurse|force)\b/i,
+  /\bdel\s+\/s\b/i,
+  /\brm\s+-[a-z]*rf[a-z]*\s+~(?:\/|$)/i,
+];
+
+function hasUnquotedInjectionMetachar(command: string): boolean {
+  let quote: string | null = null;
+  for (let i = 0; i < command.length; i++) {
+    const ch = command[i]!;
+    if (quote) {
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      continue;
+    }
+    if (ch === ';' || ch === '`' || ch === '\n' || ch === '\r') return true;
+    if (ch === '$' && command[i + 1] === '(') return true;
+  }
+  return false;
+}
+
+export function bashBlockReason(command: string): string | null {
+  const normalized = normalizeCommand(command);
+  for (const pattern of BASH_DENYLIST) {
+    if (pattern.test(normalized)) {
+      return `Command blocked by security policy (matches ${pattern})`;
+    }
+  }
+  if (hasUnquotedInjectionMetachar(command)) {
+    return 'Command blocked by security policy: unquoted shell metacharacter (; backtick $() newline) is not allowed';
+  }
+  return null;
+}
 
 function runCommand(command: string, context: ToolUseContext, timeoutMs: number): Promise<{ stdout: string; stderr: string; code: number }> {
   return new Promise((resolve, reject) => {
@@ -53,11 +96,21 @@ export const BashTool = buildTool({
     const command = String(input.command ?? '');
     if (!command.trim()) return 'Command must not be empty';
     if (command.includes('sudo') && !isWindows) return 'sudo is not allowed';
-    return null;
+    if (typeof input.timeout === 'number' && input.timeout > MAX_BASH_TIMEOUT_MS) {
+      return `Timeout exceeds maximum of ${MAX_BASH_TIMEOUT_MS}ms`;
+    }
+    return bashBlockReason(command);
   },
   call: async (input, context, onProgress) => {
     const command = String(input.command ?? '');
     const timeout = typeof input.timeout === 'number' ? input.timeout : 120000;
+    const blocked = bashBlockReason(command);
+    if (blocked) {
+      return { data: blocked, isError: true };
+    }
+    if (timeout > MAX_BASH_TIMEOUT_MS) {
+      return { data: `Timeout exceeds maximum of ${MAX_BASH_TIMEOUT_MS}ms`, isError: true };
+    }
     onProgress?.({ type: 'log', message: `Running: ${command}` });
     const { stdout, stderr, code } = await runCommand(command, context, timeout);
     const output = [stdout.trim(), stderr.trim()].filter(Boolean).join('\n');
@@ -90,6 +143,27 @@ export function isDestructiveCommand(command: string): boolean {
 
 const MAX_READ_CHARS = 100000;
 
+function resolveWithinRoot(
+  cwd: string,
+  roots: string[] | undefined,
+  filePath: string,
+): { path: string } | { error: string } {
+  const resolved = path.resolve(cwd, String(filePath ?? ''));
+  const allowed = roots && roots.length > 0 ? roots : [cwd];
+  for (const root of allowed) {
+    if (isInsideRoot(path.resolve(root), resolved)) return { path: resolved };
+  }
+  return { error: `Path escapes workspace root: ${filePath}` };
+}
+
+function isInsideRoot(rootResolved: string, resolved: string): boolean {
+  const rel = path.relative(rootResolved, resolved);
+  if (rel === '') return true;
+  if (rel.startsWith('..') || path.isAbsolute(rel)) return false;
+  const rootSep = rootResolved.endsWith(path.sep) ? rootResolved : rootResolved + path.sep;
+  return resolved.toLowerCase().startsWith(rootSep.toLowerCase());
+}
+
 export const FileReadTool = buildTool({
   name: 'Read',
   aliases: ['FileRead'],
@@ -107,7 +181,11 @@ export const FileReadTool = buildTool({
   isReadOnly: () => true,
   maxResultSizeChars: Infinity,
   call: async (input, context) => {
-    const filePath = path.resolve(context.cwd, String(input.file_path ?? ''));
+    const containment = resolveWithinRoot(context.cwd, context.roots, String(input.file_path ?? ''));
+    if ('error' in containment) {
+      return { data: containment.error, isError: true };
+    }
+    const filePath = containment.path;
     const offset = typeof input.offset === 'number' ? input.offset : 0;
     const limit = typeof input.limit === 'number' ? input.limit : MAX_READ_CHARS;
     try {
@@ -139,7 +217,11 @@ export const FileWriteTool = buildTool({
     required: ['file_path', 'content'],
   },
   call: async (input, context) => {
-    const filePath = path.resolve(context.cwd, String(input.file_path ?? ''));
+    const containment = resolveWithinRoot(context.cwd, context.roots, String(input.file_path ?? ''));
+    if ('error' in containment) {
+      return { data: containment.error, isError: true };
+    }
+    const filePath = containment.path;
     const parent = path.dirname(filePath);
     await fs.mkdir(parent, { recursive: true });
     const content = String(input.content ?? '');
@@ -168,7 +250,11 @@ export const FileEditTool = buildTool({
     required: ['file_path', 'old_string', 'new_string'],
   },
   call: async (input, context) => {
-    const filePath = path.resolve(context.cwd, String(input.file_path ?? ''));
+    const containment = resolveWithinRoot(context.cwd, context.roots, String(input.file_path ?? ''));
+    if ('error' in containment) {
+      return { data: containment.error, isError: true };
+    }
+    const filePath = containment.path;
     const oldString = String(input.old_string ?? '');
     const newString = String(input.new_string ?? '');
     const replaceAll = input.replace_all === true;
@@ -204,7 +290,11 @@ export const GlobTool = buildTool({
   isReadOnly: () => true,
   call: async (input, context) => {
     const { glob } = await import('node:fs/promises');
-    const base = path.resolve(context.cwd, String(input.path ?? '.'));
+    const containment = resolveWithinRoot(context.cwd, context.roots, String(input.path ?? '.'));
+    if ('error' in containment) {
+      return { data: containment.error, isError: true };
+    }
+    const base = containment.path;
     const pattern = String(input.pattern ?? '');
     const files: string[] = [];
     for await (const entry of glob(pattern, { cwd: base })) {
@@ -236,7 +326,11 @@ export const GrepTool = buildTool({
   isReadOnly: () => true,
   call: async (input, context) => {
     const { glob } = await import('node:fs/promises');
-    const base = path.resolve(context.cwd, String(input.path ?? '.'));
+    const containment = resolveWithinRoot(context.cwd, context.roots, String(input.path ?? '.'));
+    if ('error' in containment) {
+      return { data: containment.error, isError: true };
+    }
+    const base = containment.path;
     const regex = new RegExp(String(input.pattern ?? ''));
     const include = String(input.include ?? '**/*');
     const results: string[] = [];
