@@ -62,7 +62,10 @@ describe('UCH Agent Integration — Full Lifecycle', () => {
 
   it('learnFromInteraction creates episodes', async () => {
     const before = plugin.kernel.getStats().episodes;
-    await plugin.learnFromInteraction('What is the architecture?', 'The system uses a layered approach.');
+    await plugin.learnFromInteraction(
+      'What is the architecture?',
+      'The system uses a layered approach.',
+    );
     const after = plugin.kernel.getStats().episodes;
     expect(after).toBeGreaterThan(before);
   });
@@ -119,8 +122,54 @@ describe('UCH Agent Integration — Full Lifecycle', () => {
     await newPlugin.shutdown();
   });
 
+  it('detects VS Code and Copilot runtimes from the environment', () => {
+    const runtimeVars = [
+      'VSCODE_GIT_IPC_HANDLE',
+      'TERM_PROGRAM',
+      'GITHUB_COPILOT',
+      'CLAUDE_CODE',
+      'CODEX_API_KEY',
+      'OPENCODE',
+      'CURSOR',
+    ] as const;
+    const previous = Object.fromEntries(runtimeVars.map((key) => [key, process.env[key]]));
+
+    const restore = () => {
+      for (const key of runtimeVars) {
+        const value = previous[key];
+        if (value === undefined) {
+          delete process.env[key];
+        } else {
+          process.env[key] = value;
+        }
+      }
+    };
+
+    try {
+      for (const key of runtimeVars) delete process.env[key];
+      process.env.TERM_PROGRAM = 'vscode';
+      const vscodePlugin = new UCHAgentPlugin({ workspaceRoot: tmpDir, autoIngestGit: false });
+      expect(vscodePlugin.agentName).toBe('vscode');
+
+      delete process.env.TERM_PROGRAM;
+      process.env.GITHUB_COPILOT = '1';
+      const copilotPlugin = new UCHAgentPlugin({ workspaceRoot: tmpDir, autoIngestGit: false });
+      expect(copilotPlugin.agentName).toBe('copilot');
+    } finally {
+      restore();
+    }
+  });
+
   it('supports all configured tool names', () => {
-    const tools = ['claude-code', 'codex', 'opencode', 'cursor', 'copilot', 'windsurf', 'antigravity'];
+    const tools = [
+      'claude-code',
+      'codex',
+      'opencode',
+      'cursor',
+      'copilot',
+      'windsurf',
+      'antigravity',
+    ];
     for (const tool of tools) {
       const p = new UCHAgentPlugin({
         toolName: tool,
@@ -243,6 +292,8 @@ describe('bootUCH singleton', () => {
     await instance.shutdown();
     try {
       fs.rmSync(tmpDir, { recursive: true, force: true });
-    } catch { /* best-effort */ }
+    } catch {
+      /* best-effort */
+    }
   });
 });
