@@ -8,6 +8,7 @@ import type {
   CognitiveProcess,
   PID,
   ProcessSpec,
+  ProcessStatus,
   ProcessThread,
 } from './types.js';
 
@@ -110,6 +111,7 @@ export class ProcessTable implements Storable {
     const index = process.threads.findIndex((t) => t.threadId === threadId);
     if (index < 0) return false;
     const [thread] = process.threads.splice(index, 1);
+    if (!thread) return false;
     process.updatedAt = new Date();
     this.emit('process:detached', { pid, threadId, driverLabel: thread.driverLabel });
     return true;

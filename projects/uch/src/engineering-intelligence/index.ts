@@ -48,6 +48,18 @@ export {
   type BenchmarkReport,
 } from './benchmark/runner.js';
 export {
+  VETO_THRESHOLD,
+  calibrateThreshold,
+  evaluateInstability,
+  nestingDepth,
+  runInstabilityParityBenchmark,
+  type FailureFamily,
+  type InstabilityBelief,
+  type InstabilityParityCase,
+  type InstabilityParityReport,
+  type InstabilityVerdict,
+} from './failure-physics/instability.js';
+export {
   autoTarget,
   coerceFindings,
   engineeringFindingsFor,
