@@ -58,3 +58,36 @@ describe('ExecutiveBrain engineering judgment', () => {
     expect(summary).toContain('next steps');
   });
 });
+
+describe('ExecutiveBrain — engineering-intelligence filter', () => {
+  it('attaches a deterministic engineering review to every assessment', () => {
+    const brain = new ExecutiveBrain({ eventBus: new NeuralEventBus() });
+
+    const assessment = brain.evaluateChange({
+      intent: 'extend an existing profile API',
+      proposedChange:
+        'Extend the existing UserService with a profile summary method and add tests and docs.',
+      context: { existingArchitecture: 'UserService owns profile operations.' },
+    });
+
+    expect(assessment.engineeringReview).toBeDefined();
+    expect(assessment.engineeringReview?.score).toBeGreaterThan(0);
+    expect(assessment.engineeringVetoes).toBeUndefined();
+    expect(assessment.judgment.verdict).toBe('pass');
+  });
+
+  it('escalates the verdict to review when an engineering veto fires', () => {
+    const brain = new ExecutiveBrain({ eventBus: new NeuralEventBus() });
+
+    const assessment = brain.evaluateChange({
+      intent: 'add queue durability',
+      proposedChange:
+        'The message broker has no failover and no standby; if it dies the pipeline stops.',
+      context: { existingArchitecture: 'The broker is the ingest path.' },
+    });
+
+    expect(assessment.engineeringVetoes).toEqual(['sys.spof']);
+    expect(assessment.engineeringReview?.findings.some((f) => f.gate === 'veto')).toBe(true);
+    expect(assessment.judgment.verdict).toBe('review');
+  });
+});

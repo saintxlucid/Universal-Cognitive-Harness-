@@ -1,0 +1,35 @@
+{
+  "servers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "env": {
+        "DISABLE_THOUGHT_LOGGING": "true"
+      }
+    },
+    "uch": {
+      "command": "node",
+      "args": ["${workspaceFolder}/projects/uch/dist/cli/index.js", "mcp"]
+    },
+    "exa": {
+      "type": "http",
+      "url": "https://mcp.exa.ai/mcp"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "firecrawl": {
+      "command": "npx",
+      "args": ["-y", "@firecrawl/mcp"]
+    },
+    "gh_grep": {
+      "url": "https://mcp.grep.app",
+      "type": "http"
+    }
+  }
+}

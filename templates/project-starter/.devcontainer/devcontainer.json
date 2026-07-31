@@ -1,0 +1,22 @@
+{
+  "name": "Monorepo Project",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  "forwardPorts": [5173, 3001, 5432, 6379],
+  "portsAttributes": {
+    "5173": { "label": "Web App", "onAutoForward": "openBrowser" },
+    "3001": { "label": "API", "onAutoForward": "silent" },
+    "5432": { "label": "PostgreSQL", "onAutoForward": "silent" },
+    "6379": { "label": "Redis", "onAutoForward": "silent" }
+  },
+  "postCreateCommand": "npm install && npx turbo telemetry disable",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "Prisma.prisma",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  }
+}

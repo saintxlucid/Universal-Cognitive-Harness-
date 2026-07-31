@@ -133,7 +133,7 @@ Identity is a stack of three genomes, each with a different rate of change and d
 
 Contents:
 - Core philosophy (persistence, signal universality, governance, evidence)
-- The 16 Laws of Cognitive Physics
+- The 18 Laws of Cognitive Physics
 - The 10 Immutable Commitments (§7)
 - The Cognitive Ontology's core entity definitions
 

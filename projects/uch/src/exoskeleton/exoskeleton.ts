@@ -1,13 +1,12 @@
-import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
-import { AetherCore, type AetherConfig } from '../aether/aether-core.js';
-import { Consciousness } from '../aether/consciousness.js';
-import { CognitiveKernel } from '../kernel/cognitive-kernel.js';
-import { WorkspaceBrain } from '../workspace-brain/workspace-brain.js';
-import { ExecutiveBrain } from '../executive-brain/executive-brain.js';
-import { TraceRecorder } from '../cognitive-plane/trace-engine/trace-recorder.js';
-import { CognitiveReplay } from '../cognitive-plane/replay/cognitive-replay.js';
-import { TracePersistence } from '../cognitive-plane/persistence/trace-persistence.js';
-import { SignalStore } from '../cognitive-plane/signals/signal-store.js';
+import { type EventType } from '../event-bus/neural-event-bus.js';
+import type { AetherCore, AetherConfig } from '../aether/aether-core.js';
+import type { Consciousness } from '../aether/consciousness.js';
+import type { CognitiveKernel } from '../kernel/cognitive-kernel.js';
+import type { WorkspaceBrain } from '../workspace-brain/workspace-brain.js';
+import type { ExecutiveBrain } from '../executive-brain/executive-brain.js';
+import type { TraceRecorder } from '../cognitive-plane/trace-engine/trace-recorder.js';
+import type { CognitiveReplay } from '../cognitive-plane/replay/cognitive-replay.js';
+import type { SignalStore } from '../cognitive-plane/signals/signal-store.js';
 import { Auth } from '../control-plane/auth/auth.js';
 import { SecretsStore } from '../control-plane/secrets/secrets-store.js';
 import { PolicyEngine } from '../control-plane/policies.js';
@@ -20,17 +19,28 @@ import { GitDriver } from '../drivers/git/git-driver.js';
 import { CodeScorer } from '../suit/litmus/code-scorer.js';
 import { ReflexEngine } from '../suit/instinct/reflex-engine.js';
 import { FastPathRouter, type RoutineHandler } from '../agentic/fastpath/fast-path-router.js';
-import { ImmuneSystem } from './immune.js';
-import { EndocrineSystem } from './endocrine.js';
-import { SleepCycle, createKernelMemorySource } from '../sleep_cycle/cycle.js';
-import { ActionSelector } from '../basal_ganglia/action-selector.js';
-import { Connectome, type ConnectionType } from '../connectome/wiring.js';
-import { Hippocampus } from '../hippocampus/consolidator.js';
-import { Neocortex } from '../neocortex/pattern-learner.js';
-import { CortexKernel } from '../cortex_kernel/integrator.js';
-import { NervousSystem } from '../nervous-system/nervous-system.js';
+import type { ImmuneSystem } from '../cognitive-core/immune.js';
+import type { EndocrineSystem } from '../cognitive-core/endocrine.js';
+import type { SleepCycle } from '../sleep_cycle/cycle.js';
+import type { ActionSelector } from '../basal_ganglia/action-selector.js';
+import type { Connectome } from '../connectome/wiring.js';
+import { EngineeringEnrichment } from '../engineering-intelligence/index.js';
+import { FrameworkTraceRecorder, frameworkProblemTypeOf } from '../cognitive-plane/frameworks/tracing/trace-recorder.js';
+import { createFrameworkRegistry } from '../cognitive-plane/frameworks/registry.js';
+import { prosCons } from '../cognitive-plane/frameworks/decisions/decision-models.js';
+import { rcaAnalyze } from '../cognitive-plane/frameworks/rca/rca.js';
+import { planTasks } from '../cognitive-plane/frameworks/productivity/productivity-os.js';
+import { detectGaps } from '../cognitive-plane/frameworks/research/methodology.js';
+import { dikwTransform } from '../cognitive-plane/frameworks/knowledge/dikw.js';
+import type { Hippocampus } from '../hippocampus/consolidator.js';
+import type { Neocortex } from '../neocortex/pattern-learner.js';
+import type { CortexKernel } from '../cortex_kernel/integrator.js';
+import type { NervousSystem } from '../nervous-system/nervous-system.js';
 import { createSignal } from '../nervous-system/signal.js';
-import { Metabolism } from '../metabolism/metabolism.js';
+import type { Metabolism } from '../metabolism/metabolism.js';
+import type { NeuralEventBus } from '../event-bus/neural-event-bus.js';
+import type { TracePersistence } from '../cognitive-plane/persistence/trace-persistence.js';
+import { CognitiveCore } from '../cognitive-core/cognitive-core.js';
 import { getTools } from '../agentic/tools/registry.js';
 import type { Tool } from '../agentic/tools/types.js';
 import { QueryEngine, type QueryEngineConfig } from '../agentic/query/engine.js';
@@ -73,6 +83,7 @@ export interface ExoskeletonTransport {
 }
 
 export class CognitiveExoskeleton {
+  readonly core: CognitiveCore;
   readonly eventBus: NeuralEventBus;
   readonly nervousSystem: NervousSystem;
   readonly metabolism: Metabolism;
@@ -100,6 +111,8 @@ export class CognitiveExoskeleton {
   readonly sleepCycle: SleepCycle;
   readonly actionSelector: ActionSelector;
   readonly connectome: Connectome;
+  readonly engineeringEnrichment: EngineeringEnrichment;
+  readonly frameworkTracer: FrameworkTraceRecorder;
   readonly hippocampus: Hippocampus;
   readonly neocortex: Neocortex;
   readonly cortexKernel: CortexKernel;
@@ -147,40 +160,61 @@ export class CognitiveExoskeleton {
     this.agenticModel = llm.isAvailable
       ? new LLMClientAdapter(llm, { model: config.model })
       : null;
-    this.eventBus = new NeuralEventBus();
-    this.nervousSystem = new NervousSystem({ trackEnergy: true });
-    this.metabolism = new Metabolism();
-    this.consciousness = new Consciousness();
-    this.aether = new AetherCore(this.eventBus, {
-      tickIntervalMs: 5000,
-      ...this.config.aetherConfig,
-    });
-    this.kernel = new CognitiveKernel({
-      agent_id: 'exoskeleton',
-      user_id: 'system',
-      project_id: this.config.workspaceId,
-    });
-    this.workspace = new WorkspaceBrain({
-      workspace_id: this.config.workspaceId,
-      name: this.config.workspaceName,
-      root_path: this.config.workspaceRoot,
-      eventBus: this.eventBus,
-    });
-    this.executive = new ExecutiveBrain({ eventBus: this.eventBus });
 
-    this.traceRecorder = new TraceRecorder(this.eventBus);
-    this.replay = new CognitiveReplay(this.traceRecorder.ledger);
-    this.signals = new SignalStore(this.traceRecorder.ledger);
+    // Control plane first — governance instances are injected INTO the core.
     this.auth = new Auth();
     this.secrets = new SecretsStore();
     this.policies = new PolicyEngine();
     this.budgets = new BudgetTracker();
     this.otlp = new OTLPExporter();
-    this.persistence = new TracePersistence(this.config.traceFile);
     this.lifecycle = new Lifecycle();
     this.plugins = new PluginLoader();
+
+    // Suit intelligence.
     this.codeScorer = new CodeScorer();
     this.reflexEngine = new ReflexEngine();
+
+    // The brain — owns every cognitive organ, the ledger, and the aether loop.
+    this.core = new CognitiveCore({
+      workspaceId: this.config.workspaceId,
+      workspaceName: this.config.workspaceName,
+      workspaceRoot: this.config.workspaceRoot,
+      traceFile: this.config.traceFile,
+      aetherConfig: this.config.aetherConfig,
+      agentId: 'exoskeleton',
+      policies: this.policies,
+      auth: this.auth,
+      reflexEngine: this.reflexEngine,
+    });
+
+    // Cognitive members — direct references into the core.
+    this.eventBus = this.core.eventBus;
+    this.nervousSystem = this.core.nervousSystem;
+    this.metabolism = this.core.metabolism;
+    this.aether = this.core.aether;
+    this.consciousness = this.core.consciousness;
+    this.kernel = this.core.kernel;
+    this.workspace = this.core.workspace;
+    this.executive = this.core.executive;
+    this.traceRecorder = this.core.traceRecorder;
+    this.replay = this.core.replay;
+    this.signals = this.core.signals;
+    this.persistence = this.core.persistence;
+    this.immuneSystem = this.core.immuneSystem;
+    this.endocrineSystem = this.core.endocrineSystem;
+    this.sleepCycle = this.core.sleepCycle;
+    this.actionSelector = this.core.actionSelector;
+    this.connectome = this.core.connectome;
+    this.hippocampus = this.core.hippocampus;
+    this.neocortex = this.core.neocortex;
+    this.cortexKernel = this.core.cortexKernel;
+
+    // Suit-side cognitive companions.
+    this.frameworkTracer = new FrameworkTraceRecorder(this.eventBus);
+    this.engineeringEnrichment = new EngineeringEnrichment(this.eventBus);
+    this.metabolism.registerComponent('engineering');
+
+    // Embodiment — drivers attach to the core's event bus.
     this.fsDriver = new FileSystemDriver(this.eventBus, {
       rootPath: this.config.workspaceRoot,
     });
@@ -188,31 +222,9 @@ export class CognitiveExoskeleton {
       repoPath: this.config.workspaceRoot,
     });
 
-    this.immuneSystem = new ImmuneSystem(this.policies, this.auth, this.reflexEngine);
-    this.endocrineSystem = new EndocrineSystem(this.nervousSystem, this.consciousness);
-    this.sleepCycle = new SleepCycle(
-      this.nervousSystem,
-      this.aether,
-      createKernelMemorySource(this.kernel),
-      null,
-    );
-    this.actionSelector = new ActionSelector();
-    this.connectome = new Connectome();
-    this.hippocampus = new Hippocampus(this.kernel);
-    this.neocortex = new Neocortex();
-    this.cortexKernel = new CortexKernel(this.consciousness, this.kernel, this.executive, this.eventBus);
-
-    this.metabolism.registerComponent('exoskeleton', { cpu: 5000, tokens: 500000 });
-    this.metabolism.registerComponent('aether');
-    this.metabolism.registerComponent('endocrine');
-    this.metabolism.registerComponent('immune');
-    this.metabolism.registerComponent('sleep-cycle');
-    this.metabolism.registerComponent('reflex');
-
     this.registerCoreServices();
     this.setupPolicies();
-    this.wireNervousSystem();
-    this.wireConnectome();
+    this.wireFrameworkConnectome();
 
     this.fastPath = this.buildFastPathRouter();
   }
@@ -250,6 +262,99 @@ export class CognitiveExoskeleton {
           return `episodes=${k.episodes}`;
         },
       },
+      // Framework routines (blueprint §5.3): the most common reasoning
+      // requests resolve to the deterministic engines — no LLM, no catalog
+      // traversal. Law 13 applied to thinking itself.
+      {
+        name: 'framework-decide',
+        description: 'runs a deterministic decision engine (pros & cons or model selection) without the LLM',
+        keywords: ['fw', 'framework', 'decide', 'decision', 'pros-cons', 'pros and cons'],
+        execute: (input) => {
+          const pros = parseList(input, 'pros');
+          const cons = parseList(input, 'cons');
+          if (pros.length > 0 || cons.length > 0) {
+            const result = prosCons({ pros, cons });
+            this.frameworkTracer.recordCompletion({
+              engine: 'pros-cons', family: 'decisions', problem: input,
+              profile: {}, result: result as unknown as Record<string, unknown>, verdict: result.verdict,
+            });
+            return JSON.stringify(result);
+          }
+          const registry = createFrameworkRegistry(this.frameworkTracer);
+          const result = registry.select({ problem: input, ...parseProfile(input) });
+          return JSON.stringify({
+            selected: result.selected.id,
+            name: result.selected.name,
+            family: result.selected.family,
+            rationale: result.rationale,
+          });
+        },
+      },
+      {
+        name: 'framework-rca',
+        description: 'runs the F.O.C.U.S. root-cause analysis engine without the LLM',
+        keywords: ['rca', 'root-cause', 'root cause', 'fishbone', 'diagnose'],
+        execute: (input) => {
+          const result = rcaAnalyze({
+            problem: input,
+            evidence: parseList(input, 'fact').map((fact) => ({ fact, source: 'fast-path' })),
+          });
+          this.frameworkTracer.recordCompletion({
+            engine: 'rca-focus', family: 'rca', problem: input,
+            profile: { rootCauseNeeded: true }, result: result as unknown as Record<string, unknown>,
+          });
+          return JSON.stringify(result);
+        },
+      },
+      {
+        name: 'framework-plan',
+        description: 'runs the Productivity OS planner without the LLM',
+        keywords: ['plan', 'plan-day', 'plan day', 'mit', 'eisenhower'],
+        execute: (input) => {
+          const names = parseList(input, 'task');
+          const tasks = names.length > 0 ? names.map((name) => ({ name })) : [{ name: input }];
+          const result = planTasks({ tasks });
+          const mit = result.mostImportantTasks.length > 0
+            ? result.mostImportantTasks
+            : tasks.slice(0, 3).map((t) => t.name);
+          this.frameworkTracer.recordCompletion({
+            engine: 'productivity-os', family: 'productivity', problem: input,
+            profile: {}, result: result as unknown as Record<string, unknown>,
+          });
+          return JSON.stringify({ mit, frog: result.frog, quickTasks: result.quickTasks });
+        },
+      },
+      {
+        name: 'framework-gap',
+        description: 'runs research gap analysis without the LLM',
+        keywords: ['gap', 'research-gap', 'research gap', 'literature gap'],
+        execute: (input) => {
+          const result = detectGaps({
+            topic: input,
+            notes: parseList(input, 'note').map((finding, i) => ({ title: `note ${i + 1}`, finding })),
+          });
+          this.frameworkTracer.recordCompletion({
+            engine: 'research-gap', family: 'research', problem: input,
+            profile: {}, result: result as unknown as Record<string, unknown>,
+          });
+          return JSON.stringify(result.ranked);
+        },
+      },
+      {
+        name: 'framework-dikw',
+        description: 'runs the DIKW transform without the LLM',
+        keywords: ['dikw', 'transform', 'sense-making', 'sense making'],
+        execute: (input) => {
+          const result = dikwTransform({
+            dataPoints: parseList(input, 'datum').map((value, i) => ({ value, attribute: `datum ${i + 1}` })),
+          });
+          this.frameworkTracer.recordCompletion({
+            engine: 'dikw', family: 'knowledge', problem: input,
+            profile: {}, result: result as unknown as Record<string, unknown>,
+          });
+          return JSON.stringify(result.wisdom);
+        },
+      },
     ];
     for (const routine of routines) {
       router.register(routine);
@@ -263,21 +368,9 @@ export class CognitiveExoskeleton {
 
   private registerCoreServices(): void {
     this.lifecycle.register({
-      name: 'trace-persistence',
-      version: '0.1.0',
-      dependencies: [],
-      start: async () => {
-        this.persistence.open();
-        await this.persistence.loadInto(this.traceRecorder.ledger);
-      },
-      stop: async () => {
-        this.persistence.close();
-      },
-    });
-    this.lifecycle.register({
       name: 'otlp-exporter',
       version: '0.1.0',
-      dependencies: ['trace-persistence'],
+      dependencies: [],
       start: async () => {
         this.otlp.start();
       },
@@ -309,17 +402,6 @@ export class CognitiveExoskeleton {
       },
     });
     this.lifecycle.register({
-      name: 'aether',
-      version: '0.1.0',
-      dependencies: [],
-      start: async () => {
-        this.aether.start();
-      },
-      stop: async () => {
-        this.aether.stop();
-      },
-    });
-    this.lifecycle.register({
       name: 'agentic-history',
       version: '0.1.0',
       dependencies: [],
@@ -327,22 +409,6 @@ export class CognitiveExoskeleton {
         await this.history.open();
       },
       stop: async () => {},
-    });
-
-    this.aether.register('endocrine', {
-      name: 'endocrine',
-      tick: async () => { await this.endocrineSystem.tick(); },
-      status: () => this.endocrineSystem.getStatus(),
-    });
-    this.aether.register('immune', {
-      name: 'immune',
-      tick: async () => { await this.immuneSystem.tick(); },
-      status: () => this.immuneSystem.getStatus(),
-    });
-    this.aether.register('hippocampus', {
-      name: 'hippocampus',
-      tick: async () => { await this.hippocampus.tick(); },
-      status: () => this.hippocampus.getStatus(),
     });
   }
 
@@ -378,51 +444,46 @@ export class CognitiveExoskeleton {
     ]);
   }
 
-  private wireNervousSystem(): void {
-    this.nervousSystem.subscribe('cortex', async (signal) => {
-      this.consciousness.observe('working', `Signal: ${signal.type}`, signal.source);
-    }, undefined, 'consciousness-feed');
-  }
-
-  private wireConnectome(): void {
-    // Auto-wiring: the Connectome learns the substrate's shape from
-    // `connectome:link` signals rather than hand-registration (CONNECTOME §4.3).
-    this.nervousSystem.subscribeToAll(
-      (signal) => {
-        if (signal.type !== 'connectome:link') return;
-        const { from, to, type, description } = signal.payload as {
-          from?: string;
-          to?: string;
-          type?: ConnectionType;
-          description?: string;
+  private wireFrameworkConnectome(): void {
+    // Framework traces auto-wire the graph (blueprint §5.1): every
+    // selection/completion links its problem-type node to the framework
+    // node via the register-or-strengthen `connectome:link` path — the
+    // harness learns which frameworks it actually uses for which problems.
+    // The core's own wireConnectome handles the generic connectome:link
+    // auto-wiring and boot seeds; this suit-side wiring feeds the graph
+    // from the suit's framework tracer.
+    this.eventBus.subscribe(
+      ['framework:selected', 'framework:completed'] as EventType[],
+      async (event) => {
+        const payload = event.payload as {
+          engine?: unknown;
+          selected?: unknown;
+          problemType?: unknown;
+          profile?: Record<string, unknown>;
         };
-        if (typeof from !== 'string' || typeof to !== 'string' || from.length === 0 || to.length === 0) {
-          return;
-        }
-        this.connectome.link(
-          from,
-          to,
-          type ?? 'reference',
-          typeof description === 'string' ? description : '',
+        const engine =
+          typeof payload.engine === 'string'
+            ? payload.engine
+            : typeof payload.selected === 'string'
+              ? payload.selected
+              : null;
+        if (!engine) return;
+        const problemType =
+          typeof payload.problemType === 'string'
+            ? payload.problemType
+            : frameworkProblemTypeOf(payload.profile ?? {});
+        await this.nervousSystem.emit(
+          createSignal('connectome:link', 'framework-tracing', {
+            from: `problem-type:${problemType}`,
+            to: `framework:${engine}`,
+            type: 'reference',
+            description: `framework '${engine}' applied to ${problemType} problem`,
+          }),
         );
       },
-      (signal) => signal.type === 'connectome:link',
-      'connectome-auto-wiring',
+      undefined,
+      'framework-connectome-wiring',
     );
-
-    // Seed wiring emitted as events — boot organ registration drives the graph.
-    const seeds: Array<{ from: string; to: string; type: ConnectionType; description: string }> = [
-      { from: 'eventBus', to: 'traceRecorder', type: 'event-driven', description: 'Events flow from bus to recorder' },
-      { from: 'traceRecorder', to: 'signals', type: 'data-flow', description: 'Trace ledger feeds signal detection' },
-      { from: 'eventBus', to: 'endocrine', type: 'event-driven', description: 'Events trigger neuromodulation updates' },
-      { from: 'aether', to: 'consciousness', type: 'control', description: 'Aether orchestrates consciousness layers' },
-      { from: 'fsDriver', to: 'eventBus', type: 'event-driven', description: 'Filesystem changes propagate as events' },
-    ];
-    for (const seed of seeds) {
-      void this.nervousSystem.emit(
-        createSignal('connectome:link', 'exoskeleton', seed),
-      );
-    }
   }
 
   attachTransport(transport: ExoskeletonTransport): void {
@@ -443,14 +504,8 @@ export class CognitiveExoskeleton {
   }
 
   async start(): Promise<void> {
+    await this.core.start();
     await this.lifecycle.startAll();
-    this.metabolism.start();
-
-    const sig = createSignal('aether:started', 'exoskeleton', {
-      workspaceId: this.config.workspaceId,
-      startedAt: new Date().toISOString(),
-    });
-    await this.nervousSystem.emit(sig);
 
     this.nervousSystem.emitFromEvent(
       {
@@ -462,10 +517,6 @@ export class CognitiveExoskeleton {
       },
       'exoskeleton',
     );
-
-    this.aether.observeThought('meta', 'Cognitive Exoskeleton fully booted', 'exoskeleton', [
-      'startup',
-    ]);
   }
 
   async stop(): Promise<void> {
@@ -485,36 +536,29 @@ export class CognitiveExoskeleton {
     }
     this.transports.clear();
 
-    this.metabolism.stop();
     await this.lifecycle.stopAll();
+    await this.core.stop();
   }
 
   getState(): ExoskeletonState {
+    const state = this.core.getState();
     return {
-      running: this.aether.getState().running,
-      startedAt: this.aether.getState().startedAt,
-      aetherPhase: this.aether.phase,
-      connectedAgents: this.aether.getState().connectedAgents,
-      consciousness: this.consciousness.getState(),
-      subsystems: this.aether.getState().subsystems,
+      running: state.running,
+      startedAt: state.startedAt,
+      aetherPhase: state.aetherPhase,
+      connectedAgents: state.connectedAgents,
+      consciousness: state.consciousness,
+      subsystems: state.subsystems,
     };
   }
 
   getStats(): Record<string, unknown> {
     return {
-      aether: this.aether.getStats(),
-      nervousSystem: this.nervousSystem.getStats(),
-      metabolism: this.metabolism.getStats(),
-      endocrine: this.endocrineSystem.getStatus(),
-      immune: this.immuneSystem.getStatus(),
-      sleep: this.sleepCycle.getStatus(),
-      connectome: this.connectome.getConnections().length,
-      actionSelector: this.actionSelector.getStats(),
-      hippocampus: this.hippocampus.getStatus(),
-      neocortex: this.neocortex.getStatus(),
+      ...this.core.getStats(),
       transports: this.getTransports(),
       litmus: { threshold: this.codeScorer['config'].threshold },
       instinct: { reflexCount: this.reflexEngine.getReflexes().length },
+      frameworks: this.frameworkTracer.getStats(),
       reflex: {
         ...this.fastPath.getStats(),
         routines: this.fastPath.listRoutines(),
@@ -558,6 +602,7 @@ export class CognitiveExoskeleton {
       abortController: overrides?.abortController,
       toolContext: {
         cwd: this.config.workspaceRoot,
+        roots: [this.config.workspaceRoot],
         abortController: overrides?.abortController ?? new AbortController(),
         getSessionId: () => sessionId,
         memory,
@@ -605,4 +650,42 @@ export class CognitiveExoskeleton {
     };
     return { text: texts.join('\n').trim(), toolCalls, terminal };
   }
+}
+
+/* ── Fast-path framework routine helpers ────────────────────────────── */
+
+/** Extract `key: item1, item2` lists from a free-text routine input. */
+function parseList(input: string, key: string): string[] {
+  const pattern = new RegExp(`\\b${key}\\s*:\\s*([^\\n]+)`, 'i');
+  const match = input.match(pattern);
+  if (!match?.[1]) return [];
+  return match[1]
+    .split(/[,;]/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
+/** Parse `key=value` profile flags (data, time, risk, complexity, stakeholders) from routine input. */
+function parseProfile(input: string): Record<string, number | boolean> {
+  const out: Record<string, number | boolean> = {};
+  const map: Record<string, string> = {
+    data: 'dataAvailability',
+    time: 'timePressure',
+    risk: 'risk',
+    complexity: 'complexity',
+    stakeholders: 'stakeholderInvolvement',
+  };
+  for (const [alias, field] of Object.entries(map)) {
+    const match = input.match(new RegExp(`\\b${alias}\\s*=\\s*(\\d(?:\\.\\d+)?)`, 'i'));
+    if (match?.[1]) {
+      const value = Number.parseFloat(match[1]);
+      if (Number.isFinite(value)) out[field] = value;
+    }
+  }
+  for (const flag of ['root-cause', 'human-centered', 'continuous-improvement', 'speed']) {
+    if (new RegExp(`\\b${flag}\\b`, 'i').test(input)) {
+      out[flag === 'root-cause' ? 'rootCauseNeeded' : flag === 'human-centered' ? 'humanCentered' : flag === 'continuous-improvement' ? 'continuousImprovement' : 'speedAdaptability'] = true;
+    }
+  }
+  return out;
 }

@@ -14,7 +14,8 @@ export type TraceEventType =
   | 'agent_attach' | 'agent_detach'
   | 'session_start' | 'session_end'
   | 'diagnostic' | 'human_feedback'
-  | 'decision' | 'plan_step' | 'reflection';
+  | 'decision' | 'plan_step' | 'reflection'
+  | 'framework_select' | 'framework_complete' | 'framework_error';
 
 export interface TraceAttribute {
   key: string;

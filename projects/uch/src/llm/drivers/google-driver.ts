@@ -74,7 +74,8 @@ export class GoogleDriver implements LLMDriver {
   }
 
   async complete(params: CompletionParams): Promise<string> {
-    const response = await fetch(`${this.baseURL}/models/${this.modelName}:generateContent`, {
+    const model = params.model ?? this.modelName;
+    const response = await fetch(`${this.baseURL}/models/${model}:generateContent`, {
       method: 'POST',
       headers: this.headers(),
       body: JSON.stringify(this.requestBody(params, false)),
@@ -88,7 +89,8 @@ export class GoogleDriver implements LLMDriver {
   }
 
   async *completeStream(params: CompletionParams): AsyncGenerator<string> {
-    const response = await fetch(`${this.baseURL}/models/${this.modelName}:streamGenerateContent?alt=sse`, {
+    const model = params.model ?? this.modelName;
+    const response = await fetch(`${this.baseURL}/models/${model}:streamGenerateContent?alt=sse`, {
       method: 'POST',
       headers: this.headers(),
       body: JSON.stringify(this.requestBody(params, true)),

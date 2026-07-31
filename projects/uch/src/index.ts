@@ -363,6 +363,81 @@ export type {
 //   Intelligence
 export { Conscience } from './cognitive-brain/conscience.js';
 export type { ReflectionReport, PredictionResult } from './cognitive-brain/conscience.js';
+
+//   Cognitive Frameworks Library
+export {
+  FrameworkRegistry,
+  createFrameworkRegistry,
+  createFrameworkCatalog,
+  FRAMEWORK_CATALOG_VERSION,
+} from './cognitive-plane/frameworks/registry.js';
+
+//   Organ Engines (Blueprint §2): Productivity Kernel, Signal Fusion, Code Governance
+export { ProductivityKernel } from './productivity-kernel/productivity-kernel.js';
+export type {
+  PendingTask,
+  DayPlan,
+  ProductivityKernelConfig,
+  ProductivityEvent,
+  ProductivityEventType,
+} from './productivity-kernel/productivity-kernel.js';
+export { SignalFusionEngine } from './cortex_kernel/signal-fusion-engine.js';
+export type {
+  FusionRunRecord,
+  SignalFusionEngineConfig,
+  SignalFusionEvent,
+} from './cortex_kernel/signal-fusion-engine.js';
+export { CodeGovernanceGate } from './kernel/constitution/code-governance-gate.js';
+export type {
+  GovernanceVerdict,
+  GovernanceRecord,
+  CodeGovernanceInput,
+  CodeGovernanceGateConfig,
+  CodeGovernanceEvent,
+  PrincipleId,
+} from './kernel/constitution/code-governance-gate.js';export type {
+  FrameworkDefinition,
+  FrameworkFamily,
+  FrameworkLLMProvider,
+  FrameworkSelectionInput,
+  FrameworkSelectionResult,
+  FrameworkStage,
+  DecisionContext,
+} from './cognitive-plane/frameworks/types.js';
+export {
+  decisionMatrix,
+  costBenefit,
+  paretoAnalysis,
+  decisionTree,
+  swotAnalysis,
+  premortem,
+  prosCons,
+  sixHats,
+} from './cognitive-plane/frameworks/decisions/decision-models.js';
+export { selectDecisionModel, classifyDecision } from './cognitive-plane/frameworks/decisions/model-selector.js';
+export {
+  ideal,
+  fiveWhys,
+  designThinking,
+  pdcaPlan,
+  ooda,
+  kepnerTregoe,
+} from './cognitive-plane/frameworks/problems/problem-solver.js';
+export {
+  rcaAnalyze,
+  traceFiveWhys,
+  fishbone,
+  paretoPrioritize,
+  CAUSE_CATEGORIES,
+} from './cognitive-plane/frameworks/rca/rca.js';
+export { strategyWheel, strategyVsPlan } from './cognitive-plane/frameworks/strategy/strategy-wheel.js';
+export { planTasks, threeThreeThree } from './cognitive-plane/frameworks/productivity/productivity-os.js';
+export { validateMethodology, detectGaps, GAP_TYPES } from './cognitive-plane/frameworks/research/methodology.js';
+export { assessInformation, CRITICAL_QUESTIONS } from './cognitive-plane/frameworks/critical/critical-evaluator.js';
+export { dikwTransform, checkRepresentationInvariance } from './cognitive-plane/frameworks/knowledge/dikw.js';
+export { fuseSignals, factorRegimeNotes } from './cognitive-plane/frameworks/signals/signal-fusion.js';
+export { auditCodePrinciples } from './cognitive-plane/frameworks/code/code-principles.js';
+
 export { CognitiveOrganism, CognitiveOrganismConfig } from './cognitive-plane/organism/organism.js';
 export type {
   AttentionSignal,
@@ -464,13 +539,17 @@ export type {
   ComponentBudget,
 } from './metabolism/metabolic-profile.js';
 
+// ── Cognitive Core (JARVIS — persistent brain) ──────────────
+export { CognitiveCore } from './cognitive-core/cognitive-core.js';
+export type { CognitiveCoreConfig } from './cognitive-core/cognitive-core.js';
+export { ImmuneSystem } from './cognitive-core/immune.js';
+export type { ThreatAssessment } from './cognitive-core/immune.js';
+export { EndocrineSystem } from './cognitive-core/endocrine.js';
+export type { GlobalSignals } from './cognitive-core/endocrine.js';
+
 // ── Exoskeleton (Root Orchestrator) ─────────────────────────
 export { CognitiveExoskeleton } from './exoskeleton/exoskeleton.js';
 export type { ExoskeletonConfig, ExoskeletonState, ExoskeletonTransport } from './exoskeleton/exoskeleton.js';
-export { ImmuneSystem } from './exoskeleton/immune.js';
-export type { ThreatAssessment } from './exoskeleton/immune.js';
-export { EndocrineSystem } from './exoskeleton/endocrine.js';
-export type { GlobalSignals } from './exoskeleton/endocrine.js';
 
 // ── Suit / Litmus (Organic Code Engine) ─────────────────────
 export { CodeScorer } from './suit/litmus/code-scorer.js';
@@ -514,11 +593,28 @@ export type {
   AcceleratorKind,
   AcceleratorRequest,
   AcceleratorResult,
+  CapabilityTier,
+  ProviderModel,
   InferenceProvider,
   ProviderGateway,
   GatewayCompletion,
   AcceleratorCompletionParams,
 } from './accelerators/types.js';
+
+// ── Virtual Processors (Level 4 — model virtualization) ──────
+export {
+  VIRTUAL_PROCESSORS,
+  getVirtualProcessor,
+  resolveVirtualCpu,
+  requiredTier,
+  resolveProvider,
+} from './accelerators/virtual-processors.js';
+export type {
+  VirtualProcessor,
+  VirtualProcessorId,
+  ProviderRosterEntry,
+  ProviderSelection,
+} from './accelerators/virtual-processors.js';
 export type {
   SemanticOutput,
   CompressionOutput,
@@ -739,3 +835,10 @@ export * from './mnemosyne/index.js';
 // top level; mnemosyne's narrower union stays available under an alias.
 export type { EpistemicStatus } from './kernel/types/provenance.js';
 export type { EpistemicStatus as MnemosyneEpistemicStatus } from './mnemosyne/index.js';
+
+// ---------------------------------------------------------------------------
+// ENGINEERING INTELLIGENCE LAYER - Engineering Judgment organ (Cerebellum)
+// Domain stores (Tier I CS / III Systems / V Economics), Tier VI Laws as
+// reasoning primitives, deterministic EngineeringEvaluator. ADR-003.
+// ---------------------------------------------------------------------------
+export * from './engineering-intelligence/index.js';

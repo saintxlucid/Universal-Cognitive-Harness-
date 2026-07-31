@@ -94,6 +94,10 @@ export class WorkspaceDecisionGraph implements Storable {
     return this.graph.getNode(`decision:${decisionId}`);
   }
 
+  search(query: string): GraphNode[] {
+    return this.graph.searchNodes(query);
+  }
+
   getRelations(decisionId: string): GraphEdge[] {
     return this.graph.getEdgesFrom(`decision:${decisionId}`);
   }

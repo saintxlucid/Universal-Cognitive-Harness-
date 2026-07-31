@@ -31,7 +31,7 @@ export class OpenAIDriver implements LLMDriver {
 
   async complete(params: CompletionParams): Promise<string> {
     const response = await this.openai.chat.completions.create({
-      model: this.modelName,
+      model: params.model ?? this.modelName,
       messages: params.messages.map((m) => ({ role: m.role, content: m.content })),
       temperature: params.temperature ?? 0.7,
       max_tokens: params.maxTokens ?? this.maxTokens,
@@ -41,7 +41,7 @@ export class OpenAIDriver implements LLMDriver {
 
   async *completeStream(params: CompletionParams): AsyncGenerator<string> {
     const stream = await this.openai.chat.completions.create({
-      model: this.modelName,
+      model: params.model ?? this.modelName,
       messages: params.messages.map((m) => ({ role: m.role, content: m.content })),
       temperature: params.temperature ?? 0.7,
       max_tokens: params.maxTokens ?? this.maxTokens,
@@ -61,7 +61,7 @@ export class OpenAIDriver implements LLMDriver {
       content.push({ type: 'image_url', image_url: { url: img.startsWith('data:') ? img : `data:image/png;base64,${img}` } });
     }
     const response = await this.openai.chat.completions.create({
-      model: this.modelName,
+      model: params.model ?? this.modelName,
       messages: [{ role: 'user', content: content as unknown as string }],
       temperature: params.temperature ?? 0.7,
       max_tokens: params.maxTokens ?? this.maxTokens,

@@ -1,0 +1,26 @@
+name: PR Labeler
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          configuration-path: .github/labeler.yml
+          sync-labels: true
+
+  autosize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: pascalgn/autosize-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LABELS: '["size/small:0-50", "size/medium:50-200", "size/large:200-500", "size/xlarge:500+"]'

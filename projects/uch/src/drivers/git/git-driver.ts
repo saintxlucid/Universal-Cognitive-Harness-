@@ -55,10 +55,10 @@ export interface GitDriverConfig {
 }
 
 export class GitDriver {
-  private eventBus: NeuralEventBus;
+  private eventBus: NeuralEventBus | undefined;
   private repoPath: string;
 
-  constructor(eventBus: NeuralEventBus, config?: GitDriverConfig) {
+  constructor(eventBus: NeuralEventBus | undefined, config?: GitDriverConfig) {
     this.eventBus = eventBus;
     this.repoPath = config?.repoPath ?? '.';
   }
@@ -150,7 +150,7 @@ export class GitDriver {
 
     const info = this.getRecentCommits(1)[0] ?? null;
 
-    this.eventBus.publish({
+    this.eventBus?.publish({
       type: 'git:commit',
       source: 'git-driver',
       payload: { message, hash, author, branch: this.getBranch() },
@@ -164,7 +164,7 @@ export class GitDriver {
     if (!isValidRef(remote) || !isValidRef(target)) return false;
     try {
       this.run(['push', remote, target]);
-      this.eventBus.publish({
+      this.eventBus?.publish({
         type: 'git:push',
         source: 'git-driver',
         payload: { remote, branch: target },
@@ -180,7 +180,7 @@ export class GitDriver {
     if (!isValidRef(remote) || !isValidRef(target)) return false;
     try {
       this.run(['pull', remote, target]);
-      this.eventBus.publish({
+      this.eventBus?.publish({
         type: 'git:pull',
         source: 'git-driver',
         payload: { remote, branch: target },
@@ -195,7 +195,7 @@ export class GitDriver {
     if (!isValidRef(branch)) return false;
     try {
       this.run(['checkout', branch]);
-      this.eventBus.publish({
+      this.eventBus?.publish({
         type: 'git:branch_changed',
         source: 'git-driver',
         payload: { branch },

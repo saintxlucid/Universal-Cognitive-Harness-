@@ -177,7 +177,7 @@ projects/uch/
 ### 5.1 `src/index.ts` — Main Entry Barrel
 The entire public API (~200 exports). Sections: Control Plane → Cognitive Plane (trace, persistence, replay, protocol, signals, search, scheduler, decisions, analytics, patterns, diff, suggestions, constitution, genome, compiler, scientific memory, trust, reflection, creativity, health, taste, dreaming, evolution, intelligence, memory, workspace) → Branded Types → Context → Drivers → Aether → Nervous System → Metabolism → Exoskeleton → Suit/Litmus → Suit/Instinct → CLI/Server → LLM → Accelerators → Embeddings → MCP → Session → Git → Interface → Organs (connectome, basal ganglia, hippocampus, neocortex, cortex kernel, sleep cycle) → Neural Event Bus → NeuralFS → Harness API → Legacy recorder → Reason Graph → Belief/Goal/Trace stores → WebSocket → Kernel sub-exports → Concept Genome → Agentic engine.
 
-### 5.2 Kernel Layer — `src/kernel/` (35 files, 5,720 lines)
+### 5.2 Kernel Layer — `src/kernel/` (51 tracked files; ADR-006 kernel services landed 2026-08-01)
 
 **Core:**
 | File | Purpose & key exports |
@@ -241,6 +241,18 @@ The entire public API (~200 exports). Sections: Control Plane → Cognitive Plan
 | `cic/circuit-breaker.ts` | `CircuitBreaker` closed/open/half-open (threshold 5, cooldown 30 s, 3 probes); `CircuitBreakerOpenError/TimeoutError`. |
 | `cic/threat-mitigations.ts` | `ThreatMitigationEngine` + 14 mitigations T01–T14 (unauthorized access, cross-project contamination, privilege escalation, consent bypass, data exfiltration, runaway process, cascading policy, replay, consolidation poisoning, retention, hard-delete audit, timing side channel, token exhaustion, session hijacking). |
 | `facts/facts-fence.ts` | Markdown fact fence (`<!--- uch:facts:begin -->`), `FactRow` kinds (event/preference/commitment/belief/fact), visibility, notability; `parseFactsFence/renderFactsFence`, expiry, trajectory + regression flagging. |
+
+**ADR-006 kernel services (`kernel/process/`, `kernel/memory/vmem/`, `kernel/organism/`, `kernel/transactional/`, `kernel/diagnostics/`, `kernel/merge/`, `kernel/packages/` — added 2026-08-01 per `design/COGNITIVE-KERNEL-SHIPPING.md`):**
+| File | Purpose & key exports |
+|---|---|
+| `process/process-table.ts` | ★ `ProcessTable` — kernel's unit of persistent cognition: spawn (monotonic PID, never reused), attach (joins a PID — nothing transfers), kill (record preserved, Law 12), signal/drainSignals queue, threadsOf, persist/load. |
+| `memory/vmem/vmem.ts` | ★ `CognitiveVMem` — cognitive virtual memory: Hot→Warm→Cold→Archive paging, deterministic score (recency decay × salience × energy), touch/promote/evict (archive never auto-deleted), compact (payload-hash merge), stats, persist/load. |
+| `organism/versioned-store.ts` + `restore.ts` | `VersionedStore<T>` (monotonic commit versions, rollbackTo preserves history) + `restoreOrganism` (validator-gated snapshot → verify → roll forward/back; store untouched on rejection). |
+| `transactional/transaction.ts` | ★ `TransactionalMemory` — ACID cognition: propose → verify (all gates) → commit/rollback (refuses on failed verdict); append-only ledger; `integrityGate`/`organicScoreGate` adapters. |
+| `diagnostics/metrics.ts` + `health.ts` | 12 SMART-for-cognition metrics (memoryFragmentation…verificationCoverage) with warn/critical bands (energyEfficiency higher-is-better inversion), `diagnose()` worst-wins aggregation + remediation hints. |
+| `merge/cognitive-merge.ts` | ★ `mergeCognition` — two belief sets → disjoint union; genuine conflicts (|Δconfidence| > 0.15, verdict/evidence mismatch) DETECTED + reported, never auto-resolved; deterministic, inputs never mutated. |
+| `packages/manifest.ts` + `registry.ts` | `validatePackage` (name/semver/entry-hash via sha256/requires/no-absolute-path) + `PackageRegistry` (offline install/verify/remove/list, tamper detection; **policy entries land in `policy-quarantine/`, never applied — no package auto-modifies the Constitution**). |
+| `neural-fs/mounts.ts` | `MountTable` — longest-prefix mount resolution, `canAccess` authority intersection (mount ∩ grant, mirrors ProjectionEngine), `CP_VERBS` (CP ops → FS verb families). |
 
 ### 5.3 Exoskeleton Core — `src/exoskeleton/`, `src/aether/`, `src/nervous-system/`, `src/metabolism/`, `src/connectome/`, `src/basal_ganglia/`, `src/hippocampus/`, `src/neocortex/`, `src/sleep_cycle/`, `src/cortex_kernel/`
 
@@ -596,6 +608,16 @@ Every claim carries: source type (6 kinds), source_id, reliability (0–1), time
 | **Local hash embeddings** | `cognitive-memory-system.ts`, `embeddings/embedder.ts` | 64-dim word + trigram hashing, normalized; used when no API key |
 | **3-layer progressive search** | `memory/progressive-search.ts` | index (compact) → timeline (chronological) → details; ~10× token savings |
 | **Agentic loop** | `agentic/query/` | streaming turns, tool feedback, permission gates, token budgets, compaction, stop hooks (memory extraction, dream trigger) |
+| **Cognitive process model (ADR-006 A)** | `kernel/process/process-table.ts` | PID namespace (branded, monotonic, never reused across load), threads (drivers attached to same PID — attach joins, nothing transfers), kill preserves record (Law 12), signal queue |
+| **Cognitive vmem (ADR-006 B)** | `kernel/memory/vmem/vmem.ts` | Hot→Warm→Cold→Archive paging; score = recency decay × salience × energy; eviction demotes lowest score; archive never auto-deleted; compaction merges shared payloadRef |
+| **Organism versioning (ADR-006 C)** | `kernel/organism/` | VersionedStore (monotonic commits, rollback keeps history) + validator-gated restoreOrganism (verify before touch, no mutation on rejection) |
+| **Transactional cognition (ADR-006 D)** | `kernel/transactional/` | propose → verify (all gates, order preserved) → commit/rollback; refuse on failed verdict or double-commit; append-only ledger |
+| **Self-diagnosis SMART (ADR-006 E)** | `kernel/diagnostics/` | 12 health metrics, warn/critical bands, higher-is-better inversion (energyEfficiency), worst-wins overall + remediation hints |
+| **FS mounts (ADR-006 F)** | `neural-fs/mounts.ts` | Longest-prefix mount resolve; canAccess = mount ∩ grant (ProjectionEngine mirror); CP_VERBS map |
+| **Cognitive merge (trivial slice)** | `kernel/merge/cognitive-merge.ts` | Disjoint knowledge unions; conflicts detected (confidence/verdict/evidence), never auto-resolved; deterministic, immutable inputs |
+| **Cognitive packages (offline core)** | `kernel/packages/` | validatePackage (sha256 entry hashes, semver, no abs paths) + PackageRegistry install/verify/remove offline with tamper detection; policy quarantine — Constitution never auto-modified |
+| **CP instruction catalog** | `protocol/catalog.ts` | Assembly-table metadata for all 17 CP ops (category, organ, energy cost 1–10, expected output, verification requirement) + monotonic cognitive clock |
+| **Driver compliance certification** | `drivers/compliance.ts` | POSIX-style: declared L0–L4 + supported ops → protocol coverage %, level fidelity (per-level op minimums), energy profile, certified/partial/not-certified verdict |
 
 ---
 
@@ -655,7 +677,7 @@ MCP transport passes 9/10 fixtures (F10 pending); REST/CLI/A2A/IPC unimplemented
 | File | Contents |
 |---|---|
 | `FORMAL_FOUNDATIONS.md` | Level 0 axioms: typed set theory (𝕊ℂ𝕄𝔼ℙ𝕂𝔹𝔾𝕍𝕋ℕ), exactly-3-graphs (causal DAG / connectome / semantic), hybrid time (τ + Lamport λ + version vectors), Shannon entropy + 5 mandatory metrics, entropy-reduction pipeline (classification ↓20% → dedup ↓40% → aggregation ↓20% → compression ↓10% → importance ↓5% → priority ↓5%), economic calculus (ROI, 5 decision rules, 6 economic agents, Metabolism as market maker), 7-layer protocol stack, execution model (5 interrupt levels), consciousness threshold `IG(s)·N(s,M) > θ_conscious`, branded-type enforcement, three-genome identity |
-| `LAWS_OF_COGNITIVE_PHYSICS.md` | 19 laws (see §6.5). Dual naming table (19 organs: engineering name first, biological in parens). Enforcement: static analysis (L1/L8/L11/L18), Judiciary (L2/L3/L4/L7/L14), Metabolism (L14), Nervous System (L15), constitutional review (L9/L10/L12/L13/L17/L19) |
+| `LAWS_OF_COGNITIVE_PHYSICS.md` | 32 laws in 5 families (Laws 1–19 original; 20–32 added 2026-08-01). Dual naming table (19 organs: engineering name first, biological in parens). Enforcement: static analysis (L1/L8/L11/L30), Judiciary (L2/L3/L4/L7/L14/L27), Metabolism (L14/L21), Nervous System (L15/L24), constitutional review (all 32), specification governance (RFC-0000) |
 | `CONSTITUTION.md` | 8 articles: Separation of Powers, Triadic Validation, Rights of Components (6 sections incl. §6 Session Privacy / consolidation-only visibility, added 2026-08-01), Amendment Process, Supremacy, Judicial Review, Emergency Powers (Watch 24 h / Lockdown 1 h / Survival 15 min), amendability |
 | `COGNITIVE_BIOLOGY.md` | 10 physiological processes: Plasticity, Homeostasis, Metabolism (7 cost dims incl. attention), Development (8 stages), Healing, Sleep (8 activities), Evolution (micro/meso/macro), Immune Response, Endocrine Regulation (7 signals), Thalamic Gating |
 | `COGNITIVE_ONTOLOGY.md` | Shared vocabulary: ~50 signal types in 6 families, entity taxonomy (Thought 5 layers, Memory, Evidence, Threat, Policy), 8-stage lifecycle transition table, component taxonomy (cells/tissues/organs/systems), priority 0–4 |
@@ -701,6 +723,7 @@ MCP transport passes 9/10 fixtures (F10 pending); REST/CLI/A2A/IPC unimplemented
 | `ADR-003-engineering-intelligence-layer.md` | Accepted | Engineering Judgment organ (Cerebellum): 10 tier domain stores, laws as reasoning primitives, EngineeringEvaluator gates, judgment-pack enrichment, learning loop |
 | `ADR-004-cognitive-compute-fabric.md` | Accepted | Cognitive Compute Fabric — virtual processor namespace, affinity routing, provider resolution, dispatch contract (Level 4) |
 | `ADR-005-universal-cognitive-protocol.md` | Accepted | Universal Cognitive Protocol — substrate-runs-drivers naming, 3-layer split, Episode canonicalization (episode_id + episode hash), L0–L4 ladder, Live Cognitive State, driver triad + Cognitive Coprocessor, Cognitive Virtual Memory; Amendment A (2026-08-01): harness→driver terminology + Cognitive Trace/Middleware/Packages |
+| `ADR-006-cognitive-microkernel.md` | Accepted | Cognitive Microkernel — 12 kernel primitives (10 verified, 2 deltas resolved), kernel/service boundary, Cognitive Process model; **Phases A–F implemented 2026-08-01** (`src/kernel/{process,memory/vmem,organism,transactional,diagnostics}`, `neural-fs/mounts.ts`) |
 | `COGNITIVE-TRACE.md` | Approved design | Cognitive Trace `uch.cognitive-trace.v1` — OTel-shaped schema, span kinds, uccp.* attributes, organ ownership table, 8-point driver contract, lifecycle, verification |
 | `COGNITIVE-MIDDLEWARE.md` | Approved design | Cognitive Middleware — 9-stage governed pipeline (ingress→…→augment) + Cognitive Image cache: per-grant, regenerable, TTL-coherent read-optimized projection (attach = O(1)) |
 | `COGNITIVE-PACKAGES.md` | Approved design | Cognitive Packages `uch.package.v1` — 4 kinds (driver/skill/policy/instrument), manifest contract, package governance gate (signed, scoped, intersected, vetoable, revocable) |

@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: '20'
 
 jobs:
   lint:
@@ -19,7 +19,7 @@ jobs:
           cache: npm
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: '3.x'
       - run: python -m pip install --upgrade pip pre-commit
       - run: npm ci
       - run: pre-commit run --all-files
@@ -62,7 +62,7 @@ jobs:
       - run: npm ci
       - name: npm audit
         run: npm audit --audit-level=high
-        continue-on-error: true
+        continue-on-error: false
 
   dead-code:
     runs-on: ubuntu-latest

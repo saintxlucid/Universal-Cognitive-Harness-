@@ -125,3 +125,32 @@ await result.governance.admitAndPublish({
 | `src/control-plane/event-governance.ts` | `EventGovernance` gate: dedupe, policy, grant, staleness, ledger, bus emission |
 | `src/control-plane/policies.ts` | `PolicyEngine` with exact + namespaced wildcard patterns |
 | `src/control-plane/__tests__/event-governance.test.ts` | 16 tests: provenance chains, idempotency, policy deny/allow, cross-project isolation, revocation, budget, staleness, observability, attach wiring |
+
+## Event schema versioning policy
+
+Event types are public contracts: drivers and consumers compile against
+their payload shapes, and a silent reshape breaks both ends. Every event
+schema therefore carries **semantic versioning**.
+
+- **Schemas are semver.** Each event type declares a schema version
+  (`major.minor`, carried in the event's metadata). Consumers pin to a
+  major and are served any compatible minor.
+- **Additive-only within a minor.** A minor bump may *add* fields with
+  defaults; it must never change, remove, or reinterpret an existing field.
+  Consumers must tolerate unknown fields.
+- **Deprecation window: minimum 2 minor versions.** A field slated for
+  removal is marked deprecated in the schema and stays for at least two
+  minor releases before it may be dropped.
+- **Breaking changes require a new event type name.** A breaking reshape
+  is not a redefinition of an existing type — it is a new event type (e.g.
+  `git:commit.v2`), published alongside the old one until the old type's
+  deprecation window closes. The old type is never rewritten in place.
+- **Changelog.** Schema changes are recorded **in this design document** —
+  each new event type, schema bump, and deprecation is appended here so
+  consumers can diff exactly what moved between versions.
+
+### Event schema changelog
+
+| Date | Event type | Change |
+| --- | --- | --- |
+| 2026-08-01 | (policy) | Event schema versioning policy adopted; all existing event types default to schema `1.0` until individually versioned |

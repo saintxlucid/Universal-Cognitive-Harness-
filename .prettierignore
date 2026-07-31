@@ -1,0 +1,10 @@
+dist/
+build/
+.next/
+node_modules/
+.turbo/
+coverage/
+*.lock
+*.log
+.git/
+.agent/vendor/

@@ -1,4 +1,4 @@
-import { ImmuneSystem, type ThreatAssessment } from '../../exoskeleton/immune.js';
+import { ImmuneSystem, type ThreatAssessment } from '../../cognitive-core/immune.js';
 import { PolicyEngine } from '../../control-plane/policies.js';
 import { CircuitBreaker } from './circuit-breaker.js';
 

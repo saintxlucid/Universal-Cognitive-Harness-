@@ -1,0 +1,60 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "UCH: Start MCP Server",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/projects/uch/dist/cli/index.js",
+        "mcp"
+      ],
+      "group": "none",
+      "presentation": {
+        "reveal": "never",
+        "panel": "dedicated"
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "UCH: Status",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/projects/uch/dist/cli/index.js",
+        "status"
+      ]
+    },
+    {
+      "label": "UCH: Ingest Git History",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/projects/uch/dist/cli/index.js",
+        "ingest"
+      ]
+    },
+    {
+      "label": "UCH: Build",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "build"],
+      "options": {
+        "cwd": "${workspaceFolder}/projects/uch"
+      },
+      "group": "build"
+    },
+    {
+      "label": "UCH: Test",
+      "type": "shell",
+      "command": "npm",
+      "args": ["test"],
+      "options": {
+        "cwd": "${workspaceFolder}/projects/uch"
+      },
+      "group": "test"
+    }
+  ]
+}

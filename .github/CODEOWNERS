@@ -1,0 +1,25 @@
+# Default owners for everything in the repo
+* @anomalyco
+
+# Root config and governance
+/.agent/ @anomalyco
+/.github/ @anomalyco
+/.opencode/ @anomalyco
+/.claude/ @anomalyco
+/.codex/ @anomalyco
+/.vscode/ @anomalyco
+/.devcontainer/ @anomalyco
+/shared/ @anomalyco
+/templates/ @anomalyco
+
+# Build and infrastructure
+Dockerfile @anomalyco
+.dockerignore @anomalyco
+docker-compose.yml @anomalyco
+Makefile @anomalyco
+
+# CI/CD
+/.github/workflows/ @anomalyco
+
+# Tests
+/tests/ @anomalyco

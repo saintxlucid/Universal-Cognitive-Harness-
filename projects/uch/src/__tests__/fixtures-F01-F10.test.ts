@@ -14,7 +14,7 @@ import { CognitiveKernel } from '../kernel/cognitive-kernel.js';
 import { ExecutiveBrain } from '../executive-brain/executive-brain.js';
 import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
 import { PolicyEngine } from '../control-plane/policies.js';
-import { ImmuneSystem } from '../exoskeleton/immune.js';
+import { ImmuneSystem } from '../cognitive-core/immune.js';
 import { Auth } from '../control-plane/auth/auth.js';
 import { ReflexEngine } from '../suit/instinct/reflex-engine.js';
 

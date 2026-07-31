@@ -1,4 +1,5 @@
 import type { ComplianceViolation } from '../constitution/constitution.js';
+import type { InformationAssessment } from '../frameworks/critical/critical-evaluator.js';
 
 export type IntegrityFlag =
   | 'subjectivity'
@@ -89,6 +90,40 @@ export class IntegrityChecklist {
       context[issue.flag] = true;
     }
     return context;
+  }
+
+  /**
+   * Pre-commit information filter (blueprint §5.2): merges the critical
+   * evaluator's 9-question assessment (law-mapped questions) into the
+   * five-law checklist so both produce one verdict. Evaluator failures
+   * map onto integrity flags; a 'reject' assessment fails the filter.
+   */
+  evaluateInformation(
+    context: IntegrityContext,
+    assessment: InformationAssessment,
+  ): IntegrityResult {
+    const base = this.evaluate(context);
+    const lawFlags: Record<string, IntegrityFlag> = {
+      qualified_source: 'unqualified_source',
+      prejudice: 'prejudice',
+      propaganda: 'propaganda',
+      fact_vs_opinion: 'subjectivity',
+      whole_story: 'omission',
+    };
+    const mergedIssues = [...base.issues];
+    for (const check of assessment.checks) {
+      if (check.ok || !check.answered) continue;
+      const flag = lawFlags[check.id];
+      if (!flag) continue;
+      if (mergedIssues.some((i) => i.flag === flag && i.question === check.question)) continue;
+      mergedIssues.push({
+        flag,
+        question: check.question,
+        detail: `Critical evaluation flags "${check.question}" for "${context.claim}".`,
+      });
+    }
+    const passed = mergedIssues.length === 0 && assessment.verdict !== 'reject';
+    return { ...base, passed, issues: mergedIssues };
   }
 
   attachViolations(result: IntegrityResult, violations: ComplianceViolation[]): IntegrityResult {

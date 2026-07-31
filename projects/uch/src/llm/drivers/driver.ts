@@ -9,6 +9,8 @@ export interface CompletionParams {
   maxTokens?: number;
   stream?: boolean;
   multimodal?: boolean;
+  /** Per-call model override; defaults to the driver's configured model */
+  model?: string;
 }
 
 export interface EmbeddingParams {

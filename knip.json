@@ -1,0 +1,29 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [],
+  "project": ["**/*.{js,mjs,cjs,ts,tsx,json}"],
+  "ignore": [
+    ".agent/**",
+    ".claude/**",
+    ".codex/**",
+    ".opencode/**",
+    ".vscode/**",
+    ".devcontainer/**",
+    ".github/**",
+    ".git/**",
+    "node_modules/**",
+    "projects/**/node_modules/**",
+    ".git-blame-ignore-revs"
+  ],
+  "ignoreDependencies": [],
+  "ignoreBinaries": [],
+  "rules": {
+    "files": "warn",
+    "dependencies": "warn",
+    "devDependencies": "warn",
+    "unlisted": "warn",
+    "exports": "warn",
+    "types": "warn",
+    "duplicates": "error"
+  }
+}

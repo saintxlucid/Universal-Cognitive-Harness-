@@ -35,6 +35,8 @@ const LAWS: GenomeLaw[] = [
   { id: lawID('law:14'), name: 'Economic Rationality', statement: 'Every operation must justify its energy cost through expected information gain.', rationale: 'Without economics, energy is wasted on low-value computation.', enforcement: 'economic-audit' },
   { id: lawID('law:15'), name: 'Information Conservation', statement: 'A signal with zero information gain must be absorbed at the lowest capable nervous layer.', rationale: 'Without information conservation, the cortex drowns in noise.', enforcement: 'information-audit' },
   { id: lawID('law:16'), name: 'Interrupt Hierarchy', statement: 'A higher-priority signal may preempt any lower-priority execution.', rationale: 'Without interrupts, emergencies queue behind routine processing.', enforcement: 'runtime-audit' },
+  { id: lawID('law:17'), name: 'Signal Fusion', statement: 'No action is taken on a single weak signal; decisions require fused evidence from multiple independently-sourced signals.', rationale: 'Weak signals are only robust in aggregate; without fusion, decisions inherit the noise of the last signal.', enforcement: 'constitutional-review' },
+  { id: lawID('law:18'), name: 'Governance Before Landing', statement: 'No change to the workspace lands without passing the governance gate.', rationale: 'Without a pre-landing gate, violations enter the workspace after the fact and can only be repaired, never prevented.', enforcement: 'static-analysis' },
 ];
 
 const COMMITMENTS: ImmutableCommitment[] = [

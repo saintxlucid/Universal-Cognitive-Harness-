@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-typescript-next",
+    "EditorConfig.EditorConfig",
+    "christian-kohler.path-intellisense",
+    "bradlc.vscode-tailwindcss",
+    "Prisma.prisma",
+    "ms-azuretools.vscode-docker",
+    "github.vscode-github-actions",
+    "eamodio.gitlens",
+    "streetsidesoftware.code-spell-checker",
+    "uniqhuman.vscode-ps-script"
+  ]
+}

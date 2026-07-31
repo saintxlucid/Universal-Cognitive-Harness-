@@ -22,7 +22,7 @@ import {
   T13TokenExhaustionMitigation,
   T14SessionHijackingMitigation,
 } from '../kernel/cic/threat-mitigations.js';
-import { ImmuneSystem } from '../exoskeleton/immune.js';
+import { ImmuneSystem } from '../cognitive-core/immune.js';
 import { PolicyEngine } from '../control-plane/policies.js';
 import { ReflexEngine } from '../suit/instinct/reflex-engine.js';
 import { Auth } from '../control-plane/auth/auth.js';

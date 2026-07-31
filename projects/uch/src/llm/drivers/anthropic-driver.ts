@@ -34,7 +34,7 @@ export class AnthropicDriver implements LLMDriver {
 
   async complete(params: CompletionParams): Promise<string> {
     const { system, messages } = this.mapMessages(params);
-    return this.provider.complete(this.modelName, {
+    return this.provider.complete(params.model ?? this.modelName, {
       messages,
       system,
       temperature: params.temperature,
@@ -44,7 +44,7 @@ export class AnthropicDriver implements LLMDriver {
 
   async *completeStream(params: CompletionParams): AsyncGenerator<string> {
     const { system, messages } = this.mapMessages(params);
-    for await (const text of this.provider.completeStream(this.modelName, {
+    for await (const text of this.provider.completeStream(params.model ?? this.modelName, {
       messages,
       system,
       temperature: params.temperature,

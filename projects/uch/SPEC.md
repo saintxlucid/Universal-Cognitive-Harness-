@@ -1,5 +1,14 @@
 # Cognitive Operating System — Specification
 
+> **Canon note (2026-08-01).** This document is the legacy COS-era
+> specification. The normative corpus of UCH is now the Five-Book Canon:
+> Genesis (product) · Constitution + Laws (immutable law) · Blueprint
+> (engineering) · Standards/RFCs (contracts) · Ascension (scale). See
+> [docs/README.md](docs/README.md) for the canon map and
+> [rfc/RFC-0000-specification-governance.md](rfc/RFC-0000-specification-governance.md)
+> for the governance system. This file is retained for historical
+> continuity and is superseded where it conflicts with the canon.
+
 ## Executive Summary
 
 The COS is a **Cognitive Kernel** — a persistent intelligence runtime that sits beneath any agent framework and above any LLM. It provides structured long-horizon memory, principled retrieval, adaptive learning, and self-improving cognition. It is **not** a library, MCP server, or agent framework. It is an **Artificial Cognitive Infrastructure** — a new layer in the AI computing stack.

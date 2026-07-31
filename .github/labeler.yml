@@ -1,0 +1,65 @@
+# Labeler configuration for automated PR labeling
+# Matches file paths to labels
+
+"area:agent":
+  - .agent/**/*
+  - .agents/**/*
+
+"area:ci":
+  - .github/workflows/**/*
+
+"area:config":
+  - .editorconfig
+  - .env.example
+  - .gitattributes
+  - .gitignore
+  - .nvmrc
+  - .prettierrc
+  - .prettierignore
+  - .markdownlint.json
+
+"area:dependencies":
+  - package.json
+  - package-lock.json
+  - .github/dependabot.yml
+
+"area:devcontainer":
+  - .devcontainer/**/*
+
+"area:docker":
+  - Dockerfile
+  - .dockerignore
+  - docker-compose.yml
+
+"area:docs":
+  - "**/*.md"
+  - docs/**/*
+  - .github/copilot-instructions.md
+
+"area:mcp":
+  - .mcp.json
+  - .vscode/mcp.json
+  - .opencode/opencode.json
+
+"area:opencode":
+  - .opencode/**/*
+
+"area:projects":
+  - projects/**/*
+
+"area:scripts":
+  - scripts/**/*
+
+"area:shared":
+  - shared/**/*
+
+"area:templates":
+  - templates/**/*
+
+"area:tests":
+  - tests/**/*
+
+"area:tooling":
+  - Makefile
+  - commitlint.config.*
+  - .git-blame-ignore-revs

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: OpenCode Support
+    url: https://opencode.ai
+    about: Get help with OpenCode runtime
+  - name: Claude Code Support
+    url: https://docs.anthropic.com/en/docs/claude-code/overview
+    about: Get help with Claude Code runtime

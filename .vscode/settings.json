@@ -1,0 +1,25 @@
+{
+  "chat.useAgentsMdFile": true,
+  "chat.useClaudeMdFile": true,
+  "chat.useCustomizationsInParentRepositories": true,
+  "chat.mcp.discovery.enabled": {
+    "claude-desktop": true,
+    "windsurf": true,
+    "cursor-global": true,
+    "cursor-workspace": true
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "prettier.requireConfig": true,
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "files.eol": "\\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "uch.autoStartMcpServer": true,
+  "uch.autoIngestGit": true,
+  "uch.workspaceMemory": true
+}

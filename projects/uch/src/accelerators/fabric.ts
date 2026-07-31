@@ -6,7 +6,9 @@ import type {
   AcceleratorResult,
   InferenceProvider,
   ProviderGateway,
+  ProviderModel,
 } from './types.js';
+import type { ProviderRosterEntry } from './virtual-processors.js';
 
 export interface ProviderHealth {
   providerId: string;
@@ -26,10 +28,32 @@ export interface DispatchOptions {
   maxTokens?: number;
   skipInference?: boolean;
   retries?: number;
+  /** Kernel-selected provider (Level 4 routing); falls back to health ordering if unhealthy. */
+  preferredProviderId?: string;
+  /** Kernel-selected model for the preferred provider, at its required tier. */
+  model?: string;
 }
 
 const COOLDOWN_MS = 15_000;
 const MAX_CONSECUTIVE_FAILURES = 2;
+
+/** Default model rosters per provider family (Level 4 — model virtualization). */
+const DEFAULT_ROSTERS: Record<string, ProviderModel[]> = {
+  openai: [
+    { tier: 'tiny', model: 'gpt-4o-mini', costRank: 1 },
+    { tier: 'standard', model: 'gpt-4o-mini', costRank: 1 },
+    { tier: 'deep', model: 'gpt-4o', costRank: 2 },
+  ],
+  anthropic: [
+    { tier: 'tiny', model: 'claude-3-5-haiku-latest', costRank: 1 },
+    { tier: 'standard', model: 'claude-3-5-haiku-latest', costRank: 1 },
+    { tier: 'deep', model: 'claude-sonnet-4-5', costRank: 2 },
+  ],
+  cerebras: [
+    { tier: 'standard', model: 'llama-3.3-70b', costRank: 0 },
+    { tier: 'deep', model: 'llama-3.3-70b', costRank: 0 },
+  ],
+};
 
 function extractConfidence(output: Record<string, unknown>): number {
   const c = output.confidence;
@@ -76,6 +100,23 @@ export class InferenceFabric {
     return [...this.health.values()].map((h) => ({ ...h }));
   }
 
+  /** Capability surface snapshot for the Level 4 router (pure data). */
+  roster(): ProviderRosterEntry[] {
+    return this.providers.map((p) => {
+      const h = this.health.get(p.id);
+      const healthy = h === undefined ? true : this.isHealthy(p.id);
+      return {
+        providerId: p.id,
+        label: p.label,
+        available: p.isAvailable(),
+        healthy,
+        consecutiveFailures: h?.consecutiveFailures ?? 0,
+        avgLatencyMs: h?.avgLatencyMs ?? null,
+        models: p.roster ? p.roster.map((m) => ({ ...m })) : [],
+      };
+    });
+  }
+
   async dispatch<I extends Record<string, unknown>, O extends object>(
     accelerator: Accelerator<I, O>,
     input: I,
@@ -91,7 +132,11 @@ export class InferenceFabric {
       return this.fallbackResult(accelerator, input, kind, started);
     }
 
-    const ordered = await this.orderedHealthyProviders(priority, latencyTargetMs);
+    const ordered = await this.orderedHealthyProviders(
+      priority,
+      latencyTargetMs,
+      options?.preferredProviderId,
+    );
     if (ordered.length === 0) {
       return this.fallbackResult(accelerator, input, kind, started);
     }
@@ -99,7 +144,9 @@ export class InferenceFabric {
     const attempts = Math.min(retries, ordered.length);
     for (let i = 0; i < attempts; i++) {
       const provider = ordered[i]!;
-      const gateway = this.gatewayFor(provider);
+      const modelOverride =
+        provider.id === options?.preferredProviderId ? options?.model : undefined;
+      const gateway = this.gatewayFor(provider, modelOverride);
       try {
         const output = await accelerator.execute(input, gateway, {
           maxTokens: options?.maxTokens,
@@ -141,12 +188,16 @@ export class InferenceFabric {
     };
   }
 
-  private gatewayFor(provider: InferenceProvider): ProviderGateway {
+  private gatewayFor(provider: InferenceProvider, modelOverride?: string): ProviderGateway {
     return {
       isAvailable: () => provider.isAvailable(),
       complete: async (params) => {
         const t0 = Date.now();
-        const text = await provider.complete(params);
+        const merged =
+          modelOverride && params.model === undefined
+            ? { ...params, model: modelOverride }
+            : params;
+        const text = await provider.complete(merged);
         return { text, providerId: provider.id, latencyMs: Date.now() - t0 };
       },
     };
@@ -159,7 +210,11 @@ export class InferenceFabric {
     return h.consecutiveFailures < MAX_CONSECUTIVE_FAILURES;
   }
 
-  private async orderedHealthyProviders(priority: number, latencyTargetMs?: number): Promise<InferenceProvider[]> {
+  private async orderedHealthyProviders(
+    priority: number,
+    latencyTargetMs?: number,
+    preferredProviderId?: string,
+  ): Promise<InferenceProvider[]> {
     await this.probeUnmeasured();
     const available = this.providers.filter((p) => p.isAvailable() && this.isHealthy(p.id));
     available.sort((a, b) => {
@@ -172,6 +227,13 @@ export class InferenceFabric {
       const lb = hb?.avgLatencyMs ?? Number.MAX_SAFE_INTEGER;
       return la - lb;
     });
+    if (preferredProviderId !== undefined) {
+      const index = available.findIndex((p) => p.id === preferredProviderId);
+      if (index > 0) {
+        const [preferred] = available.splice(index, 1);
+        if (preferred) available.unshift(preferred);
+      }
+    }
     if (latencyTargetMs !== undefined && available.length > 1) {
       const within = available.filter((p) => {
         const h = this.health.get(p.id);
@@ -189,18 +251,23 @@ export class InferenceFabric {
 
   private async probeUnmeasured(): Promise<void> {
     const unmeasured = this.providers.filter((p) => this.health.get(p.id)?.avgLatencyMs === null);
-    await Promise.all(unmeasured.map(async (provider) => {
-      const t0 = Date.now();
-      try {
-        await provider.complete({ system: 'ping', user: 'ping', temperature: 0, maxTokens: 16 });
-        const h = this.health.get(provider.id);
-        if (!h) return;
-        h.lastLatencyMs = Date.now() - t0;
-        h.avgLatencyMs = h.avgLatencyMs === null ? h.lastLatencyMs : h.avgLatencyMs * 0.8 + h.lastLatencyMs * 0.2;
-      } catch {
-        this.recordFailure(provider.id);
-      }
-    }));
+    await Promise.all(
+      unmeasured.map(async (provider) => {
+        const t0 = Date.now();
+        try {
+          await provider.complete({ system: 'ping', user: 'ping', temperature: 0, maxTokens: 16 });
+          const h = this.health.get(provider.id);
+          if (!h) return;
+          h.lastLatencyMs = Date.now() - t0;
+          h.avgLatencyMs =
+            h.avgLatencyMs === null
+              ? h.lastLatencyMs
+              : h.avgLatencyMs * 0.8 + h.lastLatencyMs * 0.2;
+        } catch {
+          this.recordFailure(provider.id);
+        }
+      }),
+    );
   }
 
   private recordSuccess(providerId: string, latencyMs: number): void {
@@ -228,12 +295,16 @@ export class InferenceFabric {
     const openaiKey = process.env.OPENAI_API_KEY;
     if (openaiKey) {
       const client = new LLMClient({ provider: 'openai', apiKey: openaiKey });
-      this.registerProvider(this.llmAdapter('openai', 'OpenAI', client));
+      this.registerProvider(
+        this.llmAdapter('openai', 'OpenAI', client, DEFAULT_ROSTERS.openai ?? []),
+      );
     }
     const anthropicKey = process.env.ANTHROPIC_API_KEY;
     if (anthropicKey) {
       const client = new LLMClient({ provider: 'anthropic', apiKey: anthropicKey });
-      this.registerProvider(this.llmAdapter('anthropic', 'Anthropic', client));
+      this.registerProvider(
+        this.llmAdapter('anthropic', 'Anthropic', client, DEFAULT_ROSTERS.anthropic ?? []),
+      );
     }
     const cerebrasKeys = [
       process.env.CEREBRAS_API_KEY,
@@ -245,33 +316,47 @@ export class InferenceFabric {
       if (!key) return;
       const id = i === 0 ? 'cerebras' : `cerebras-${i}`;
       const openai = new OpenAI({ apiKey: key, baseURL: 'https://api.cerebras.ai/v1' });
-      this.registerProvider(this.openaiCompatibleAdapter(id, `Cerebras ${id}`, openai));
+      this.registerProvider(
+        this.openaiCompatibleAdapter(id, `Cerebras ${id}`, openai, DEFAULT_ROSTERS.cerebras ?? []),
+      );
     });
   }
 
-  private llmAdapter(id: string, label: string, client: LLMClient): InferenceProvider {
+  private llmAdapter(
+    id: string,
+    label: string,
+    client: LLMClient,
+    roster: ProviderModel[],
+  ): InferenceProvider {
     return {
       id,
       label,
+      roster,
       isAvailable: () => client.isAvailable,
-      complete: async ({ system, user, temperature, maxTokens }) => {
+      complete: async ({ system, user, temperature, maxTokens, model }) => {
         const messages = [
           ...(system ? [{ role: 'system' as const, content: system }] : []),
           { role: 'user' as const, content: user },
         ];
-        return client.complete({ messages, temperature, maxTokens });
+        return client.complete({ messages, temperature, maxTokens, model });
       },
     };
   }
 
-  private openaiCompatibleAdapter(id: string, label: string, client: OpenAI): InferenceProvider {
+  private openaiCompatibleAdapter(
+    id: string,
+    label: string,
+    client: OpenAI,
+    roster: ProviderModel[],
+  ): InferenceProvider {
     return {
       id,
       label,
+      roster,
       isAvailable: () => true,
-      complete: async ({ system, user, temperature, maxTokens }) => {
+      complete: async ({ system, user, temperature, maxTokens, model }) => {
         const response = await client.chat.completions.create({
-          model: process.env.CEREBRAS_MODEL ?? 'llama-3.3-70b',
+          model: model ?? process.env.CEREBRAS_MODEL ?? 'llama-3.3-70b',
           messages: [
             ...(system ? [{ role: 'system' as const, content: system }] : []),
             { role: 'user' as const, content: user },

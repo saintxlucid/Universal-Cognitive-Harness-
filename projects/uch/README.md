@@ -1,182 +1,161 @@
 # UCH — Universal Cognitive Harness
 
-A portable cognitive infrastructure layer that sits beneath any agent
-framework and above any LLM — amplifying capabilities with structured
-long-horizon memory, principled retrieval, adaptive learning, and
-self-improving cognition.
+> **Separate cognition from inference.**
+> The workspace owns the intelligence. The agent borrows it.
+
+UCH is a **cognitive runtime and open specification** — a persistent
+substrate that any IDE, coding agent, or AI runtime can attach to and
+inherit memory, knowledge, skills, policies, and learned judgment. Models,
+sessions, and editors are transient; the cognition is not.
+
+It is not a memory library, not an agent framework, and not an MCP server.
+It is a new layer in the AI computing stack — the layer that owns
+**persistent, governed cognition**.
+
+[Book I — Genesis (product)](docs/GENESIS.md) ·
+[Book II — Constitution (law)](spec/CONSTITUTION.md) ·
+[Book III — Blueprint (engineering)](design/ARCHITECTURE.md) ·
+[Book IV — Standards (RFCs)](rfc/) ·
+[Book V — Ascension (scale)](docs/ROADMAP.md) ·
+[Manifesto](MANIFESTO.md)
 
 | | |
 | --- | --- |
-| **Status** | Active development — core complete, 200+ source modules, 86 test files / 1547 tests passing |
-| **Runtime** | Node.js 18+ (ESM, TypeScript strict) |
-| **Interfaces** | MCP (STDIO), legacy HTTP/SSE, UCCP server, agent boot module (Claude Code / Codex / OpenCode) |
+| **Status** | Active — 565 source files, 55 subsystems, 154 test files / 2,436 test cases |
+| **Runtime** | Node.js 18+ (ESM, TypeScript strict) · 3 runtime dependencies |
+| **Interfaces** | CLI · MCP (STDIO/SSE) · HTTP · IPC · A2A · agent boot module |
+| **Contracts** | CP v1.0 (cognitive ABI, stable) · CIC envelope · `uch.manifest.v1` · W3C traces |
+| **Governance** | Specification-first · RFC lifecycle (RFC-0000) · 32 Laws · Constitution |
 | **License** | MIT |
 
-## What UCH Is
+## The inversion
 
-Not a memory library. Not an agent framework. Not an MCP server.
+Every AI tool today reconstructs the same intelligence and throws it away.
+UCH inverts ownership:
 
-An **Artificial Cognitive Infrastructure** — a new layer in the AI
-computing stack:
-
-```
-Applications
-    ↓
-Cognitive Personalities
-    ↓
-Skill Ecosystem
-    ↓
-Cognitive Runtime
-    ↓
-Cognitive Kernel
-    ↓
-Neural Filesystem (NeuralFS)
-    ↓
-Knowledge Storage
-    ↓
-Models (LLMs become a computational resource, like a GPU)
-    ↓
-Accelerators
+```text
+Applications / Agents
+        ↓
+Harness Drivers          ← Claude Code · Codex · Cursor · VS Code · OpenCode · future pilots
+        ↓
+UNIVERSAL COGNITIVE RUNTIME (UCH)   ← the persistent substrate
+        ↓
+Cognitive Kernel · Memory · Signals · Governance · Metabolism
+        ↓
+Cognitive ISA (CP v1)    ← the ABI that must not break
+        ↓
+Inference Engines        ← replaceable — LLMs are a resource, like a GPU
+        ↓
+Hardware
 ```
 
-UCH is designed as a **computational organism** — a collection of
-specialized cognitive systems that cooperate the way brain regions do,
-while remaining explicit, inspectable, versioned, and computationally
-efficient.
+The LLM sits near the bottom because it is a *transient pilot*. Cognition —
+identity, memory, decisions, skills, judgment — lives in the substrate and
+survives every pilot replacement (Law 32 — Persistence, Law 19 — Cognition
+Ownership).
 
-## Quick Start
+## The Five Books
+
+The specification is the source of truth, not the conversation. Every
+normative change passes the RFC lifecycle before it touches the corpus.
+
+| Book | File | Purpose |
+| --- | --- | --- |
+| **I — Genesis** | [docs/GENESIS.md](docs/GENESIS.md) | Product — problem, vision, computing thesis, market, strategy (20 chapters) |
+| **II — Constitution** | [spec/CONSTITUTION.md](spec/CONSTITUTION.md) · [spec/LAWS_OF_COGNITIVE_PHYSICS.md](spec/LAWS_OF_COGNITIVE_PHYSICS.md) | Immutable law — 32 laws in five families, cognitive rights, kernel ABI |
+| **III — Blueprint** | [design/ARCHITECTURE.md](design/ARCHITECTURE.md) · [design/STACK.md](design/STACK.md) · [design/CIR.md](design/CIR.md) | Engineering — kernel, memory, scheduler, signals, drivers, CIR |
+| **IV — Standards** | [rfc/](rfc/) | RFC series — contracts: Identity, Signals, Memory, governance |
+| **V — Ascension** | [docs/ROADMAP.md](docs/ROADMAP.md) | Scale — epochs, performance, certification, ecosystem |
+
+## Quick start
 
 ```bash
 cd projects/uch
 npm install
-npm run build          # tsc → dist/
+npm run build
 
-# Run as an MCP server (default command):
-node dist/cli/index.js
-#   → UCH MCP Server v0.2.0 — LLM: disabled (set OPENAI_API_KEY)
-
-# With an LLM provider:
-#   copy .env.example → .env and set OPENAI_API_KEY
-
-# CLI mode:
+# System status:
 node dist/cli/index.js status
-node dist/cli/index.js help
+
+# Run as an MCP server (default):
+node dist/cli/index.js
+#   → UCH MCP Server — 25 cognitive tools
+
+# Attach to this workspace (manifest discovery + grants + projections):
+node dist/cli/index.js attach
+
+# First memory (with OPENAI_API_KEY set for embeddings):
+node dist/cli/index.js remember "UCH is a cognitive substrate"
+node dist/cli/index.js recall "cognitive"
 ```
 
 Use the package scripts: `npm test` (vitest), `npm run typecheck`
-(`tsc --noEmit`), `npm run lint` (eslint), `npm run build`.
+(`tsc --noEmit`), `npm run lint` (eslint), `npm run check:spec-version`.
+Full walkthrough: [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md).
 
-## Documentation Index
+## What the substrate owns
+
+| Domain | What exists |
+| --- | --- |
+| **Memory** | Episodic, semantic, procedural, scientific (takes/calibration), belief (time-machine), working (compression), vmem paging Hot→Archive; sleep-cycle consolidation + distillation |
+| **Signals** | Immutable event bus with governance gate (provenance, idempotency, policy, audit); five-layer nervous system priority routing; zero-LLM reflex fast path |
+| **Governance** | 32 Laws (five families) · Constitution (rights, responsibilities, immutability) · `EventGovernance` gate · grants + projections · Organic Score with constitutional vetoes · integrity checklist |
+| **Identity & Attachment** | Workspace manifest (`uch.manifest.v1`), per-agent scoped grants, authorized projections, attach lifecycle, PID namespace, cognitive processes |
+| **Inference fabric** | Virtual processors (10-CPU namespace), tier routing, cheapest-healthy-provider selection with verification failover, energy budgets |
+| **Engineering intelligence** | 150-concept tiered domain catalog, deterministic evaluator with veto gates (SPOF, unrecovered failure, pathological complexity), labeled benchmark corpus |
+| **Trace & replay** | OTel W3C trace ledger, `traceparent` continuation, cognitive replay, time machine (`beliefsAt`), cognitive diff |
+| **Frameworks** | 34-framework Cognitive Frameworks Library (10 families) with selection, journal, calibration analytics |
+| **Interfaces** | CLI (~40 commands) · MCP STDIO (25 tools) · HTTP/SSE · WebSocket · IPC · A2A · agent boot plugin (Claude Code / Codex / OpenCode) |
+
+## Governance
+
+- **32 Laws of Cognitive Physics** in five families — Physics · Biology ·
+  Psychology · Society · Computing — enforced by static analysis, runtime
+  auditing, and constitutional review.
+- **The RFC lifecycle** ([RFC-0000](rfc/RFC-0000-specification-governance.md)):
+  `Idea → Research → RFC → Prototype → Benchmark → Architecture Review →
+  Security Review → Constitution Check → Acceptance → Specification →
+  Reference Implementation → Certification → Stable`.
+- **The Five Gates** — Scientific, Architectural, Engineering, Biological,
+  Economic. A feature that fails any gate dies at the idea stage.
+- **Certification** — driver conformance (`src/drivers/compliance.ts`),
+  CP conformance suite, and the engineering benchmark corpus are the
+  machinery that will certify UCH-compliant drivers and runtimes.
+
+## Repository layout
+
+```text
+spec/        The normative corpus — laws, constitution, CP, ontology, biology
+rfc/         The RFC series — contracts under governance
+design/      ADRs, architecture, CIR, threat model, conformance, governance (DOE)
+docs/        The canon hub — Genesis, getting started, CLI/MCP references, roadmap
+src/         55 subsystems — kernel, cognitive-plane, agentic, drivers, control-plane…
+research/    Research notes, evidence register, synthesis
+skills/      40+ skill definitions ship with the substrate
+planning/    Phase plans (organism organs → digital twin → physiology → brain/suit)
+```
+
+## Documentation
 
 | Document | Purpose |
 | --- | --- |
-| `README.md` | This file — overview, quick start, status |
-| `docs/README.md` | Docs hub — index of every reference |
-| `docs/CLI.md` | Full `uch` command reference |
-| `docs/MCP.md` | MCP tools, transports, and how to connect |
-| `docs/SKILLS.md` | Skill system: catalog, import, provenance |
-| `docs/memory-filing-rules.md` | Mandatory rules for writing to memory |
-| `docs/extraction-map.md` | Provenance record of ported patterns |
-| `docs/organism-architecture.md` | High-level organism architecture and topology |
-| `docs/organism-implementation.md` | Implementation reference for `CognitiveOrganism` |
-| `SPEC.md` | Full cognitive system specification |
-| `spec/` | Formal foundations: ontology, constitution, genome, laws |
-| `spec/CP.md` | Cognitive Protocol v1 — the versioned contract (envelope, ops, errors, conformance, bindings) |
-| `design/` | ADR, architecture, conformance, threat model, privacy |
-| `research/` | Research notes, evidence register, synthesis |
-| `UCCP-persist-load-SUMMARY.md` | Persist/load implementation summary |
+| [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) | Install, first run, attach, CLI tour |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | The five Epochs and their status |
+| [docs/README.md](docs/README.md) | Docs hub — index of every reference |
+| [docs/CLI.md](docs/CLI.md) | Every `uch` command with examples |
+| [docs/MCP.md](docs/MCP.md) | MCP tools, transports, connection |
+| [docs/SKILLS.md](docs/SKILLS.md) | Skill system: catalog, import, provenance |
+| [docs/memory-filing-rules.md](docs/memory-filing-rules.md) | Mandatory rules for writing to memory |
+| [SPEC.md](SPEC.md) | Legacy full-system specification (COS-era) |
+| [VISION.md](VISION.md) | Strategic thesis — UCH as open cognitive infrastructure |
+| [CHANGELOG.md](CHANGELOG.md) | Release history |
 
-## Architecture
+## Contributing
 
-### 10-Layer Cortex
+UCH is run as a standards project: the specification comes first, the
+runtime is its reference implementation. Read
+[CONTRIBUTING.md](CONTRIBUTING.md) (RFC lifecycle, Five Gates, DOE wave
+discipline) and [SECURITY.md](SECURITY.md) (threat model, disclosure)
+before opening an issue or pull request.
 
-| Layer | Name | Function |
-| --- | --- | --- |
-| 1 | Sensory Cortex | Perception — chat, vision, code, filesystem, web, API |
-| 2 | Attention Cortex | Scoring — importance, novelty, urgency, user intent |
-| 3 | Understanding Cortex | Extraction — concepts, meaning, intent, goals, principles |
-| 4 | Reason Graph | Relationships — causality, dependencies, contradictions, time |
-| 5 | Memory Organ | Multi-store — episodic, semantic, procedural, identity, project, skills |
-| 6 | Memory Evolution | Lifecycle — aging, importance, confidence, merging, forgetting |
-| 7 | Dream Engine | Consolidation — pattern discovery, abstraction, contradiction detection |
-| 8 | Executive Cortex | Selection — memory, tools, reasoning strategy, personality |
-| 9 | Meta Brain | Self-observation — hallucination detection, failure analysis, retrieval quality |
-| 10 | Identity Engine | Models of user, team, projects, self, goals, capabilities |
-
-### Biological Code Architecture
-
-```
-frontal_cortex/       # Executive function, planning, decision-making
-hippocampus/          # Episodic encoding, consolidation, recall
-neocortex/            # Semantic abstraction, world models, generalization
-basal_ganglia/        # Action selection, habits, procedural learning
-cerebellum/           # Skill refinement, timing, coordination
-amygdala/             # Salience, emotional weighting, relevance
-insular_cortex/       # Interoception, self-awareness, error monitoring
-visual_cortex/        # Perception pipelines, sensory processing
-association_cortex/   # Cross-modal integration, abstraction
-temporal_cortex/      # Language, semantics, concept storage
-prefrontal_cortex/    # Working memory, goal maintenance, inhibition
-sleep_cycle/          # Offline consolidation, pattern discovery
-connectome/           # Graph of all relationships between concepts
-ontology/             # The Cognitive Constitution — definitions of truth, belief, knowledge
-```
-
-See `docs/organism-architecture.md` and `spec/COGNITIVE_BIOLOGY.md` for
-the full model.
-
-## Implemented Core
-
-| System | Status |
-| --- | --- |
-| **Cognitive Memory System** | Working — episodic observation, provenance-weighted recall, outcome learning |
-| **Retrieval** | Working — RRF fusion over semantic/keyword/graph/temporal signals, recency decay (per-prefix half-lives), provenance weighting, MMR rerank |
-| **Synthesis** | Working — grounded claims with `[id]` citation markers, contradiction detection, gap reporting (`SynthesisEngine`) |
-| **Takes / Calibration** | Working — gradeable claims with conviction, Brier scorecards, bias tags (`uch takes`, `uch calibration`) |
-| **Coding Principles** | Working — 4-principle evaluation with plan verification loop (`uch principles-check`) |
-| **15 Cognitive Plane Stores** | Complete — constitution, genome, scientific memory, trust, reflection, decisions, patterns, suggestions, scheduler, health, taste, dreaming, creativity, compiler, webhooks |
-| **Persistence Layer** | Working — JSON snapshot with Date serialization, Map↔Record converters, `Storable` interface |
-| **Skill System** | Working — catalog, import with provenance index, creation, optimization (`uch skill …`) |
-| **CLI + MCP STDIO Server** | Built — 23 MCP tools, `uch` command surface |
-| **Agent Boot Module** | Working — auto-loads into Claude Code, Codex, OpenCode on startup |
-| **Agentic Resilience Runtime** | Working — backend protocols (state/disk + permissions), middleware pipeline + 5 built-ins, tool-call repair, layered compaction, credential pool, error classification + failover chain, prompt profiles, TTL availability registry, lane queue, subagent registries (persistence, orphans, expiry) |
-| **Cognitive Protocol (CP) v1** | Stable — 17-op semantic instruction set (`uch-cp` 1.0.0), envelope validation, version gating, conformance suite, MCP (`cp.list`/`cp.invoke`) + HTTP (`/cp/v1`) + in-process bindings |
-| **NeuralFS Version Store** | Working — content-addressed commits (sha256 CIDs), snapshot trees over concepts/episodes/edges/beliefs, diff, checkout (time travel), restore, append-only JSONL journal persistence |
-| **Driver Registry** | Working — unified `Driver` interface (start/stop/handleEvent) + registry over 7 drivers: filesystem, git, runtime, agent, acp, ide, mcp |
-| **LLM Drivers** | Working — `LLMDriver` interface (complete, stream, multimodal, embed) + OpenAI / Anthropic / Google drivers |
-| **Design & Threat Models** | Complete — ADR, conformance, CIC spec, threat model, privacy/erasure |
-| **Test Suite** | 86 files / 1547 tests — stores, agents, runtime, MCP, e2e, conformance, agentic resilience |
-
-## In Progress
-
-- **NeuralFS store coverage**: concept/experience/skill/world/project stores working; belief, goal, reasoning-trace stores scaffolded (version store complete)
-- **Dream Engine / Sleep Cycle**: Offline consolidation — module scaffolded
-- **Connectome**: Relationship graph between concepts — module scaffolded
-- **10-Layer Cortex**: Wired sensory→memory layers; reason graph, meta brain, identity engine in design
-- **Resilience wiring**: `queryLoop` integration of failover chain + credential pool (modules complete, standalone)
-
-## Key Innovations
-
-- **Concept Genome**: Every concept has DNA — identity, purpose, relationships, dependencies, evolution, evidence
-- **NeuralFS**: A cognitive filesystem where concepts, experiences, and skills are first-class objects with provenance, confidence, and lifecycle
-- **Cognitive Constitution**: Formal ontology defining what facts, beliefs, knowledge, understanding, identity, and trust mean
-- **Forgetting Algorithm**: Intelligent decay based on importance, frequency, confidence, and prediction value
-- **Provenance-Weighted Retrieval**: Every memory carries source, timestamp, confidence, evidence, validity window, and trust score
-- **Synthesis with Citations**: Every claim the brain makes carries a resolvable citation marker; unattributable claims surface as gaps, never as assertions
-- **Calibration**: The brain records gradeable claims, grades them against reality, and exposes Brier scores and bias tags so its own confidence becomes measurable
-- **Recency Decay**: Per-prefix half-life map (evergreen concepts vs. decaying episodes) composes multiplicatively with provenance weights in retrieval fusion
-
-## Environment
-
-See `.env.example`. At minimum one LLM provider key is required for
-embeddings and AI features; everything else works in deterministic
-local mode.
-
-| Variable | Purpose |
-| --- | --- |
-| `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GOOGLE_API_KEY` | LLM provider keys |
-| `UCH_LLM_PROVIDER` | `openai \| anthropic \| google \| auto` |
-| `UCH_LLM_MODEL` | Default model override |
-| `OPENAI_BASE_URL` | Custom endpoint (proxies, local models) |
-| `CEREBRAS_API_KEY[_1..3]`, `CEREBRAS_MODEL` | Inference fabric compute resources |
-| `UCH_RECENCY_DECAY` | Recency decay overrides (`prefix:halflifeDays:coefficient,…`) |
+*Persistent cognition. Replaceable pilots.*

@@ -10,7 +10,14 @@
  * was actually measured.
  *
  * Gates (matching the skill): score >= 90 pass, 70-89 revise, < 70 reject.
+ *
+ * Engineering-intelligence hookup: optional pre-computed engineering
+ * findings (Tier III SPOF, Tier VIII unrecovered failure, Tier I
+ * pathological complexity) with `gate: 'veto'` hard-reject regardless of
+ * the aggregate score, mirroring the security/error-masking vetoes below.
  */
+
+import type { EngineeringFinding } from '../../engineering-intelligence/types.js';
 
 export type OrganicMetricId =
   | 'architecture-integrity'
@@ -53,6 +60,12 @@ export interface OrganicScoreInput {
   intent?: string;
   /** Optional execution context (tests run, files touched). */
   context?: { filesTouched?: string[]; testsRun?: string[] };
+  /**
+   * Optional pre-computed engineering-intelligence findings
+   * (EngineeringEvaluator output). Findings with `gate: 'veto'`
+   * hard-reject regardless of the aggregate score.
+   */
+  engineeringFindings?: EngineeringFinding[];
 }
 
 export interface OrganicScoreResult {
@@ -61,6 +74,8 @@ export interface OrganicScoreResult {
   metrics: MetricVerdict[];
   findings: Finding[];
   recommendations: string[];
+  /** Concept ids that hard-rejected via engineering veto findings. */
+  vetoedBy?: string[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -369,12 +384,29 @@ export class OrganicScoreEngine {
         : '[C5] Error-masking present — constitutional veto (law 8). Handle, log, or rethrow.');
     }
 
+    // Engineering-intelligence vetoes: pre-computed findings with
+    // `gate: 'veto'` (Tier I pathological complexity, Tier III SPOF,
+    // Tier VIII unrecovered failure surfaces) hard-reject regardless of
+    // the aggregate score — mirroring the constitutional vetoes above.
+    const engineeringVetoes = (input.engineeringFindings ?? []).filter(
+      (f) => f.gate === 'veto',
+    );
+    let vetoedBy: string[] | undefined;
+    if (engineeringVetoes.length > 0) {
+      verdict = 'reject';
+      vetoedBy = [...new Set(engineeringVetoes.map((f) => f.conceptId))];
+      for (const v of engineeringVetoes) {
+        recommendations.push(`[EI veto] ${v.conceptId} — ${v.message}`);
+      }
+    }
+
     return {
       verdict,
       score,
       metrics,
       findings: findings.slice(0, 20),
       recommendations: [...new Set(recommendations)].slice(0, 10),
+      ...(vetoedBy ? { vetoedBy } : {}),
     };
   }
 

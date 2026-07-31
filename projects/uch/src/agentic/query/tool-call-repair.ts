@@ -32,63 +32,77 @@ export function parseJsonArgs(args: string | Record<string, unknown>): { input: 
   }
 }
 
+type Coercer = (value: unknown) => { value: unknown; coerced: boolean };
+
+const NOOP_COERCER: Coercer = (value) => ({ value, coerced: false });
+
+function coerceNumber(value: unknown): { value: unknown; coerced: boolean } {
+  if (typeof value === 'number') return { value, coerced: false };
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    if (!Number.isNaN(parsed)) return { value: parsed, coerced: true };
+  }
+  if (typeof value === 'boolean') return { value: value ? 1 : 0, coerced: true };
+  return { value, coerced: false };
+}
+
+function coerceBoolean(value: unknown): { value: unknown; coerced: boolean } {
+  if (typeof value === 'boolean') return { value, coerced: false };
+  if (typeof value === 'string') {
+    if (value === 'true' || value === '1') return { value: true, coerced: true };
+    if (value === 'false' || value === '0') return { value: false, coerced: true };
+  }
+  if (typeof value === 'number') return { value: value !== 0, coerced: true };
+  return { value, coerced: false };
+}
+
+function coerceString(value: unknown): { value: unknown; coerced: boolean } {
+  if (typeof value === 'string') return { value, coerced: false };
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return { value: String(value), coerced: true };
+  }
+  return { value, coerced: false };
+}
+
+function coerceArray(value: unknown): { value: unknown; coerced: boolean } {
+  if (Array.isArray(value)) return { value, coerced: false };
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return { value: parsed, coerced: true };
+    } catch {
+      return { value: value.split(',').map((s) => s.trim()).filter(Boolean), coerced: true };
+    }
+  }
+  return { value, coerced: false };
+}
+
+function coerceObject(value: unknown): { value: unknown; coerced: boolean } {
+  if (typeof value === 'object' && !Array.isArray(value)) return { value, coerced: false };
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return { value: parsed, coerced: true };
+      }
+    } catch {
+      // fall through
+    }
+  }
+  return { value, coerced: false };
+}
+
+const COERCERS: Record<string, Coercer> = {
+  number: coerceNumber,
+  boolean: coerceBoolean,
+  string: coerceString,
+  array: coerceArray,
+  object: coerceObject,
+};
+
 export function coerceValue(value: unknown, schema: ToolInputSchema['properties'][string]): { value: unknown; coerced: boolean } {
   if (value === null || value === undefined) return { value, coerced: false };
-  switch (schema.type) {
-    case 'number': {
-      if (typeof value === 'number') return { value, coerced: false };
-      if (typeof value === 'string') {
-        const parsed = Number(value);
-        if (!Number.isNaN(parsed)) return { value: parsed, coerced: true };
-      }
-      if (typeof value === 'boolean') return { value: value ? 1 : 0, coerced: true };
-      return { value, coerced: false };
-    }
-    case 'boolean': {
-      if (typeof value === 'boolean') return { value, coerced: false };
-      if (typeof value === 'string') {
-        if (value === 'true' || value === '1') return { value: true, coerced: true };
-        if (value === 'false' || value === '0') return { value: false, coerced: true };
-      }
-      if (typeof value === 'number') return { value: value !== 0, coerced: true };
-      return { value, coerced: false };
-    }
-    case 'string': {
-      if (typeof value === 'string') return { value, coerced: false };
-      if (typeof value === 'number' || typeof value === 'boolean') {
-        return { value: String(value), coerced: true };
-      }
-      return { value, coerced: false };
-    }
-    case 'array': {
-      if (Array.isArray(value)) return { value, coerced: false };
-      if (typeof value === 'string') {
-        try {
-          const parsed = JSON.parse(value);
-          if (Array.isArray(parsed)) return { value: parsed, coerced: true };
-        } catch {
-          return { value: value.split(',').map((s) => s.trim()).filter(Boolean), coerced: true };
-        }
-      }
-      return { value, coerced: false };
-    }
-    case 'object': {
-      if (typeof value === 'object' && !Array.isArray(value)) return { value, coerced: false };
-      if (typeof value === 'string') {
-        try {
-          const parsed = JSON.parse(value);
-          if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
-            return { value: parsed, coerced: true };
-          }
-        } catch {
-          // fall through
-        }
-      }
-      return { value, coerced: false };
-    }
-    default:
-      return { value, coerced: false };
-  }
+  return (COERCERS[schema.type] ?? NOOP_COERCER)(value);
 }
 
 export function resolveEnumValue(value: unknown, allowed: string[]): { value: unknown; coerced: boolean } {

@@ -106,6 +106,9 @@ export const signalPriorityForType = new Map<EventType, SignalPriority>([
   ['aether:stopped', 3 as SignalPriority],
   ['aether:tick', 2 as SignalPriority],
   ['connectome:link', 1 as SignalPriority],
+  ['framework:selected', 2 as SignalPriority],
+  ['framework:completed', 1 as SignalPriority],
+  ['framework:error', 2 as SignalPriority],
 ]);
 
 export const layerForPriority: Record<number, NervousSystemLayer> = {

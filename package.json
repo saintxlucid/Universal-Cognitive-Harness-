@@ -1,0 +1,49 @@
+{
+  "name": "software-development-workspace",
+  "private": true,
+  "version": "1.0.0",
+  "packageManager": "npm@11.12.1",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "new:project": "powershell -ExecutionPolicy Bypass -File ./scripts/new-project.ps1",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "node --test tests/workspace-config.test.mjs",
+    "test:all": "npm test && turbo run test",
+    "doctor": "powershell -ExecutionPolicy Bypass -File ./scripts/workspace-doctor.ps1",
+    "prepare": "husky",
+    "agent:harness": "node .agent/harness/workspace-agent-harness.mjs"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yaml,yml}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.220",
+    "@eslint/js": "^10.0.1",
+    "@google/generative-ai": "^0.24.1",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@types/node": "^24.0.0",
+    "eslint": "^10.8.0",
+    "globals": "^17.8.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
+    "openai": "^7.1.0",
+    "prettier": "^3.3.4",
+    "turbo": "^2.0.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.65.0"
+  }
+}

@@ -190,7 +190,7 @@ Biological vocabulary is permitted — **required** — but only under an engine
 | Energy Budget | Metabolism | Resource allocation | `src/metabolism/` | Budget compliance, overspend rate |
 | Governance | Constitution | Rules, separation of powers | `src/cognitive-plane/constitution/`, `spec/CONSTITUTION.md` | Policy violation rate, review latency |
 
-The physiology is specified in [COGNITIVE_BIOLOGY.md](spec/COGNITIVE_BIOLOGY.md) (plasticity, homeostasis, metabolism, development, healing, sleep, evolution, immune response, endocrine regulation, thalamic gating). The invariants are specified in [LAWS_OF_COGNITIVE_PHYSICS.md](spec/LAWS_OF_COGNITIVE_PHYSICS.md) — nineteen laws, enforced by static analysis, runtime auditing, and constitutional review. The identity that outlives every organ is specified in [GENOME.md](spec/GENOME.md).
+The physiology is specified in [COGNITIVE_BIOLOGY.md](spec/COGNITIVE_BIOLOGY.md) (plasticity, homeostasis, metabolism, development, healing, sleep, evolution, immune response, endocrine regulation, thalamic gating). The invariants are specified in [LAWS_OF_COGNITIVE_PHYSICS.md](spec/LAWS_OF_COGNITIVE_PHYSICS.md) — thirty-two laws in five families (Physics · Biology · Psychology · Society · Computing), enforced by static analysis, runtime auditing, constitutional review, and specification governance. The identity that outlives every organ is specified in [GENOME.md](spec/GENOME.md).
 
 This discipline already exists in this repository: every organ above has source, most have tests, and the whole corpus is verified by 100 test files / 1,738 test cases. What the manifesto adds is the public claim: this is a field, not a feature.
 
@@ -277,4 +277,21 @@ All six ADR-001 Phase-I acceptance criteria are implemented.
 
 *Persistent cognition. Replaceable pilots.* — [GENOME.md](spec/GENOME.md)
 
-*Drafted 2026-07-31. Grounds [ADR-001](design/ADR-001-workspace-owned-cognitive-runtime.md) in a public discipline claim; bound by [LAWS_OF_COGNITIVE_PHYSICS.md](spec/LAWS_OF_COGNITIVE_PHYSICS.md) and [CONSTITUTION.md](spec/CONSTITUTION.md).*
+## The Canon
+
+This manifesto is the creed. The five books it grounds are the canon — the
+authoritative corpus every implementation is built from:
+
+| Book | File | Purpose |
+|---|---|---|
+| **I — Genesis** | [docs/GENESIS.md](docs/GENESIS.md) | Product — why this exists (20 chapters) |
+| **II — Constitution** | [spec/CONSTITUTION.md](spec/CONSTITUTION.md) + [spec/LAWS_OF_COGNITIVE_PHYSICS.md](spec/LAWS_OF_COGNITIVE_PHYSICS.md) | Immutable law — 32 laws in five families, rights, responsibilities, the kernel ABI |
+| **III — Blueprint** | [design/ARCHITECTURE.md](design/ARCHITECTURE.md) + [design/STACK.md](design/STACK.md) + [design/CIR.md](design/CIR.md) | Engineering — the discipline, not the implementation |
+| **IV — Standards** | [rfc/](rfc/) | The RFC series — the source of truth for every contract |
+| **V — Ascension** | *to be authored* | Scale — performance, quality, ecosystem, enterprise, platform |
+
+The canon is governed by the Specification Governance System
+([rfc/RFC-0000](rfc/RFC-0000-specification-governance.md)): the
+specification is the source of truth, not the conversation.
+
+*Drafted 2026-07-31. Grounds [ADR-001](design/ADR-001-workspace-owned-cognitive-runtime.md) in a public discipline claim; bound by [LAWS_OF_COGNITIVE_PHYSICS.md](spec/LAWS_OF_COGNITIVE_PHYSICS.md) and [CONSTITUTION.md](spec/CONSTITUTION.md). Extended 2026-08-01 with the Canon (Books I–V).*

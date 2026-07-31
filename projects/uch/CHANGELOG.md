@@ -49,6 +49,40 @@ All notable changes to UCH are documented here. Format follows
 - 3 pre-existing test failures (`e2e-server-flow`, `neural-fs`) resolved —
   suite at 100 files / 1,738 tests green.
 - `package-lock.json` re-synced with 0.2.0 dependency set.
+- Security audit wave 2026-07-31: 8/8 findings fixed (command injection,
+  path traversal, denylist bypass, tool containment) — see BUG-REPORT.md.
+
+### Added
+
+- **Engineering Intelligence layer (ADR-003, waves A–D)** — 150-concept
+  tiered catalog, deterministic evaluator with constitutional vetoes
+  (SPOF / unrecovered failure / pathological complexity), labeled
+  benchmark corpus, enrichment wiring (`engineering:reviewed`), MCP
+  `engineering-review`, CLI `engineering-review` / `engineering-benchmark`.
+- **Cognitive Frameworks Library (Phases 1–4)** — 10 families / 34
+  frameworks, selection + journal + calibration analytics, `uch solve`,
+  MCP `framework-run`/`framework-stats`, trace consumption.
+- **Cognitive Compute Fabric (ADR-004 Level 4)** — 10-CPU virtual-processor
+  namespace, tier routing, cheapest-healthy provider selection with
+  verification failover, energy budgets.
+- **Universal Cognitive Protocol (ADR-005)** — substrate + driver
+  architecture; driver compliance certification
+  (`src/drivers/compliance.ts`).
+- **Cognitive Microkernel (ADR-006, phases A–F)** — cognitive process
+  model (PID namespace, attach-joins-PID), vmem paging (Hot→Archive),
+  organism versioning, transactional cognition (propose→verify→commit),
+  SMART self-diagnosis, FS mounts, cognitive merge (trivial slice),
+  signed cognitive packages, spec versioning (VERSION.md + CI gate).
+- **Platform Zero (specification-first, 2026-08-01)** — Five-Book Canon
+  (Genesis / Constitution / Blueprint / Standards / Ascension), 32 Laws
+  of Cognitive Physics in five families (was 19), Constitution Articles
+  IX–XI (Cognitive Rights, Responsibilities, Immutability of the Core),
+  Specification Governance System (RFC-0000 lifecycle + Five Gates),
+  RFC-0001 Identity / RFC-0002 Signals / RFC-0003 Memory, CIR design
+  (RFC-0004 proposed), Genesis PRD (ch. 1–3).
+- **Platform packaging** — README as platform landing page,
+  GETTING-STARTED, ROADMAP (five Epochs), SECURITY policy, contributing
+  RFC governance.
 
 ## [0.2.0] — 2026-07-31
 

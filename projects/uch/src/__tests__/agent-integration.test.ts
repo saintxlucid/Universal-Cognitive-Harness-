@@ -160,6 +160,111 @@ describe('UCH Agent Integration — Full Lifecycle', () => {
     }
   });
 
+  it('exposes a universal integration plan for every supported runtime', () => {
+    const plan = plugin.getUniversalIntegrationPlan();
+
+    expect(plan.hiveMode).toBe(true);
+    expect(plan.runtimes.vscode).toBeDefined();
+    expect(plan.runtimes.copilot).toBeDefined();
+    expect(plan.runtimes.opencode).toBeDefined();
+    expect(plan.runtimes['claude-code']).toBeDefined();
+    expect(plan.runtimes.codex).toBeDefined();
+    expect(plan.runtimes.vscode.capabilities.mcp).toBe(true);
+    expect(plan.runtimes.opencode.capabilities.mcp).toBe(true);
+    expect(plan.runtimes['claude-code'].capabilities.sessionHandoff).toBe(true);
+    expect(plan.runtimes.codex.capabilities.sessionHandoff).toBe(true);
+  });
+
+  it('offers a shared cognitive protocol snapshot and harness adapter sync', () => {
+    const adapter = plugin.createHarnessAdapter('vscode');
+    expect(adapter.runtime).toBe('vscode');
+
+    const initial = plugin.getCognitiveStateSnapshot('vscode');
+    expect(initial.runtime).toBe('vscode');
+    expect(initial.objective).toBe('Persistent cognitive substrate');
+    expect(initial.hypotheses).toEqual([]);
+
+    const synced = plugin.syncCognitiveState('vscode', {
+      objective: 'Ship harness integration',
+      hypotheses: ['The adapter can bridge workspace memory'],
+    });
+
+    expect(synced.objective).toBe('Ship harness integration');
+    expect(synced.hypotheses).toContain('The adapter can bridge workspace memory');
+
+    const result = adapter.sync(synced);
+    expect(result.event.kind).toBe('state-sync');
+    expect(result.state.objective).toBe('Ship harness integration');
+  });
+
+  it('tracks continuity across wearable lifecycle events', () => {
+    const worn = plugin.wear('vscode', 'Maintain continuity across hosts');
+    expect(worn.kind).toBe('wear');
+    expect(worn.runtime).toBe('vscode');
+
+    const synced = plugin.syncLifecycle('vscode', {
+      objective: 'Bridge Copilot and VS Code states',
+      evidence: ['Shared memory handshake'],
+    });
+    expect(synced.kind).toBe('sync');
+
+    const learned = plugin.learnFromWearable('vscode', 'Captured a host handoff');
+    expect(learned.kind).toBe('learn');
+
+    const slept = plugin.sleepWearable('vscode');
+    expect(slept.kind).toBe('sleep');
+
+    const ledger = plugin.getContinuityLedger();
+    expect(ledger.activeRuntime).toBeNull();
+    expect(ledger.wearCount).toBe(1);
+    expect(ledger.history).toHaveLength(4);
+    expect(ledger.currentState.objective).toBe('Bridge Copilot and VS Code states');
+  });
+
+  it('runs a deterministic cognitive middleware pipeline for augmented thinking', () => {
+    plugin.syncLifecycle('copilot', {
+      objective: 'Design a resilient API boundary',
+      hypotheses: ['A shared contract is better than ad hoc integration'],
+      evidence: ['The workspace already has a plugin protocol'],
+      decisions: ['Use a universal cognitive state contract'],
+    });
+
+    const augmentation = plugin.augmentThought('copilot', 'Create API', {
+      focus: 'architecture',
+      includePolicies: true,
+    });
+
+    expect(augmentation.request).toBe('Create API');
+    expect(augmentation.injectedContext).toContain('Genome');
+    expect(augmentation.injectedContext).toContain('Engineering standards');
+    expect(augmentation.injectedContext).toContain('Active risks');
+    expect(augmentation.summary).toContain('architecture');
+    expect(augmentation.state.objective).toBe('Design a resilient API boundary');
+  });
+
+  it('exposes richer wearable lifecycle methods via the harness adapter', () => {
+    const adapter = plugin.createHarnessAdapter('cursor');
+
+    const worn = adapter.wear('Maintain continuity across hosts');
+    expect(worn.event.kind).toBe('wear');
+    expect(worn.state.objective).toBe('Maintain continuity across hosts');
+
+    const synced = adapter.syncLifecycle({
+      objective: 'Bridge editor and agent sessions',
+      evidence: ['The adapter can cross host boundaries'],
+    });
+    expect(synced.event.kind).toBe('sync');
+    expect(synced.state.objective).toBe('Bridge editor and agent sessions');
+
+    const learned = adapter.learn('Captured a host handoff');
+    expect(learned.event.kind).toBe('learn');
+    expect(learned.state.evidence).toContain('Captured a host handoff');
+
+    const slept = adapter.sleep();
+    expect(slept.event.kind).toBe('sleep');
+    expect(slept.state.confidence).toBeLessThanOrEqual(0.6);
+  });
+
   it('supports all configured tool names', () => {
     const tools = [
       'claude-code',

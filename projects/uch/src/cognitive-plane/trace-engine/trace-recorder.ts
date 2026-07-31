@@ -43,6 +43,9 @@ const EVENT_TO_SPAN: Record<string, { name: string; kind: SpanKind }> = {
   'agent:detached': { name: 'agent.detach', kind: 'internal' },
   'session:started': { name: 'session.start', kind: 'internal' },
   'session:ended': { name: 'session.end', kind: 'internal' },
+  'framework:selected': { name: 'framework.select', kind: 'internal' },
+  'framework:completed': { name: 'framework.complete', kind: 'internal' },
+  'framework:error': { name: 'framework.error', kind: 'internal' },
 };
 
 function eventToTraceEventType(eventType: string): TraceEventType {
@@ -70,6 +73,9 @@ function eventToTraceEventType(eventType: string): TraceEventType {
     'agent:detached': 'agent_detach',
     'session:started': 'session_start',
     'session:ended': 'session_end',
+    'framework:selected': 'framework_select',
+    'framework:completed': 'framework_complete',
+    'framework:error': 'framework_error',
   };
   return map[eventType] ?? 'diagnostic';
 }

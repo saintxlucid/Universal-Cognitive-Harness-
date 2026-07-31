@@ -67,6 +67,65 @@ function percentile(values: number[], p: number): number {
   return sorted[index] ?? 0;
 }
 
+function adjacentSimilarities(spans: SentenceSpan[]): number[] {
+  const similarities: number[] = [];
+  for (let i = 1; i < spans.length; i++) {
+    similarities.push(cosineSimilarity(spans[i - 1]!.embedding, spans[i]!.embedding));
+  }
+  return similarities;
+}
+
+async function embedSentenceSpans(
+  sentences: string[],
+  embed?: SemanticChunkOptions['embedSentence'],
+): Promise<SentenceSpan[] | null> {
+  try {
+    if (!embed) return null;
+    const embeddings = await Promise.all(sentences.map((s) => embed(s)));
+    return sentences.map((sentence, i) => ({
+      text: sentence,
+      embedding: embeddings[i] ?? [],
+    }));
+  } catch {
+    return null;
+  }
+}
+
+function selectBoundaries(similarities: number[], thresholdPercentile: number): number[] {
+  const derivative = savitzkyGolayDerivative(similarities);
+  const candidates = boundaryCandidates(derivative);
+  if (candidates.length === 0) return [];
+  const candidateSimilarities = candidates.map((idx) => similarities[idx] ?? 0);
+  const threshold = percentile(candidateSimilarities, thresholdPercentile);
+  return candidates
+    .filter((idx) => (similarities[idx] ?? 0) <= threshold)
+    .filter((idx, i, arr) => i === 0 || idx - arr[i - 1]! >= 2);
+}
+
+function groupSpans(spans: SentenceSpan[], boundaries: number[]): string[] {
+  const groups: string[] = [];
+  let start = 0;
+  for (const boundary of boundaries) {
+    groups.push(spans.slice(start, boundary).map((s) => s.text).join(' '));
+    start = boundary;
+  }
+  groups.push(spans.slice(start).map((s) => s.text).join(' '));
+  return groups;
+}
+
+function chunkGroups(groups: string[], options: SemanticChunkOptions): string[] {
+  const maxChars = options.maxChars ?? 6000;
+  const finalChunks: string[] = [];
+  for (const group of groups) {
+    if (group.length > maxChars) {
+      finalChunks.push(...chunkText(group, options));
+    } else {
+      finalChunks.push(group);
+    }
+  }
+  return finalChunks;
+}
+
 export async function chunkSemantic(
   text: string,
   options: SemanticChunkOptions = {},
@@ -76,69 +135,20 @@ export async function chunkSemantic(
     return chunkText(text, options);
   }
 
-  let spans: SentenceSpan[];
-  try {
-    const embed = options.embedSentence;
-    if (!embed) {
-      return chunkText(text, options);
-    }
-    const embeddings = await Promise.all(sentences.map((s) => embed(s)));
-    spans = sentences.map((sentence, i) => ({
-      text: sentence,
-      embedding: embeddings[i] ?? [],
-    }));
-  } catch {
+  const spans = await embedSentenceSpans(sentences, options.embedSentence);
+  if (!spans) {
     return chunkText(text, options);
   }
 
-  const similarities: number[] = [];
-  for (let i = 1; i < spans.length; i++) {
-    similarities.push(cosineSimilarity(spans[i - 1]!.embedding, spans[i]!.embedding));
-  }
+  const similarities = adjacentSimilarities(spans);
   if (similarities.length === 0) {
     return chunkText(text, options);
   }
 
-  const derivative = savitzkyGolayDerivative(similarities);
-  const candidates = boundaryCandidates(derivative);
-  if (candidates.length === 0) {
-    return chunkText(text, options);
-  }
-
-  const candidateSimilarities = candidates.map((idx) => similarities[idx] ?? 0);
-  const threshold = percentile(
-    candidateSimilarities,
-    options.similarityThresholdPercentile ?? 20,
-  );
-  const boundaries = candidates
-    .filter((idx) => (similarities[idx] ?? 0) <= threshold)
-    .filter((idx, i, arr) => i === 0 || idx - arr[i - 1]! >= 2);
-
+  const boundaries = selectBoundaries(similarities, options.similarityThresholdPercentile ?? 20);
   if (boundaries.length === 0) {
     return chunkText(text, options);
   }
 
-  const groups: string[] = [];
-  let start = 0;
-  for (const boundary of boundaries) {
-    groups.push(spans.slice(start, boundary).map((s) => s.text).join(' '));
-    start = boundary;
-  }
-  groups.push(spans.slice(start).map((s) => s.text).join(' '));
-
-  const maxChars = options.maxChars ?? 6000;
-  const targetWords = options.targetWords ?? 300;
-  const finalChunks: string[] = [];
-  for (const group of groups) {
-    if (group.length > maxChars) {
-      finalChunks.push(...chunkText(group, options));
-    } else if (group.length > maxChars * 1.5) {
-      finalChunks.push(...chunkText(group, options));
-    } else {
-      finalChunks.push(group);
-    }
-  }
-
-  void targetWords;
-  return finalChunks;
+  return chunkGroups(groupSpans(spans, boundaries), options);
 }

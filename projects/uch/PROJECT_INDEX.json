@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "project": "uch",
+  "name": "Universal Cognitive Harness",
+  "version": "0.2.0",
+  "generated_at": "2026-07-31T21:50:00.000Z",
+  "indexed_commit": "e520a15f2e07a83cec9849088f45d069eb0d2996",
+  "indexed_commit_date": "2026-07-31",
+  "staleness_threshold_days": 7,
+  "next_refresh_due": "2026-08-07",
+  "drift": {
+    "dirty_entries": 144,
+    "modified_src_files": 26,
+    "staged_renames": ["src/exoskeleton/immune.ts -> src/cognitive-core/immune.ts", "src/exoskeleton/endocrine.ts -> src/cognitive-core/endocrine.ts"]
+  },
+  "metrics": {
+    "src_files": 504,
+    "src_lines": 81439,
+    "test_files": 134,
+    "tests_total": 2152,
+    "tests_failed_stable": 2,
+    "tests_failed_intermittent_max": 12,
+    "src_areas_total": 51,
+    "src_areas_without_inline_tests": 26,
+    "docs_files": 66,
+    "commit_count": 18,
+    "authors": ["saintxlucid"],
+    "estimated_tokens_src": "1.2M-1.6M"
+  },
+  "entry_points": [
+    { "path": "src/index.ts", "kind": "library", "fan_out": 146 },
+    { "path": "src/cli/index.ts", "kind": "cli", "commands": 33 },
+    { "path": "src/cli/uccp.ts", "kind": "server", "protocol": "UCCP HTTP/SSE (legacy)" },
+    { "path": "src/mcp/stdio-server.ts", "kind": "server", "protocol": "MCP STDIO" },
+    { "path": "src/agent/boot.ts", "kind": "agent-bootstrap" },
+    { "path": "src/agent/plugin.ts", "kind": "agent-plugin", "fan_out": 16 }
+  ],
+  "layers": [
+    { "name": "kernel", "path": "src/kernel", "files": 47, "role": "memory stores, retrieval, constitution, organic score" },
+    { "name": "exoskeleton", "path": "src/exoskeleton", "files": 2, "role": "root orchestrator (51 deps)" },
+    { "name": "cognitive-plane", "path": "src/cognitive-plane", "files": 66, "role": "trace engine, frameworks, integrity, replay" },
+    { "name": "control-plane", "path": "src/control-plane", "files": 19, "role": "auth, secrets, budgets, telemetry, transport" },
+    { "name": "agentic", "path": "src/agentic", "files": 43, "role": "agent middleware, tools, subagents, failover" },
+    { "name": "engineering-intelligence", "path": "src/engineering-intelligence", "files": 19, "role": "150 concepts / 10 tiers, veto gates" },
+    { "name": "workspace-graphs", "path": "src/workspace-graphs", "files": 6, "role": "knowledge/decision/task graphs, DNA" }
+  ],
+  "dependencies": {
+    "external": [
+      { "name": "openai", "version": "^7.2.0", "scope": "runtime" },
+      { "name": "@opentelemetry/api", "version": "^1.9.1", "scope": "runtime" },
+      { "name": "typescript", "version": "^5.8.0", "scope": "dev" },
+      { "name": "vitest", "version": "^3.0.0", "scope": "dev" },
+      { "name": "eslint", "version": "^9.0.0", "scope": "dev" },
+      { "name": "@vitest/coverage-v8", "version": "^3.2.7", "scope": "dev" }
+    ],
+    "audit_status": "pending (offline)",
+    "internal_edges": 1145,
+    "internal_files_analyzed": 370,
+    "bottlenecks": [
+      { "path": "src/event-bus/neural-event-bus.ts", "fan_in": 40, "fan_out": 0 },
+      { "path": "src/kernel/cognitive-kernel.ts", "fan_in": 32, "fan_out": 14 },
+      { "path": "src/cognitive-plane/persistence/persistence-engine.ts", "fan_in": 25, "fan_out": 0 }
+    ],
+    "hubs": [
+      { "path": "src/index.ts", "fan_out": 146, "instability": 1.0 },
+      { "path": "src/exoskeleton/exoskeleton.ts", "fan_out": 51, "instability": 0.86 },
+      { "path": "src/cli/uccp.ts", "fan_out": 38, "instability": 0.95 }
+    ],
+    "circular_dependencies": [
+      { "cycle": "agent/boot -> agent/plugin -> executive-brain -> engineering-intelligence/index -> benchmark/runner -> index", "risk": "low", "kind": "barrel-cycle" },
+      { "cycle": "cli/index -> exoskeleton -> cortex_kernel/integrator <-> attention-cortex", "risk": "high", "kind": "module-cycle" },
+      { "cycle": "cli/index -> exoskeleton -> cortex_kernel/integrator <-> executive-cortex", "risk": "high", "kind": "module-cycle" },
+      { "cycle": "cli/index -> exoskeleton -> cortex_kernel/integrator <-> meta-brain", "risk": "high", "kind": "module-cycle" }
+    ]
+  },
+  "risk_flags": [
+    { "id": "RF-1", "description": "cortex_kernel/integrator.ts genuine circular deps", "severity": "high" },
+    { "id": "RF-2", "description": "Flaky suite: reflex-gate determinism test compares duration_ms (structurally broken); framework-journal merge intermittent", "severity": "medium" },
+    { "id": "RF-3", "description": "Bus factor 1, 18/18 commits single author", "severity": "medium" },
+    { "id": "RF-4", "description": "exoskeleton.ts 51-dependency hub with zero inline tests", "severity": "medium" },
+    { "id": "RF-5", "description": "68 test files in src/__tests__ mega-dir; 26 areas lack co-located tests", "severity": "low" },
+    { "id": "RF-6", "description": "144 dirty working-tree entries invalidate co-change analysis", "severity": "low" }
+  ],
+  "secrets_scan": {
+    "status": "clean",
+    "matches": [{ "path": "src/coding/__tests__/coding-tools.test.ts", "line": 305, "note": "test-fixture placeholder only" }]
+  },
+  "changelog_summary": "ADR-001 attachment governance; ADR-002 OTel trace engine; Phase-01 workspace graph organs; agentic resilience suite; Mnemosyne; kernel physiology; CP v1; Engineering Intelligence tiers I-X",
+  "commands": {
+    "test": "npx vitest run",
+    "typecheck": "npx tsc --noEmit",
+    "lint": "npx eslint src/",
+    "build": "npx tsc",
+    "cli": "node dist/cli/index.js"
+  }
+}

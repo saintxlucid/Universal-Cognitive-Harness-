@@ -2,7 +2,21 @@
 
 **Level I — Immutable. Never changes. No component may violate.**
 
-These 19 laws define what is *impossible* in the Cognitive Exoskeleton, not just what is allowed. They are mathematically invariant. Any component, organ, plugin, or interface that violates them is malformed and must be rejected.
+These 32 laws define what is *impossible* in the Cognitive Exoskeleton, not just what is allowed. They are mathematically invariant. Any component, organ, plugin, or interface that violates them is malformed and must be rejected.
+
+Laws 1–19 are the original corpus and are referenced by name and number throughout the implementation. Laws 20–32 extend the corpus into the five families of the Cognitive Universe (Physics · Biology · Psychology · Society · Computing). Existing law numbers are permanent — a law number is part of its identity and may never be renumbered or reused.
+
+## The Five Families
+
+| Family | Laws | Governs |
+|---|---|---|
+| **Physics** | 1, 2, 3, 5, 15, 16, 17, 32 | What is impossible: signals, energy, causality, decay, entropy, time, persistence |
+| **Biology** | 9, 20, 21, 22, 23 | What must survive: development, homeostasis, metabolism, evolution, repair |
+| **Psychology** | 6, 7, 13, 24, 25, 26 | How cognition behaves: memory, validation, consciousness, attention, modulation, creativity |
+| **Society** | 4, 10, 14, 18, 19, 27, 28 | How components govern: evidence, identity, economy, governance, ownership, trust, consensus |
+| **Computing** | 8, 11, 12, 29, 30, 31 | How the machine must be built: recursion, locality, reversibility, isolation, compatibility, verification |
+
+Every law belongs to exactly one family. A new law must declare its family; a law may reference laws in other families but may never contradict them.
 
 ---
 
@@ -377,6 +391,136 @@ failure this project exists to prevent (ADR-001, MANIFESTO §1).
 
 ---
 
+## Law 20 — Homeostasis
+
+> The organism must maintain its internal state within survivable bounds. Regulation is a first-class function, not an optimization.
+
+Every organ has a health envelope (vital ranges for its energy, load, error rate, and coherence). Deviation outside the envelope must be detected and corrected — by the organ itself, its regulators, or the Homeostasis organ — before the deviation propagates. A state that cannot be corrected must be quarantined, not ignored.
+
+**Rationale:** A cognitive system that cannot regulate itself accumulates drift and dies slowly. Homeostasis is what makes "broken" a state the organism can recover from rather than an identity it holds. *Family: Biology.*
+
+---
+
+## Law 21 — Metabolism
+
+> Energy allocation is governed by policy, not privilege. Every component is budgeted; every computation is priced.
+
+Law 2 (Conservation of Energy) fixes the total; this law fixes the distribution. Allocation is decided by the Metabolism organ under the Budget policy: mission-critical and time-critical work gets funded first, exploration and luxury cognition last. No component may spend outside its budget without a recorded override, and overrides are themselves budgeted.
+
+**Rationale:** Without a distribution law, the cheapest law-abiding behavior is to starve everything equally. Metabolism exists to make scarcity explicit, auditable, and policy-governed. *Family: Biology.*
+
+---
+
+## Law 22 — Evolution
+
+> The organism must retain the capacity to change its structure through evidence-weighted selection. Nothing is frozen except the Constitution.
+
+The genome (spec/GENOME.md) is the unit of heritable structure; mutations (new patterns, skills, genome variants) must be selectable by measured outcome, not by authority. A structure that cannot be evaluated against evidence — and either promoted or pruned — is a liability, not a feature. Evolution never violates Laws 1–32; it selects *within* them.
+
+**Rationale:** The only alternative to evolution is ossification. The organism outlives every pilot; only selection can keep its accumulated structure aligned with the world it actually encounters. *Family: Biology.*
+
+---
+
+## Law 23 — Repair
+
+> Damage must be detectable and repairable. Failure is a state of the organism, never an identity of a component.
+
+Every component must be able to recognize its own degraded states (drift, contradictions, failed verification, energy starvation) and must expose its repair path: rollback (Law 12), re-verification (Law 31), consolidation, or retraining. A component that reports damage and is refused repair by its regulators may escalate to the Judiciary.
+
+**Rationale:** Errors in a persistent cognitive substrate are inevitable; what decides the organism's fate is whether error handling treats them as exceptions or as physiological states with treatment protocols. *Family: Biology.*
+
+---
+
+## Law 24 — Attention
+
+> Limited attention must be allocated by salience × stake, never by recency alone.
+
+Attention — the budget that determines what the organism processes deeply — is the scarcest resource after energy. It is allocated by the Thalamus (Signal Priority) from the Attention policy: how novel the signal is, how much is at stake, and how urgent the deadline. Recency may weight the allocation but may never determine it.
+
+**Rationale:** Recency-driven attention produces systems that are busy but never wise. Salience × stake is what makes a two-year-old architectural warning outrank today's noise. *Family: Psychology.*
+
+---
+
+## Law 25 — Neuromodulation
+
+> Global state changes must propagate as graded signals. Any component may be modulated; none may be permanently altered without review.
+
+Neuromodulation (the Endocrine organ) adjusts global parameters — arousal, trust sensitivity, creativity temperature, decay rate — as graded, decaying signals (Law 5). A modulator may shift another component's parameters within its declared range; structural, permanent change to another component requires the Judiciary path of the Constitution.
+
+**Rationale:** Modulation is the organism's way of being context-sensitive without being rewritten. The graded-signal requirement keeps global state changes observable, reversible, and attributable. *Family: Psychology.*
+
+---
+
+## Law 26 — Creativity
+
+> Novelty generation is permitted — and required — within the laws. The organism that cannot generate novelty cannot evolve.
+
+Every cycle must include a non-zero probability of generating new candidates: new patterns, new hypotheses, new solutions, new skills — subject to Law 4 (Evidence Over Assertion) before they enter knowledge. Creativity is not a special mode; it is the organism's mutation operator (Law 22) applied to cognition.
+
+**Rationale:** A purely convergent organism can only optimize what it already knows. Novelty is the raw material of both evolution and repair. *Family: Psychology.*
+
+---
+
+## Law 27 — Trust
+
+> Trust is an evidence-weighted quantity, not a property. It must be earned by verification and decay like any other quantity.
+
+A component's trust level is a number derived from its verification record (Law 31), its causal fidelity (Law 3), and its history — decaying under Law 5 unless renewed. Trust grants permissions; it never grants exemptions from the laws. No component may assert its own trust level; trust is always computed by others from evidence.
+
+**Rationale:** The alternative — trust as a static property — is the single largest attack surface in any permissioned system. Evidence-weighted, decaying trust is the substrate for zero-trust isolation (Law 29). *Family: Society.*
+
+---
+
+## Law 28 — Consensus
+
+> Decisions with organizational impact require convergent evidence from independent components.
+
+Law 7 (Triadic Validation) requires three perspectives on actions; this law extends it to decisions: the more components a decision affects, the more independent evidence streams must converge before it lands (Law 18). Consensus is weighted by evidence and trust (Law 27), never by volume of voices alone. A decision may proceed without full consensus only through the Constitution's emergency path.
+
+**Rationale:** Organizational decisions are where single-component blindness becomes systemic. Convergence of independent evidence is the only defense against shared hallucination. *Family: Society.*
+
+---
+
+## Law 29 — Isolation
+
+> No component, driver, package, or external client may compromise the integrity, confidentiality, or availability of another. Zero trust is the default.
+
+Every boundary — process (kernel/process), memory (vmem paging), driver, package, grant, projection — is a security boundary by default. Capabilities are granted (cognitive-runtime), never inherited. A component's compromise must be containable: it may damage itself, never its neighbors.
+
+**Rationale:** Persistent cognition makes the substrate a high-value target for the lifetime of the workspace. The laws only survive if compromise is an isolated event, not a cascade. *Family: Computing.*
+
+---
+
+## Law 30 — Compatibility
+
+> The stable contracts must not break. Change is additive, versioned, and gated.
+
+The CP ABI (spec/CP.md), the trace model (COGNITIVE-TRACE.md), the manifest schema, and the CIC envelope are the substrate's ABI. They may be extended, and they may be deprecated through the declared deprecation policy, but an existing contract consumer must never stop working silently. Contract changes pass through the Specification Governance System (RFC-0000) before implementation.
+
+**Rationale:** Platforms die by breaking their ecosystem's trust. Compatibility is the mechanical promise that makes drivers, packages, and attached clients invest in the substrate. *Family: Computing.*
+
+---
+
+## Law 31 — Verification
+
+> Every claim that enters the organism's knowledge must be verifiable. Unverifiable claims are hypotheses, not facts.
+
+Knowledge entry is a two-stage process: a claim arrives as a hypothesis, and becomes knowledge only after verification — against evidence (Law 4), by computation, experiment, or convergent testimony (Law 28). Claims that cannot be verified within their declared verification budget are stored as hypotheses with their confidence and decay (Law 5). No unverified claim may drive a decision that affects other components.
+
+**Rationale:** Law 4 governs assertion; this law governs admission. The difference is what makes the organism's knowledge a ledger of verified facts instead of a scrapbook of confident statements. *Family: Computing.*
+
+---
+
+## Law 32 — Persistence
+
+> Cognition must survive the replacement of any pilot, session, model, or host. Persistence is a property of the organism, not of its carriers.
+
+No inference run, session, driver, IDE, or model may be a necessary condition for the organism's cognition to continue. Episodes, traces, decisions, skills, and identity are stored in the substrate's own stores (kernel, .uccp) and are recoverable by any compliant client through the attachment protocol. A carrier that cannot be replaced without cognitive loss is a design defect.
+
+**Rationale:** This is the founding law of the project — the inversion of ownership (ADR-001, MANIFESTO §1) expressed as physics. If cognition does not outlive its carriers, UCH is a memory cache; if it does, UCH is a substrate. *Family: Physics.*
+
+---
+
 ## Dual Naming Convention
 
 All organs and systems carry both an **engineering name** and a **biological metaphor**:
@@ -410,8 +554,9 @@ All organs and systems carry both an **engineering name** and a **biological met
 ## Enforcement
 
 These laws are not aspirational. They are enforced by:
-1. **Static analysis** — code review rejects violations of Laws 1, 8, 11
-2. **Runtime auditing** — the Judiciary monitors for violations of Laws 2, 3, 4, 7, 14
-3. **Economic auditing** — Metabolism monitors Law 14 compliance across all scheduled operations
-4. **Information auditing** — the Nervous System monitors Law 15 compliance per signal
-5. **Constitutional review** — new organ specifications are reviewed against all 19 laws before implementation begins
+1. **Static analysis** — code review rejects violations of Laws 1, 8, 11, 30
+2. **Runtime auditing** — the Judiciary monitors for violations of Laws 2, 3, 4, 7, 14, 27
+3. **Economic auditing** — Metabolism monitors Laws 14 and 21 compliance across all scheduled operations
+4. **Information auditing** — the Nervous System monitors Laws 15 and 24 compliance per signal
+5. **Constitutional review** — new organ specifications are reviewed against all 32 laws before implementation begins
+6. **Specification governance** — contract changes are gated by the RFC lifecycle (RFC-0000) and the Five Gates before they may touch the corpus

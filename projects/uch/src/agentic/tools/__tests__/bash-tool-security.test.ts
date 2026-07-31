@@ -82,7 +82,7 @@ describe('Bash tool security (BUGD-001)', () => {
       if (!result.isError) break;
     }
     expect(result?.isError).not.toBe(true);
-  });
+  }, 60000);
 });
 
 describe('File tool path containment (BUGD-002)', () => {

@@ -83,7 +83,13 @@ export type EventType =
   | 'governance:code_reviewed'
   | 'framework:selected'
   | 'framework:completed'
-  | 'framework:error';
+  | 'framework:error'
+  | 'engineering:reviewed'
+  | 'process:spawned'
+  | 'process:joined'
+  | 'process:detached'
+  | 'process:signaled'
+  | 'process:killed';
 
 export interface NeuralEvent {
   id: string;

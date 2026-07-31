@@ -4,6 +4,19 @@ export { CognitiveScheduler, canonicalCacheKey, RISK_HUMAN_APPROVAL, FRUGALITY_M
 export type { ExecutionStrategy, ExecutionStrategyKind, ScheduledResult } from './scheduler.js';
 export { normalizeProfile, DEFAULT_PROFILE } from './profile.js';
 export type { CognitiveProfile, Urgency } from './profile.js';
+export {
+  VIRTUAL_PROCESSORS,
+  getVirtualProcessor,
+  resolveVirtualCpu,
+  requiredTier,
+  resolveProvider,
+} from './virtual-processors.js';
+export type {
+  VirtualProcessor,
+  VirtualProcessorId,
+  ProviderRosterEntry,
+  ProviderSelection,
+} from './virtual-processors.js';
 export type {
   Accelerator,
   AcceleratorKind,

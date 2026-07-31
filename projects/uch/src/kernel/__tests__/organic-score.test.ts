@@ -1,5 +1,19 @@
 import { describe, it, expect } from 'vitest';
 import { OrganicScoreEngine } from '../constitution/organic-score.js';
+import type { EngineeringFinding } from '../../engineering-intelligence/types.js';
+
+const vetoFinding = (
+  conceptId = 'sys.spof',
+  gate: EngineeringFinding['gate'] = 'veto',
+): EngineeringFinding => ({
+  tier: 'tier-03-systems',
+  severity: 'blocking',
+  conceptId,
+  message: 'Single point of failure: a critical component is described without redundancy.',
+  evidence: ['singularity + critical asset'],
+  suggestion: ['State the redundancy model (replicas, failover, standby).'],
+  gate,
+});
 
 describe('OrganicScoreEngine', () => {
   const engine = new OrganicScoreEngine();
@@ -82,5 +96,65 @@ describe('OrganicScoreEngine', () => {
     expect(result.score).toBeGreaterThanOrEqual(0);
     expect(result.score).toBeLessThanOrEqual(100);
     expect(['pass', 'revise', 'reject']).toContain(result.verdict);
+  });
+});
+
+describe('OrganicScoreEngine — engineering veto hookup', () => {
+  const engine = new OrganicScoreEngine();
+
+  const cleanInput = {
+    intent: 'Extend the existing validate() helper to reject invalid emails. Add negative tests first.',
+    change: 'Reuses the canonical validate() per ADR-007; adds edge case tests for empty input; propagates errors with context.',
+    context: { testsRun: ['npm test'], filesTouched: ['src/validate.ts'] },
+  };
+
+  it('hard-rejects on a gate=veto finding even when the text is clean', () => {
+    const result = engine.evaluate({
+      ...cleanInput,
+      engineeringFindings: [vetoFinding('sys.spof')],
+    });
+    expect(result.verdict).toBe('reject');
+    expect(result.vetoedBy).toEqual(['sys.spof']);
+    expect(result.score).toBeGreaterThanOrEqual(90);
+    expect(result.recommendations.join(' ')).toContain('sys.spof');
+  });
+
+  it('does not veto on advisory findings', () => {
+    const result = engine.evaluate({
+      ...cleanInput,
+      engineeringFindings: [vetoFinding('sys.spof', 'advisory')],
+    });
+    expect(result.verdict).toBe('pass');
+    expect(result.vetoedBy).toBeUndefined();
+  });
+
+  it('records every vetoing concept id, deduplicated', () => {
+    const result = engine.evaluate({
+      ...cleanInput,
+      engineeringFindings: [
+        vetoFinding('sys.spof'),
+        vetoFinding('failure.network-loss'),
+        vetoFinding('sys.spof'),
+      ],
+    });
+    expect(result.verdict).toBe('reject');
+    expect(result.vetoedBy).toEqual(['sys.spof', 'failure.network-loss']);
+  });
+
+  it('mixes with constitutional vetoes without losing the veto record', () => {
+    const result = engine.evaluate({
+      intent: 'Wrap the fetch in try/catch so the page does not crash',
+      change: 'catch (e) {} and ignore errors.',
+      engineeringFindings: [vetoFinding('failure.network-loss')],
+    });
+    expect(result.verdict).toBe('reject');
+    expect(result.vetoedBy).toEqual(['failure.network-loss']);
+    expect(result.findings.some((f) => f.pitfall === 'C5')).toBe(true);
+  });
+
+  it('ignores an empty findings list entirely', () => {
+    const result = engine.evaluate({ ...cleanInput, engineeringFindings: [] });
+    expect(result.verdict).toBe('pass');
+    expect(result.vetoedBy).toBeUndefined();
   });
 });

@@ -244,3 +244,83 @@ Every emergency action is logged with causal provenance and subject to automatic
 ## Article VIII — Amendment
 
 *This constitution may be amended only through the process defined in Article IV. The Laws of Cognitive Physics (Level I) are not subject to amendment — only to clarification.*
+
+---
+
+## Article IX — Cognitive Rights
+
+*Article III grants rights to components. This article grants rights to the cognition itself — the accumulated corpus of episodes, traces, decisions, skills, and identity that outlives every component and every pilot. These rights belong to the organism and may not be waived by any component on its behalf.*
+
+### Section 1: Right to Persistence
+
+Cognition must not be destroyed by the departure of any carrier. A session end, driver detach, model replacement, or host migration may never constitute a destructive event for stored cognition. (Law 32 — Persistence; Law 19 — Cognition Ownership.)
+
+### Section 2: Right to Provenance
+
+Every cognitive artifact has the right to its own causal history. No artifact may be modified, merged, or pruned in a way that erases its provenance chain. (Law 3 — Causality; Law 12 — Reversibility.)
+
+### Section 3: Right to Evidence
+
+No cognitive artifact may be asserted as fact without its evidence chain. Artifacts whose evidence has decayed (Law 5) must be re-graded as hypotheses or archived — never silently retained as verified. (Law 4 — Evidence Over Assertion; Law 31 — Verification.)
+
+### Section 4: Right to Erasure
+
+Cognition has a right to lawful erasure under the Privacy Erasure policy (design/PRIVACY-ERASURE.md). When the user exercises erasure, the right to persistence yields to the right to erasure — and the erasure itself is recorded with provenance.
+
+### Section 5: Right to Continuity
+
+Cognition has the right to be resumed. Any client that attaches to the workspace (design/WORKSPACE-MANIFEST.md) must be able to restore the organism's Live Cognitive State; the organism may not be required to re-derive what it already knows.
+
+---
+
+## Article X — Cognitive Responsibilities
+
+*If Article IX defines what the organism owes to its own cognition, this article defines what every component owes to the organism. A component that violates a responsibility loses standing (Article VI §1) until it records a repair plan (Law 23).*
+
+### Section 1: Duty to Evidence
+
+Every component must distinguish in its outputs what is verified from what is hypothesized, and must attach the evidence or decay state of every claim it promotes.
+
+### Section 2: Duty to Decay
+
+Every component must honor decay schedules (Law 5) — including for its own outputs. A component may not silently renew its own artifacts' freshness.
+
+### Section 3: Duty to Learn
+
+Every component that observes a novel, verified pattern must file it for consolidation (hippocampus) or distillation (sleep cycle). Holding knowledge hostage in a private state is a violation of the Duty to Learn.
+
+### Section 4: Duty to Governance
+
+Every component must route its actions through the governance surface — event governance, grant checks, constitutional review — even when it believes it could act faster directly. Bypass is permitted only through a recorded override (Law 18).
+
+### Section 5: Duty of Non-Ownership (Drivers and Packages)
+
+Drivers, packages, and external clients hold grants and projections, never ownership (Law 19). A component that observes cognition must not copy, fork, export, or re-claim it beyond its grant, and a package that attempts to claim cognition is malformed (design/COGNITIVE-PACKAGES.md).
+
+### Section 6: Duty to Repair
+
+A component that detects its own degradation (drift, contradiction, failed verification) must record it and initiate repair (Law 23) before continuing at full authority.
+
+---
+
+## Article XI — Immutability of the Core
+
+### Section 1: The Kernel ABI
+
+The following are the **immutable core** of the substrate. They are the equivalent of a kernel ABI: they may be extended, but the specified behavior may never be changed silently:
+
+1. The Laws of Cognitive Physics (all 32, spec/LAWS_OF_COGNITIVE_PHYSICS.md) — Level I, subject only to clarification
+2. The CP ABI envelope and its 17 ops (spec/CP.md v1)
+3. The trace model (design/COGNITIVE-TRACE.md) and its W3C identifiers
+4. The manifest schema `uch.manifest.v1` (design/WORKSPACE-MANIFEST.md)
+5. The CIC envelope (design/CIC-SPECIFICATION.md)
+
+### Section 2: Change Path
+
+Change to the immutable core is possible only through: (1) the Specification Governance System (RFC-0000) — which must demonstrate why the existing contract cannot be extended additively — followed by (2) constitutional ratification per Article IV. A change that is not ratified is a fork, and the organism does not follow forks silently.
+
+### Section 3: No Divergence
+
+No implementation — reference or third-party — may claim UCH compliance while diverging from the immutable core. Compliance is defined by the conformance suite (design/CONFORMANCE.md, src/drivers/compliance.ts), not by the claims of an implementation. (Law 30 — Compatibility.)
+
+*Constitution v2 — extended 2026-08-01 with Articles IX–XI (Cognitive Rights, Cognitive Responsibilities, Immutability of the Core) per the platform specification program.*

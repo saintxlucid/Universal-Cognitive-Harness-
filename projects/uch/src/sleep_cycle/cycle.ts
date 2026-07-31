@@ -13,6 +13,9 @@ export interface SleepReport {
   patternsLearned: number;
   skillsBenchmarked: number;
   insightsGenerated: number;
+  /** Dominant-framework patterns consolidated from framework traces (blueprint §5.1). */
+  frameworkPatternsLearned?: number;
+  dominantFrameworks?: SleepFrameworkPattern[];
   [key: string]: unknown;
 }
 
@@ -40,6 +43,23 @@ export interface DistilledSkill {
 
 export interface SleepSkillSink {
   publish(skill: DistilledSkill): Promise<void>;
+}
+
+/** A dominant framework per problem type, consolidated from framework traces. */
+export interface SleepFrameworkPattern {
+  problemType: string;
+  engine: string;
+  count: number;
+}
+
+/**
+ * Framework-trace source (blueprint §5.1): the sleep cycle consumes
+ * framework invocation traces to consolidate "dominant framework per
+ * problem type" patterns — the harness learns which frameworks it
+ * actually uses for which problems.
+ */
+export interface SleepFrameworkSource {
+  getDominantPerProblemType(): SleepFrameworkPattern[];
 }
 
 export interface SkillDistillationConfig {
@@ -117,6 +137,7 @@ export class SleepCycle {
   private aether: AetherCore;
   private memorySource: SleepMemorySource | null;
   private skillSink: SleepSkillSink | null;
+  private frameworkSource: SleepFrameworkSource | null;
   private config: SkillDistillationConfig;
   private distilledSkills: DistilledSkill[] = [];
   private _phase: SleepPhase = 'awake';
@@ -132,11 +153,13 @@ export class SleepCycle {
     skillSink?: SleepSkillSink | null,
     config?: Partial<SkillDistillationConfig>,
     napIntervalMs = 300000,
+    frameworkSource?: SleepFrameworkSource | null,
   ) {
     this.nervousSystem = nervousSystem;
     this.aether = aether;
     this.memorySource = memorySource ?? null;
     this.skillSink = skillSink ?? null;
+    this.frameworkSource = frameworkSource ?? null;
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.napIntervalMs = napIntervalMs;
   }
@@ -151,6 +174,10 @@ export class SleepCycle {
 
   setSkillSink(sink: SleepSkillSink): void {
     this.skillSink = sink;
+  }
+
+  setFrameworkSource(source: SleepFrameworkSource): void {
+    this.frameworkSource = source;
   }
 
   startNapCycle(): void {
@@ -234,6 +261,8 @@ export class SleepCycle {
     insightsGenerated: number;
     skillsDistilled: number;
     tokenReductionPct: number;
+    frameworkPatternsLearned: number;
+    dominantFrameworks: SleepFrameworkPattern[];
   }> {
     if (!this.memorySource) {
       return {
@@ -243,6 +272,8 @@ export class SleepCycle {
         insightsGenerated: 0,
         skillsDistilled: 0,
         tokenReductionPct: 0,
+        frameworkPatternsLearned: 0,
+        dominantFrameworks: [],
       };
     }
 
@@ -298,6 +329,14 @@ export class SleepCycle {
       await this.memorySource.markConsolidated(candidates.map((c) => c.id), consolidationSummary);
     }
 
+    // Framework-trace consolidation (blueprint §5.1): repeated selections
+    // become "dominant framework per problem-type" patterns. Only patterns
+    // above the minimum frequency threshold are treated as learned.
+    const frameworkPatterns = this.frameworkSource?.getDominantPerProblemType() ?? [];
+    const dominantFrameworks = frameworkPatterns
+      .filter((p) => p.count >= this.config.patternMinFrequency)
+      .sort((a, b) => b.count - a.count);
+
     return {
       memoriesConsolidated: candidates.length,
       patternsLearned: scored.length,
@@ -305,6 +344,8 @@ export class SleepCycle {
       insightsGenerated: scored.filter((p) => p.score >= this.config.patternMinFrequency).length,
       skillsDistilled: published.length,
       tokenReductionPct,
+      frameworkPatternsLearned: dominantFrameworks.length,
+      dominantFrameworks,
     };
   }
 

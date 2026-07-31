@@ -17,13 +17,27 @@ npm run lint      # eslint
 
 ## Development Workflow
 
+0. **Read the canon first.** UCH is specification-first: the Five-Book
+   Canon ([docs/README.md](docs/README.md)) is the source of truth — the
+   conversation is not. `spec/` (laws, constitution, CP) is immutable
+   law; `rfc/` is the contract series; `design/` holds ADRs and the DOE
+   operating procedures.
+
 1. **Check the docs first** — `docs/` has the full reference suite;
    `SPEC.md` and `spec/` define the cognitive model; `design/` holds
    the ADRs and conformance criteria. A change that violates the
    Constitution or the memory filing rules (`docs/memory-filing-rules.md`)
    will be rejected.
 
-2. **Prefer GSD workflow** for non-trivial changes (workspace rule).
+2. **Normative changes go through the RFC lifecycle** — a new law,
+   contract, instruction, schema, or boundary requires an RFC
+   ([RFC-0000](rfc/RFC-0000-specification-governance.md)) and passes the
+   **Five Gates** (Scientific, Architectural, Engineering, Biological,
+   Economic) before it may touch the corpus
+   ([design/DIRECTIONS.md](design/DIRECTIONS.md) SOP-08/09). Non-normative
+   changes (clarification, bug fixes) follow the GSD workflow directly.
+
+3. **Prefer GSD workflow** for non-trivial changes (workspace rule).
    Trivial fixes (typos, formatting, narrow bug fixes) can go straight
    in.
 

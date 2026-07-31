@@ -14,11 +14,29 @@ import { WorkspaceContextGatherer } from '../context/gatherer.js';
 import { MCPStdioServer } from '../mcp/stdio-server.js';
 import { CodingToolkit } from '../coding/toolkit.js';
 import { InferenceFabric, ACCELERATORS, CognitiveScheduler } from '../accelerators/index.js';
+import {
+  CognitiveWearableHarnessAdapter,
+  type HarnessAdapter,
+  type UniversalCognitiveState,
+} from './cognitive-wearable.js';
+import type {
+  CognitiveAugmentationOptions,
+  CognitiveAugmentationResult,
+  CognitiveContinuityLedger,
+  CognitiveLifecycleEvent,
+} from './cognitive-continuity.js';
 import * as path from 'node:path';
 
 export type AgentTool =
-  | 'claude-code' | 'codex' | 'opencode' | 'cursor' | 'copilot'
-  | 'windsurf' | 'antigravity' | 'vscode' | 'unknown';
+  | 'claude-code'
+  | 'codex'
+  | 'opencode'
+  | 'cursor'
+  | 'copilot'
+  | 'windsurf'
+  | 'antigravity'
+  | 'vscode'
+  | 'unknown';
 
 export interface AgentPluginConfig {
   workspaceRoot?: string;
@@ -38,6 +56,26 @@ export interface AgentContext {
   gitChanges?: string;
   sessionAge: number;
   relevantMemory: string;
+}
+
+export interface UniversalRuntimeIntegrationProfile {
+  hiveMode: boolean;
+  runtimes: Record<
+    string,
+    {
+      name: string;
+      capabilities: {
+        mcp: boolean;
+        sessionHandoff: boolean;
+        backgroundProcess: boolean;
+        chatLogs: boolean;
+        reasoningTrace: boolean;
+        workspaceMemory: boolean;
+      };
+      hooks: string[];
+      notes: string[];
+    }
+  >;
 }
 
 export class UCHAgentPlugin {
@@ -65,11 +103,14 @@ export class UCHAgentPlugin {
 
   private _agentName: string;
   private autoIngestDone = false;
+  private wearableStateByRuntime: Map<string, UniversalCognitiveState> = new Map();
+  private continuityLedger: CognitiveContinuityLedger;
 
   constructor(config?: AgentPluginConfig) {
     this.startedAt = new Date();
     const workspaceRoot = config?.workspaceRoot ?? process.cwd();
-    const wsId = config?.workspaceId ?? path.basename(workspaceRoot) + '-' + Date.now().toString(36);
+    const wsId =
+      config?.workspaceId ?? path.basename(workspaceRoot) + '-' + Date.now().toString(36);
 
     this.config = {
       workspaceRoot,
@@ -104,7 +145,11 @@ export class UCHAgentPlugin {
     this.scheduler = new CognitiveScheduler(this.fabric);
     this.accelerators = ACCELERATORS;
     this.sessionManager = new SessionManager({ kernel: this.kernel });
-    this.gitIngester = new GitIngester({ kernel: this.kernel, llm: this.llm, repoPath: this.config.workspaceRoot });
+    this.gitIngester = new GitIngester({
+      kernel: this.kernel,
+      llm: this.llm,
+      repoPath: this.config.workspaceRoot,
+    });
     this.scientificMemory = new ScientificMemory();
     this.constitution = new CognitiveConstitution();
     this.decisionLog = new DecisionLog();
@@ -126,24 +171,64 @@ export class UCHAgentPlugin {
       constitution: this.constitution,
     });
 
+    this.continuityLedger = {
+      organismId: `uch-${this.config.workspaceId}`,
+      genomeVersion: 1,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      activeRuntime: null,
+      wearCount: 0,
+      currentState: {
+        runtime: this._agentName,
+        objective: 'Persistent cognitive substrate',
+        hypotheses: [],
+        evidence: [],
+        toolCalls: [],
+        decisions: [],
+        confidence: 0.5,
+        stateVersion: 1,
+        updatedAt: new Date().toISOString(),
+      },
+      history: [],
+    };
+
     this.sessionManager.startSession(this._agentName, this.config.workspaceId);
   }
 
   private detectTool(): AgentTool {
     const env = process.env;
+
     if (env.CLAUDE_CODE) return 'claude-code';
     if (env.CODEX_API_KEY) return 'codex';
     if (env.OPENCODE) return 'opencode';
     if (env.CURSOR) return 'cursor';
-    if (env.GITHUB_COPILOT) return 'copilot';
+
+    if (
+      env.TERM_PROGRAM === 'vscode' ||
+      env.VSCODE_GIT_IPC_HANDLE ||
+      env.VSCODE_CWD ||
+      env.VSCODE_PID ||
+      env.VSCODE_IPC_HOOK_CLI
+    ) {
+      return 'vscode';
+    }
+
+    if (env.GITHUB_COPILOT || env.COPILOT_AGENT || env.COPILOT_ENV) return 'copilot';
     if (env.WINDSURF) return 'windsurf';
     if (env.ANTIGRAVITY) return 'antigravity';
+
     return 'unknown';
   }
 
-  get agentName(): string { return this._agentName; }
-  get toolName(): string { return String(this.config.toolName); }
-  get isReady(): boolean { return this.kernel.getStats().episodes >= 0; }
+  get agentName(): string {
+    return this._agentName;
+  }
+  get toolName(): string {
+    return String(this.config.toolName);
+  }
+  get isReady(): boolean {
+    return this.kernel.getStats().episodes >= 0;
+  }
 
   get uptime(): number {
     return Date.now() - this.startedAt.getTime();
@@ -162,7 +247,9 @@ export class UCHAgentPlugin {
       console.error('[uch] No API key — using local embeddings');
     }
     const providers = this.fabric.healthStatus().length;
-    console.error(`[uch] Fabric: ${providers} provider(s) — ${this.fabric.isAvailable() ? 'inference ready' : 'deterministic only'}`);
+    console.error(
+      `[uch] Fabric: ${providers} provider(s) — ${this.fabric.isAvailable() ? 'inference ready' : 'deterministic only'}`,
+    );
 
     if (this.config.autoIngestGit && !this.autoIngestDone) {
       try {
@@ -183,10 +270,13 @@ export class UCHAgentPlugin {
   }
 
   /** Called before every agent message — gathers relevant context */
-  async getContext(message?: string, options?: {
-    currentFile?: string;
-    currentProblem?: string;
-  }): Promise<AgentContext> {
+  async getContext(
+    message?: string,
+    options?: {
+      currentFile?: string;
+      currentProblem?: string;
+    },
+  ): Promise<AgentContext> {
     const recentFiles: string[] = [];
 
     const context: AgentContext = {
@@ -202,16 +292,18 @@ export class UCHAgentPlugin {
       const episodes = this.kernel.getRecentEpisodes(30);
       const items = episodes.map((e) => ({
         id: e.id,
-        text: typeof e.content === 'object' && e.content !== null
-          ? JSON.stringify(e.content) : String(e.content),
+        text:
+          typeof e.content === 'object' && e.content !== null
+            ? JSON.stringify(e.content)
+            : String(e.content),
       }));
 
       if (items.length > 0) {
         if (this.embedder.available) {
           const results = await this.embedder.search(message, items, 3);
-          context.relevantMemory = results.map((r) =>
-            `[related:${r.score.toFixed(2)}] ${(r.item as { text: string }).text}`
-          ).join('\n');
+          context.relevantMemory = results
+            .map((r) => `[related:${r.score.toFixed(2)}] ${(r.item as { text: string }).text}`)
+            .join('\n');
         } else {
           context.relevantMemory = this.kernel.recallFormatted({ text: message });
         }
@@ -230,7 +322,10 @@ export class UCHAgentPlugin {
   /** Called after every agent response — learns from the interaction */
   async learnFromInteraction(userMessage: string, assistantResponse: string): Promise<void> {
     await this.kernel.remember({
-      content: { type: 'observation', observation: `Q: ${userMessage}\nA: ${assistantResponse.slice(0, 500)}` },
+      content: {
+        type: 'observation',
+        observation: `Q: ${userMessage}\nA: ${assistantResponse.slice(0, 500)}`,
+      },
       provenance: { source: 'tool_output', reliability: 0.8 },
     });
 
@@ -318,7 +413,9 @@ export class UCHAgentPlugin {
             content: { type: 'observation', observation: `[${mem.type}] ${mem.value}` },
             provenance: { source: 'tool_output', reliability: 0.9 },
           });
-        } catch { /* skip individual failures */ }
+        } catch {
+          /* skip individual failures */
+        }
       }
     }
 
@@ -347,6 +444,292 @@ export class UCHAgentPlugin {
       decisions: session?.memories.filter((m) => m.type === 'decision').length ?? 0,
       conventions: session?.memories.filter((m) => m.type === 'convention').length ?? 0,
       conversations: session?.conversation.length ?? 0,
+    };
+  }
+
+  createHarnessAdapter(runtime: string): HarnessAdapter {
+    return new CognitiveWearableHarnessAdapter(runtime, this);
+  }
+
+  getCognitiveStateSnapshot(runtime: string): UniversalCognitiveState {
+    const stored = this.wearableStateByRuntime.get(runtime);
+    if (stored) {
+      return { ...stored };
+    }
+
+    const initialState: UniversalCognitiveState = {
+      runtime,
+      objective: 'Persistent cognitive substrate',
+      hypotheses: [],
+      evidence: [],
+      toolCalls: [],
+      decisions: [],
+      confidence: 0.5,
+      stateVersion: 1,
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.wearableStateByRuntime.set(runtime, initialState);
+    return { ...initialState };
+  }
+
+  syncCognitiveState(
+    runtime: string,
+    update: Partial<UniversalCognitiveState>,
+  ): UniversalCognitiveState {
+    const current = this.getCognitiveStateSnapshot(runtime);
+    const nextState: UniversalCognitiveState = {
+      ...current,
+      ...update,
+      runtime,
+      stateVersion: current.stateVersion + 1,
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.wearableStateByRuntime.set(runtime, nextState);
+    return { ...nextState };
+  }
+
+  wear(runtime: string, objective?: string): CognitiveLifecycleEvent {
+    const state = this.syncCognitiveState(runtime, {
+      objective: objective ?? 'Persistent cognitive substrate',
+      confidence: 0.7,
+    });
+    this.continuityLedger.activeRuntime = runtime;
+    this.continuityLedger.wearCount += 1;
+    this.continuityLedger.updatedAt = new Date().toISOString();
+    this.continuityLedger.currentState = state;
+
+    const event: CognitiveLifecycleEvent = {
+      kind: 'wear',
+      runtime,
+      timestamp: new Date().toISOString(),
+      summary: `UCH worn by ${runtime}`,
+      stateVersion: state.stateVersion,
+    };
+    this.continuityLedger.history.push(event);
+    return event;
+  }
+
+  syncLifecycle(
+    runtime: string,
+    update: Partial<UniversalCognitiveState>,
+  ): CognitiveLifecycleEvent {
+    const state = this.syncCognitiveState(runtime, update);
+    this.continuityLedger.activeRuntime = runtime;
+    this.continuityLedger.updatedAt = new Date().toISOString();
+    this.continuityLedger.currentState = state;
+
+    const event: CognitiveLifecycleEvent = {
+      kind: 'sync',
+      runtime,
+      timestamp: new Date().toISOString(),
+      summary: `Synced state for ${runtime}`,
+      stateVersion: state.stateVersion,
+    };
+    this.continuityLedger.history.push(event);
+    return event;
+  }
+
+  learnFromWearable(runtime: string, summary: string): CognitiveLifecycleEvent {
+    const state = this.syncCognitiveState(runtime, {
+      evidence: [...this.continuityLedger.currentState.evidence, summary],
+    });
+    this.continuityLedger.activeRuntime = runtime;
+    this.continuityLedger.updatedAt = new Date().toISOString();
+    this.continuityLedger.currentState = state;
+
+    const event: CognitiveLifecycleEvent = {
+      kind: 'learn',
+      runtime,
+      timestamp: new Date().toISOString(),
+      summary,
+      stateVersion: state.stateVersion,
+    };
+    this.continuityLedger.history.push(event);
+    return event;
+  }
+
+  sleepWearable(runtime: string): CognitiveLifecycleEvent {
+    const state = this.syncCognitiveState(runtime, {
+      confidence: Math.max(0.2, this.continuityLedger.currentState.confidence - 0.1),
+    });
+    this.continuityLedger.activeRuntime = null;
+    this.continuityLedger.updatedAt = new Date().toISOString();
+    this.continuityLedger.currentState = state;
+
+    const event: CognitiveLifecycleEvent = {
+      kind: 'sleep',
+      runtime,
+      timestamp: new Date().toISOString(),
+      summary: `UCH slept for ${runtime}`,
+      stateVersion: state.stateVersion,
+    };
+    this.continuityLedger.history.push(event);
+    return event;
+  }
+
+  unwear(runtime: string): CognitiveLifecycleEvent {
+    const state = this.syncCognitiveState(runtime, {
+      confidence: 0.2,
+    });
+    this.continuityLedger.activeRuntime = null;
+    this.continuityLedger.updatedAt = new Date().toISOString();
+    this.continuityLedger.currentState = state;
+
+    const event: CognitiveLifecycleEvent = {
+      kind: 'unwear',
+      runtime,
+      timestamp: new Date().toISOString(),
+      summary: `UCH removed from ${runtime}`,
+      stateVersion: state.stateVersion,
+    };
+    this.continuityLedger.history.push(event);
+    return event;
+  }
+
+  getContinuityLedger(): CognitiveContinuityLedger {
+    return {
+      ...this.continuityLedger,
+      currentState: { ...this.continuityLedger.currentState },
+      history: [...this.continuityLedger.history],
+    };
+  }
+
+  augmentThought(
+    runtime: string,
+    request: string,
+    options: CognitiveAugmentationOptions = {},
+  ): CognitiveAugmentationResult {
+    const currentState = this.getCognitiveStateSnapshot(runtime);
+    const focus = options.focus ?? 'general';
+    const includePolicies = options.includePolicies ?? true;
+
+    const pipeline = [
+      'Intent extraction',
+      'Memory injection',
+      'Genome injection',
+      'Evidence retrieval',
+      'Architecture check',
+      'Risk check',
+      'Skill injection',
+      'Context compression',
+    ];
+
+    const injectedContext = [
+      `Genome: ${currentState.objective}`,
+      `Engineering standards: preserve architecture, extend contracts, verify before merge`,
+      `Workspace memory: ${currentState.evidence.length > 0 ? currentState.evidence.join(' | ') : 'No evidence captured yet'}`,
+      `Active risks: ${currentState.hypotheses.length > 0 ? currentState.hypotheses.join(' | ') : 'No active hypotheses'}`,
+      `Current decisions: ${currentState.decisions.length > 0 ? currentState.decisions.join(' | ') : 'Use a universal cognitive state contract'}`,
+      `Pipeline: ${pipeline.join(' → ')}`,
+    ];
+
+    if (includePolicies) {
+      injectedContext.push('Policies: keep the state portable, deterministic, and host-agnostic');
+    }
+
+    const summary = `Augmented ${runtime} for ${focus}: ${request}`;
+    const nextState = this.syncCognitiveState(runtime, {
+      objective: currentState.objective,
+      evidence: [...currentState.evidence, summary],
+      toolCalls: [...currentState.toolCalls, `augment:${focus}`],
+      decisions:
+        currentState.decisions.length > 0
+          ? currentState.decisions
+          : ['Use a universal cognitive state contract'],
+    });
+
+    this.continuityLedger.activeRuntime = runtime;
+    this.continuityLedger.updatedAt = new Date().toISOString();
+    this.continuityLedger.currentState = nextState;
+
+    return {
+      request,
+      injectedContext,
+      summary,
+      state: { ...nextState },
+    };
+  }
+
+  getUniversalIntegrationPlan(): UniversalRuntimeIntegrationProfile {
+    return {
+      hiveMode: true,
+      runtimes: {
+        vscode: {
+          name: 'VS Code',
+          capabilities: {
+            mcp: true,
+            sessionHandoff: true,
+            backgroundProcess: true,
+            chatLogs: true,
+            reasoningTrace: true,
+            workspaceMemory: true,
+          },
+          hooks: ['mcp.json', 'workspace startup', 'chat context', 'agent session bridge'],
+          notes: ['Attach UCH as an MCP server and surface it through the Chat/Agents experience.'],
+        },
+        copilot: {
+          name: 'GitHub Copilot Chat',
+          capabilities: {
+            mcp: true,
+            sessionHandoff: true,
+            backgroundProcess: true,
+            chatLogs: true,
+            reasoningTrace: true,
+            workspaceMemory: true,
+          },
+          hooks: ['Copilot Chat participant', 'agent delegation', 'session continuity'],
+          notes: [
+            'Bind UCH as an external cognition layer for Copilot chat turns and agent handoff.',
+          ],
+        },
+        opencode: {
+          name: 'OpenCode',
+          capabilities: {
+            mcp: true,
+            sessionHandoff: true,
+            backgroundProcess: true,
+            chatLogs: true,
+            reasoningTrace: true,
+            workspaceMemory: true,
+          },
+          hooks: ['opencode.json', 'plugin hooks', 'background daemon', 'shared memory'],
+          notes: [
+            'Use the OpenCode runtime as an agent host and bridge its sessions into UCH memory.',
+          ],
+        },
+        'claude-code': {
+          name: 'Claude Code',
+          capabilities: {
+            mcp: true,
+            sessionHandoff: true,
+            backgroundProcess: true,
+            chatLogs: true,
+            reasoningTrace: true,
+            workspaceMemory: true,
+          },
+          hooks: ['CLAUDE.md', 'session handoff', 'shared memory', 'tool orchestration'],
+          notes: [
+            'Treat Claude Code as a first-class cognitive host with persistent memory and replay.',
+          ],
+        },
+        codex: {
+          name: 'Codex',
+          capabilities: {
+            mcp: true,
+            sessionHandoff: true,
+            backgroundProcess: true,
+            chatLogs: true,
+            reasoningTrace: true,
+            workspaceMemory: true,
+          },
+          hooks: ['AGENTS.md', 'MCP registration', 'session export/import', 'workspace memory'],
+          notes: [
+            'Bridge Codex sessions into UCH using the same portable session and memory contract.',
+          ],
+        },
+      },
     };
   }
 

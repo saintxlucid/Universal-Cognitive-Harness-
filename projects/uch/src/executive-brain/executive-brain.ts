@@ -7,7 +7,14 @@ import {
   type EngineeringJudgmentInput,
   type EngineeringJudgmentResult,
 } from '../kernel/constitution/engineering-judgment.js';
+import {
+  autoTarget,
+  createEngineeringJudgment,
+} from '../engineering-intelligence/index.js';
+import type { EngineeringReview } from '../engineering-intelligence/types.js';
 import { MistakeLogger } from '../shared/mistake-logger.js';
+import { premortem, type PremortemResult } from '../cognitive-plane/frameworks/decisions/decision-models.js';
+import type { FrameworkSelectionInput } from '../cognitive-plane/frameworks/types.js';
 
 export interface ExecutiveBrainConfig {
   eventBus: NeuralEventBus;
@@ -17,6 +24,10 @@ export interface ChangeAssessment {
   judgment: EngineeringJudgmentResult;
   critique: Critique;
   plan: Plan;
+  /** Deterministic engineering-gate review (EI layer); veto findings escalate the verdict. */
+  engineeringReview?: EngineeringReview;
+  /** Concept ids that vetoed via engineering gates (escalated to review). */
+  engineeringVetoes?: string[];
 }
 
 export class ExecutiveBrain {
@@ -115,14 +126,59 @@ export class ExecutiveBrain {
     }
   }
 
-  makeDecision(prompt: string, options: Omit<DecisionOption, 'id'>[]): Decision {
-    const decision = this.decisionEngine.createDecision(prompt, options);
+  makeDecision(
+    prompt: string,
+    options: Omit<DecisionOption, 'id'>[],
+    profile?: FrameworkSelectionInput,
+  ): Decision {
+    const decision = this.decisionEngine.createDecision(prompt, options, profile);
     this.eventBus.publish({
       type: 'cognitive:state_changed',
       source: 'executive-brain',
-      payload: { decision_id: decision.id, prompt, option_count: options.length },
+      payload: {
+        decision_id: decision.id,
+        prompt,
+        option_count: options.length,
+        model: decision.model?.id ?? null,
+      },
     });
     return decision;
+  }
+
+  /**
+   * Pre-mortem pre-commit gate (blueprint §5.2): assume the plan failed,
+   * rank the plausible causes, and gate the commit when any cause's
+   * likelihood × impact crosses the risk threshold.
+   */
+  premortemGate(
+    goal: string,
+    possibleCauses?: string[],
+    likelihood?: number[],
+    impact?: number[],
+    threshold = 0.6,
+  ): { gate: PremortemResult; passed: boolean; topRisks: string[] } {
+    const causes =
+      possibleCauses ??
+      [
+        'scope creep beyond the defined boundary',
+        'verification gap — change lands without tests or checks',
+        'unclear requirements — the goal is ambiguous',
+        'timeline slippage — effort underestimated',
+        'resource contention — dependencies are unavailable',
+      ];
+    const gate = premortem({ plan: goal, possibleCauses: causes, likelihood, impact });
+    const topRisks = gate.rankedCauses
+      .filter((r) => r.riskScore / 100 >= threshold)
+      .map((r) => r.cause);
+    this.eventBus.publish({
+      type: 'cognitive:state_changed',
+      source: 'executive-brain',
+      payload: {
+        premortem: { plan: goal, passed: topRisks.length === 0, topRisks },
+        risk_score: gate.rankedCauses[0]?.riskScore ?? 0,
+      },
+    });
+    return { gate, passed: topRisks.length === 0, topRisks };
   }
 
   review(target: string, targetType: Critique['target_type']): Critique {
@@ -173,15 +229,34 @@ export class ExecutiveBrain {
     const judgment = this.judgmentEngine.evaluate(input);
     const critique = this.review(input.proposedChange, 'code');
 
+    // Engineering-intelligence filter: deterministic gates over the
+    // proposed change. Veto findings escalate the executive verdict
+    // from pass to review regardless of the lightweight judgment.
+    const engineeringReview = createEngineeringJudgment().evaluator.evaluate(
+      autoTarget(input.proposedChange),
+    );
+    const engineeringVetoes = engineeringReview.findings
+      .filter((f) => f.gate === 'veto')
+      .map((f) => f.conceptId);
+    const escalatedJudgment = engineeringVetoes.length > 0 && judgment.verdict === 'pass'
+      ? { ...judgment, verdict: 'review' as const }
+      : judgment;
+
     const plan = this.planner.createPlan(`Assess ${input.intent}`, {
       intent: input.intent,
-      judgment,
+      judgment: escalatedJudgment,
     });
     this.planner.addStep(plan.id, 'Map the change against the existing architecture');
     this.planner.addStep(plan.id, 'Verify tests, docs, and risk coverage');
     this.planner.addStep(plan.id, 'Record follow-up actions for review');
 
-    return { judgment, critique, plan };
+    return {
+      judgment: escalatedJudgment,
+      critique,
+      plan,
+      engineeringReview,
+      ...(engineeringVetoes.length > 0 ? { engineeringVetoes } : {}),
+    };
   }
 
   summarizeAssessment(assessment: ChangeAssessment): string {

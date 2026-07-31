@@ -9,6 +9,20 @@
   "bin": {
     "uch": "dist/cli/index.js"
   },
+  "keywords": [
+    "cognitive",
+    "runtime",
+    "specification",
+    "memory",
+    "agent",
+    "substrate",
+    "persistent-cognition",
+    "knowledge",
+    "harness"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -21,7 +35,8 @@
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "uch": "node dist/cli/index.js",
-    "ingest": "node dist/cli/index.js ingest"
+    "ingest": "node dist/cli/index.js ingest",
+    "check:spec-version": "node scripts/spec-version-check.mjs"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.1",

@@ -98,6 +98,41 @@ export interface PermissionCheckContext {
   headless?: boolean;
 }
 
+function isSafetySensitiveWrite(tool: Tool, input: Record<string, unknown>): boolean {
+  return isSafetySensitiveInput(input) && !tool.isReadOnly?.(input as never);
+}
+
+function matchesAnyRule(
+  bucket: 'allow' | 'deny' | 'ask',
+  rules: PermissionRuleSet,
+  tool: Tool,
+  input: Record<string, unknown>,
+): PermissionRule | undefined {
+  return rules[bucket === 'allow' ? 'alwaysAllow' : bucket === 'deny' ? 'alwaysDeny' : 'alwaysAsk']
+    .find((rule) => ruleMatches(rule, tool.name, input));
+}
+
+function isEditTool(tool: Tool, names: string[]): boolean {
+  return names.includes(tool.name);
+}
+
+function defaultDecision(mode: PermissionMode, headless: boolean | undefined): PermissionDecision {
+  switch (mode) {
+    case 'dontAsk':
+      return { behavior: 'deny', reason: 'DontAsk mode denies non-readonly tools' };
+    case 'auto':
+      return headless
+        ? { behavior: 'deny', reason: 'Auto mode headless denies non-readonly tools' }
+        : { behavior: 'ask', reason: 'Auto mode: user decision required' };
+    case 'default':
+      return headless
+        ? { behavior: 'deny', reason: 'Headless default denies non-readonly tools' }
+        : { behavior: 'ask', reason: 'Permission required' };
+    default:
+      return { behavior: 'ask', reason: 'Permission required' };
+  }
+}
+
 export async function hasPermissionsToUseTool(
   tool: Tool,
   input: Record<string, unknown>,
@@ -105,17 +140,15 @@ export async function hasPermissionsToUseTool(
   permission: PermissionCheckContext,
 ): Promise<PermissionDecision> {
   if (permission.mode === 'bypassPermissions') {
-    const safe = isSafetySensitiveInput(input);
-    if (safe && !tool.isReadOnly?.(input as never)) {
+    if (isSafetySensitiveWrite(tool, input)) {
       return { behavior: 'deny', reason: 'Safety-sensitive path is bypass-immune' };
     }
     return { behavior: 'allow', reason: 'Bypass permissions mode' };
   }
 
-  for (const rule of permission.rules.alwaysDeny) {
-    if (ruleMatches(rule, tool.name, input)) {
-      return { behavior: 'deny', reason: `Deny rule: ${rule.pattern}` };
-    }
+  const denyRule = matchesAnyRule('deny', permission.rules, tool, input);
+  if (denyRule) {
+    return { behavior: 'deny', reason: `Deny rule: ${denyRule.pattern}` };
   }
 
   if (tool.checkPermissions) {
@@ -123,20 +156,19 @@ export async function hasPermissionsToUseTool(
     if (toolDecision.behavior === 'deny') return toolDecision;
   }
 
-  for (const rule of permission.rules.alwaysAllow) {
-    if (ruleMatches(rule, tool.name, input)) {
-      if (isSafetySensitiveInput(input) && !tool.isReadOnly?.(input as never)) {
-        return { behavior: 'deny', reason: 'Safety-sensitive path blocked despite allow rule' };
-      }
-      return { behavior: 'allow', reason: `Allow rule: ${rule.pattern}` };
+  const allowRule = matchesAnyRule('allow', permission.rules, tool, input);
+  if (allowRule) {
+    if (isSafetySensitiveWrite(tool, input)) {
+      return { behavior: 'deny', reason: 'Safety-sensitive path blocked despite allow rule' };
     }
+    return { behavior: 'allow', reason: `Allow rule: ${allowRule.pattern}` };
   }
 
   const isReadOnly = tool.isReadOnly?.(input as never) ?? false;
-  if (permission.mode === 'acceptEdits' && (tool.name === 'Edit' || tool.name === 'Write' || tool.name === 'EditFile')) {
+  if (permission.mode === 'acceptEdits' && isEditTool(tool, ['Edit', 'Write', 'EditFile'])) {
     return { behavior: 'allow', reason: 'Accept edits mode' };
   }
-  if (permission.mode === 'plan' && (tool.name === 'Edit' || tool.name === 'Write')) {
+  if (permission.mode === 'plan' && isEditTool(tool, ['Edit', 'Write'])) {
     return { behavior: 'deny', reason: 'Plan mode: no edits allowed' };
   }
 
@@ -144,29 +176,15 @@ export async function hasPermissionsToUseTool(
     return { behavior: 'allow', reason: 'Read-only tool' };
   }
 
-  for (const rule of permission.rules.alwaysAsk) {
-    if (ruleMatches(rule, tool.name, input)) {
-      if (permission.mode === 'dontAsk' || permission.headless) {
-        return { behavior: 'deny', reason: `Ask rule denied headless: ${rule.pattern}` };
-      }
-      return { behavior: 'ask', reason: `Ask rule: ${rule.pattern}` };
+  const askRule = matchesAnyRule('ask', permission.rules, tool, input);
+  if (askRule) {
+    if (permission.mode === 'dontAsk' || permission.headless) {
+      return { behavior: 'deny', reason: `Ask rule denied headless: ${askRule.pattern}` };
     }
+    return { behavior: 'ask', reason: `Ask rule: ${askRule.pattern}` };
   }
 
-  switch (permission.mode) {
-    case 'dontAsk':
-      return { behavior: 'deny', reason: 'DontAsk mode denies non-readonly tools' };
-    case 'auto':
-      return permission.headless
-        ? { behavior: 'deny', reason: 'Auto mode headless denies non-readonly tools' }
-        : { behavior: 'ask', reason: 'Auto mode: user decision required' };
-    case 'default':
-      return permission.headless
-        ? { behavior: 'deny', reason: 'Headless default denies non-readonly tools' }
-        : { behavior: 'ask', reason: 'Permission required' };
-    default:
-      return { behavior: 'ask', reason: 'Permission required' };
-  }
+  return defaultDecision(permission.mode, permission.headless);
 }
 
 export const EMPTY_PERMISSION_RULE_SET: PermissionRuleSet = {

@@ -77,14 +77,55 @@ export interface VersionNegotiation {
   reason?: string;
 }
 
-export function validateManifest(raw: unknown): ManifestValidationResult {
-  const issues: ManifestValidationResult['issues'] = [];
+const REQUIRED_STRING_FIELDS: Array<{ path: string[]; message: string }> = [
+  { path: ['manifest_version'], message: 'manifest_version must be a non-empty string' },
+  { path: ['workspace', 'name'], message: 'workspace.name must be a non-empty string' },
+  { path: ['runtime', 'min_uch_version'], message: 'runtime.min_uch_version must be a non-empty string' },
+];
 
+function pathString(raw: unknown, path: string[]): unknown {
+  let cur: unknown = raw;
+  for (const key of path) {
+    if (typeof cur !== 'object' || cur === null) return undefined;
+    cur = (cur as Record<string, unknown>)[key];
+  }
+  return cur;
+}
+
+function pushRequiredStringErrors(m: Partial<WorkspaceManifest>, issues: ManifestValidationResult['issues']): void {
+  for (const { path, message } of REQUIRED_STRING_FIELDS) {
+    const value = pathString(m, path);
+    if (typeof value !== 'string' || value.trim() === '') {
+      issues.push({ severity: 'error', message });
+    }
+  }
+}
+
+function validateEntryArray(
+  raw: unknown,
+  name: 'capabilities' | 'drivers',
+  key: 'name' | 'id',
+  issues: ManifestValidationResult['issues'],
+): void {
+  if (raw === undefined) return;
+  if (!Array.isArray(raw)) {
+    issues.push({ severity: 'error', message: `${name} must be an array` });
+    return;
+  }
+  for (const [i, entry] of raw.entries()) {
+    if (typeof entry !== 'object' || entry === null || typeof (entry as Record<string, unknown>)[key] !== 'string') {
+      issues.push({ severity: 'error', message: `${name}[${i}] must have a string ${key}` });
+    }
+  }
+}
+
+export function validateManifest(raw: unknown): ManifestValidationResult {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
     return { valid: false, issues: [{ severity: 'error', message: 'manifest must be a JSON object' }] };
   }
 
   const m = raw as Partial<WorkspaceManifest>;
+  const issues: ManifestValidationResult['issues'] = [];
 
   if (m.schema_version !== MANIFEST_SCHEMA_VERSION) {
     issues.push({
@@ -93,41 +134,9 @@ export function validateManifest(raw: unknown): ManifestValidationResult {
     });
   }
 
-  if (typeof m.manifest_version !== 'string' || m.manifest_version.trim() === '') {
-    issues.push({ severity: 'error', message: 'manifest_version must be a non-empty string' });
-  }
-
-  if (typeof m.workspace?.name !== 'string' || m.workspace.name.trim() === '') {
-    issues.push({ severity: 'error', message: 'workspace.name must be a non-empty string' });
-  }
-
-  if (typeof m.runtime?.min_uch_version !== 'string' || m.runtime.min_uch_version.trim() === '') {
-    issues.push({ severity: 'error', message: 'runtime.min_uch_version must be a non-empty string' });
-  }
-
-  if (m.capabilities !== undefined) {
-    if (!Array.isArray(m.capabilities)) {
-      issues.push({ severity: 'error', message: 'capabilities must be an array' });
-    } else {
-      for (const [i, c] of m.capabilities.entries()) {
-        if (typeof c !== 'object' || c === null || typeof c.name !== 'string') {
-          issues.push({ severity: 'error', message: `capabilities[${i}] must have a string name` });
-        }
-      }
-    }
-  }
-
-  if (m.drivers !== undefined) {
-    if (!Array.isArray(m.drivers)) {
-      issues.push({ severity: 'error', message: 'drivers must be an array' });
-    } else {
-      for (const [i, d] of m.drivers.entries()) {
-        if (typeof d !== 'object' || d === null || typeof d.id !== 'string') {
-          issues.push({ severity: 'error', message: `drivers[${i}] must have a string id` });
-        }
-      }
-    }
-  }
+  pushRequiredStringErrors(m, issues);
+  validateEntryArray(m.capabilities, 'capabilities', 'name', issues);
+  validateEntryArray(m.drivers, 'drivers', 'id', issues);
 
   if (m.skills !== undefined && !Array.isArray(m.skills)) {
     issues.push({ severity: 'error', message: 'skills must be an array of paths' });

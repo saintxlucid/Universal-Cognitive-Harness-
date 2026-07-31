@@ -32,6 +32,9 @@ export const STANDARD_CAPABILITIES = [
   'deployment',
   'monitoring',
   'knowledge-search',
+  'productivity',
+  'signal-fusion',
+  'code-governance',
 ];
 
 /** Default operation families granted to an attached agent. */
@@ -318,6 +321,9 @@ export function createStandardCapabilityRegistry(): CapabilityRegistry {
     deployment: ['propose', 'commit'],
     monitoring: ['observe', 'retrieve'],
     'knowledge-search': ['retrieve'],
+    productivity: ['observe', 'retrieve', 'propose', 'consolidate'],
+    'signal-fusion': ['retrieve', 'evaluate', 'simulate'],
+    'code-governance': ['observe', 'retrieve', 'evaluate'],
   };
 
   for (const name of STANDARD_CAPABILITIES) {

@@ -15,7 +15,15 @@
 
 import { InferenceFabric } from './fabric.js';
 import type { Accelerator, AcceleratorResult } from './types.js';
+import type { CapabilityTier } from './types.js';
 import { normalizeProfile, type CognitiveProfile } from './profile.js';
+import {
+  resolveProvider,
+  resolveVirtualCpu,
+  requiredTier,
+  type ProviderRosterEntry,
+  type VirtualProcessorId,
+} from './virtual-processors.js';
 
 export type ExecutionStrategyKind =
   | 'deterministic'
@@ -30,6 +38,16 @@ export interface ExecutionStrategy {
   rationale: string;
   maxTokens?: number;
   retries?: number;
+  /** Level 4: the virtual processor this request is routed to (e.g. reasoning.cpu). */
+  virtualCpu?: VirtualProcessorId;
+  /** The capability tier the request demands. */
+  tier?: CapabilityTier;
+  /** Kernel-chosen provider (cheapest healthy provider at the required tier). */
+  preferredProviderId?: string;
+  /** Kernel-chosen model for the preferred provider. */
+  model?: string;
+  /** Distinct providers consulted (>= 2 only for multi_model verification). */
+  providerCount?: number;
 }
 
 export interface ScheduledResult<O> extends AcceleratorResult<O> {
@@ -89,15 +107,31 @@ export class CognitiveScheduler {
   /** Decide the execution strategy for a cognitive profile. Deterministic and serializable. */
   plan(
     profileInput: Partial<CognitiveProfile>,
-    state: { cacheKey?: string; providersAvailable?: boolean } = {},
+    state: { cacheKey?: string; providersAvailable?: boolean; roster?: ProviderRosterEntry[] } = {},
   ): ExecutionStrategy {
     const profile = normalizeProfile(profileInput);
+    const virtualCpu = resolveVirtualCpu(profile);
+    const tier = requiredTier(profile, virtualCpu);
+    const selection = state.roster && state.roster.length > 0
+      ? resolveProvider(profile, state.roster, virtualCpu)
+      : undefined;
+
+    const route = (strategy: ExecutionStrategy): ExecutionStrategy => ({
+      ...strategy,
+      virtualCpu: virtualCpu.id,
+      tier,
+      ...(selection ? {
+        preferredProviderId: selection.providerIds[0],
+        model: selection.providerIds.length > 0 ? selection.model : undefined,
+        providerCount: selection.providerIds.length,
+      } : {}),
+    });
 
     if (profile.risk >= RISK_HUMAN_APPROVAL) {
-      return {
+      return route({
         kind: 'human_approval',
         rationale: `Risk ${profile.risk.toFixed(2)} >= ${RISK_HUMAN_APPROVAL}: requires human approval`,
-      };
+      });
     }
 
     if (
@@ -106,37 +140,37 @@ export class CognitiveScheduler {
       && profile.creativityNeeded < 0.25
       && profile.verificationNeeded < 0.5
     ) {
-      return { kind: 'deterministic', rationale: 'Trivial task: deterministic coprocessor suffices (frugality gate)' };
+      return route({ kind: 'deterministic', rationale: 'Trivial task: deterministic coprocessor suffices (frugality gate)' });
     }
 
     if (state.cacheKey && this.cacheHas(state.cacheKey)) {
-      return { kind: 'cached', rationale: 'Reusing previously computed reasoning (cognitive cache)' };
+      return route({ kind: 'cached', rationale: 'Reusing previously computed reasoning (cognitive cache)' });
     }
 
     if (profile.verificationNeeded >= 0.6) {
-      return {
+      return route({
         kind: 'multi_model',
         rationale: 'Verification required: consult multiple independent models',
         maxTokens: 800,
         retries: 2,
-      };
+      });
     }
 
     if (profile.reasoningNeeded >= 0.6 || profile.complexity >= 0.8) {
-      return {
+      return route({
         kind: 'large_model',
         rationale: 'Deep reasoning: route to the largest available model',
         maxTokens: 1200,
         retries: 2,
-      };
+      });
     }
 
-    return {
+    return route({
       kind: 'small_model',
       rationale: 'Routine cognition: cheapest healthy provider suffices',
       maxTokens: 400,
       retries: 1,
-    };
+    });
   }
 
   /** Execute the accelerator under the scheduler: plan → dispatch → cache → report. */
@@ -147,7 +181,12 @@ export class CognitiveScheduler {
     options?: { skipInference?: boolean; maxTokens?: number; retries?: number },
   ): Promise<ScheduledResult<O>> {
     const key = canonicalCacheKey(accelerator.kind, input);
-    const strategy = this.plan(profileInput, { cacheKey: key, providersAvailable: this.fabric.isAvailable() });
+    const roster = this.fabric.roster();
+    const strategy = this.plan(profileInput, {
+      cacheKey: key,
+      providersAvailable: this.fabric.isAvailable(),
+      roster,
+    });
 
     if (strategy.kind === 'human_approval') {
       const base = await this.fabric.dispatch(accelerator, input, { skipInference: true });
@@ -164,6 +203,8 @@ export class CognitiveScheduler {
       skipInference: options?.skipInference ?? strategy.kind === 'deterministic',
       maxTokens: options?.maxTokens ?? strategy.maxTokens,
       retries: options?.retries ?? strategy.retries,
+      preferredProviderId: strategy.preferredProviderId,
+      model: strategy.model,
     });
 
     if (result.fired && !result.fallbackUsed) {

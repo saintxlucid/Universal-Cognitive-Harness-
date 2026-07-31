@@ -35,17 +35,35 @@ export interface AcceleratorResult<O = Record<string, unknown>> {
   fired: boolean;
 }
 
+export type CapabilityTier = 'tiny' | 'standard' | 'deep';
+
+/**
+ * A model a provider can serve, tagged with its cognitive capability tier
+ * (Level 4 — model virtualization). The kernel routes a request to the
+ * cheapest healthy provider that can satisfy the required tier.
+ */
+export interface ProviderModel {
+  tier: CapabilityTier;
+  model: string;
+  /** 0 = cheapest; used as the primary frugality sort key */
+  costRank?: number;
+}
+
 export interface AcceleratorCompletionParams {
   system?: string;
   user: string;
   temperature?: number;
   maxTokens?: number;
+  /** Per-call model override — the kernel's chosen virtual processor model */
+  model?: string;
 }
 
 export interface InferenceProvider {
   id: string;
   label: string;
   isAvailable(): boolean;
+  /** Optional model roster: tiers this provider can serve. Absent = standard tier only. */
+  roster?: ProviderModel[];
   complete(params: AcceleratorCompletionParams): Promise<string>;
 }
 

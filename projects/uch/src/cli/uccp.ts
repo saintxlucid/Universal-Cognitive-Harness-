@@ -30,7 +30,7 @@ import { IPCTransport } from '../interface/ipc-transport.js';
 import { CLITransport } from '../interface/cli-transport.js';
 import { CircuitBreaker } from '../kernel/cic/circuit-breaker.js';
 import { ThreatMitigationEngine } from '../kernel/cic/threat-mitigations.js';
-import { ImmuneSystem } from '../exoskeleton/immune.js';
+import { ImmuneSystem } from '../cognitive-core/immune.js';
 import { CortexKernel } from '../cortex_kernel/integrator.js';
 import { AttentionCortex } from '../cortex_kernel/attention-cortex.js';
 import { UnderstandingCortex } from '../cortex_kernel/understanding-cortex.js';

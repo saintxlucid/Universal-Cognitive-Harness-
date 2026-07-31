@@ -32,139 +32,176 @@ function envelope(op: string, payload: Record<string, unknown>, overrides?: Part
   return { ...request, ...overrides };
 }
 
-export async function runConformance(server: CPServer): Promise<ConformanceReport> {
-  const results: ConformanceResult[] = [];
-  const record = async (name: string, fn: () => Promise<unknown>): Promise<void> => {
-    try {
-      await fn();
-      results.push({ case: name, passed: true });
-    } catch (err) {
-      results.push({ case: name, passed: false, error: err instanceof Error ? err.message : String(err) });
-    }
-  };
+function expectSuccess(res: { success: boolean }): void {
+  if (!res.success) throw new Error(`expected success, got failure`);
+}
 
-  const expectSuccess = (res: { success: boolean }): void => {
-    if (!res.success) throw new Error(`expected success, got failure`);
-  };
-  const expectFailure = (res: { success: boolean }): void => {
-    if (res.success) throw new Error(`expected failure, got success`);
-  };
+function expectFailure(res: { success: boolean }): void {
+  if (res.success) throw new Error(`expected failure, got success`);
+}
 
-  await record('ping succeeds', async () => {
-    const res = await server.dispatch(envelope('ping', {}));
-    expectSuccess(res);
-    if (res.data !== undefined && typeof res.data === 'object' && 'pong' in (res.data as object)) {
-      if ((res.data as { pong: boolean }).pong !== true) throw new Error('ping did not return pong');
-    }
-  });
+interface ConformanceCase {
+  name: string;
+  run: (server: CPServer) => Promise<void>;
+}
 
-  await record('list returns ops', async () => {
-    const res = await server.dispatch(envelope('list', {}));
-    expectSuccess(res);
-    const ops = (res.data as { ops: Array<{ op: string }> }).ops;
-    if (!ops.some((o) => o.op === 'retrieve')) throw new Error('list missing retrieve op');
-  });
+const CONFORMANCE_CASES: ConformanceCase[] = [
+  {
+    name: 'ping succeeds',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('ping', {}));
+      expectSuccess(res);
+      if (res.data !== undefined && typeof res.data === 'object' && 'pong' in (res.data as object)) {
+        if ((res.data as { pong: boolean }).pong !== true) throw new Error('ping did not return pong');
+      }
+    },
+  },
+  {
+    name: 'list returns ops',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('list', {}));
+      expectSuccess(res);
+      const ops = (res.data as { ops: Array<{ op: string }> }).ops;
+      if (!ops.some((o) => o.op === 'retrieve')) throw new Error('list missing retrieve op');
+    },
+  },
+  {
+    name: 'status succeeds',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('status', {}));
+      expectSuccess(res);
+    },
+  },
+  {
+    name: 'observe stores an episode',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('observe', { text: 'conformance observation', reliability: 1 }));
+      expectSuccess(res);
+      const episode = res.data as { id: string };
+      if (!episode.id) throw new Error('observe did not return an episode id');
+    },
+  },
+  {
+    name: 'remember stores content',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('remember', { content: 'conformance memory', reliability: 1 }));
+      expectSuccess(res);
+    },
+  },
+  {
+    name: 'retrieve finds stored content',
+    run: async (server) => {
+      await server.dispatch(envelope('remember', { content: 'deployment pipeline rollback procedure', reliability: 1 }));
+      const res = await server.dispatch(envelope('retrieve', { query: 'rollback procedure', limit: 5 }));
+      expectSuccess(res);
+      const data = res.data as { results: unknown[]; count: number };
+      if (!Array.isArray(data.results)) throw new Error('retrieve returned no results array');
+    },
+  },
+  {
+    name: 'learn integrates evidence',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('learn', { proposition: 'CP conformance runs in CI', evidence: 'test run passed', reliability: 0.9 }));
+      expectSuccess(res);
+    },
+  },
+  {
+    name: 'reflect returns beliefs',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('reflect', { limit: 5 }));
+      expectSuccess(res);
+      const data = res.data as { beliefs: unknown[] };
+      if (!Array.isArray(data.beliefs)) throw new Error('reflect returned no beliefs array');
+    },
+  },
+  {
+    name: 'plan returns derived steps',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('plan', { goal: 'ship CP v1' }));
+      expectSuccess(res);
+      const data = res.data as { derivedSteps: unknown[] };
+      if (!Array.isArray(data.derivedSteps)) throw new Error('plan returned no steps');
+    },
+  },
+  {
+    name: 'predict returns predictions',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('predict', { horizon: 3 }));
+      expectSuccess(res);
+      const data = res.data as { predictions: unknown[] };
+      if (!Array.isArray(data.predictions)) throw new Error('predict returned no predictions');
+    },
+  },
+  {
+    name: 'simulate projects context',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('simulate', { scenario: 'what happens on failure', limit: 5 }));
+      expectSuccess(res);
+    },
+  },
+  {
+    name: 'evaluate reports health',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('evaluate', {}));
+      expectSuccess(res);
+    },
+  },
+  {
+    name: 'critique reports gaps',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('critique', { query: 'something never observed' }));
+      expectSuccess(res);
+      const data = res.data as { gaps: unknown[] };
+      if (!Array.isArray(data.gaps)) throw new Error('critique returned no gaps array');
+    },
+  },
+  {
+    name: 'execute returns accepted',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('execute', { action: 'noop' }));
+      expectSuccess(res);
+    },
+  },
+  {
+    name: 'consolidate runs a sleep cycle',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('consolidate', {}));
+      expectSuccess(res);
+    },
+  },
+  {
+    name: 'unknown op rejected',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('definitely-not-an-op', {}));
+      expectFailure(res);
+    },
+  },
+  {
+    name: 'wrong protocol rejected',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('ping', {}, { protocol: 'mcp' as CPRequest['protocol'] }));
+      expectFailure(res);
+    },
+  },
+  {
+    name: 'unsupported version rejected',
+    run: async (server) => {
+      const res = await server.dispatch(envelope('ping', {}, { version: '9.0.0' }));
+      expectFailure(res);
+    },
+  },
+  {
+    name: 'missing payload object rejected by parser',
+    run: async () => {
+      const parsed = parseCPRequest({ protocol: CP_PROTOCOL_ID, version: CP_VERSION, op: 'ping' });
+      if (!parsed.error && parsed.request) {
+        if (!parsed.request.payload) throw new Error('payload not defaulted');
+      }
+    },
+  },
+];
 
-  await record('status succeeds', async () => {
-    const res = await server.dispatch(envelope('status', {}));
-    expectSuccess(res);
-  });
-
-  await record('observe stores an episode', async () => {
-    const res = await server.dispatch(envelope('observe', { text: 'conformance observation', reliability: 1 }));
-    expectSuccess(res);
-    const episode = res.data as { id: string };
-    if (!episode.id) throw new Error('observe did not return an episode id');
-  });
-
-  await record('remember stores content', async () => {
-    const res = await server.dispatch(envelope('remember', { content: 'conformance memory', reliability: 1 }));
-    expectSuccess(res);
-  });
-
-  await record('retrieve finds stored content', async () => {
-    await server.dispatch(envelope('remember', { content: 'deployment pipeline rollback procedure', reliability: 1 }));
-    const res = await server.dispatch(envelope('retrieve', { query: 'rollback procedure', limit: 5 }));
-    expectSuccess(res);
-    const data = res.data as { results: unknown[]; count: number };
-    if (!Array.isArray(data.results)) throw new Error('retrieve returned no results array');
-  });
-
-  await record('learn integrates evidence', async () => {
-    const res = await server.dispatch(envelope('learn', { proposition: 'CP conformance runs in CI', evidence: 'test run passed', reliability: 0.9 }));
-    expectSuccess(res);
-  });
-
-  await record('reflect returns beliefs', async () => {
-    const res = await server.dispatch(envelope('reflect', { limit: 5 }));
-    expectSuccess(res);
-    const data = res.data as { beliefs: unknown[] };
-    if (!Array.isArray(data.beliefs)) throw new Error('reflect returned no beliefs array');
-  });
-
-  await record('plan returns derived steps', async () => {
-    const res = await server.dispatch(envelope('plan', { goal: 'ship CP v1' }));
-    expectSuccess(res);
-    const data = res.data as { derivedSteps: unknown[] };
-    if (!Array.isArray(data.derivedSteps)) throw new Error('plan returned no steps');
-  });
-
-  await record('predict returns predictions', async () => {
-    const res = await server.dispatch(envelope('predict', { horizon: 3 }));
-    expectSuccess(res);
-    const data = res.data as { predictions: unknown[] };
-    if (!Array.isArray(data.predictions)) throw new Error('predict returned no predictions');
-  });
-
-  await record('simulate projects context', async () => {
-    const res = await server.dispatch(envelope('simulate', { scenario: 'what happens on failure', limit: 5 }));
-    expectSuccess(res);
-  });
-
-  await record('evaluate reports health', async () => {
-    const res = await server.dispatch(envelope('evaluate', {}));
-    expectSuccess(res);
-  });
-
-  await record('critique reports gaps', async () => {
-    const res = await server.dispatch(envelope('critique', { query: 'something never observed' }));
-    expectSuccess(res);
-    const data = res.data as { gaps: unknown[] };
-    if (!Array.isArray(data.gaps)) throw new Error('critique returned no gaps array');
-  });
-
-  await record('execute returns accepted', async () => {
-    const res = await server.dispatch(envelope('execute', { action: 'noop' }));
-    expectSuccess(res);
-  });
-
-  await record('consolidate runs a sleep cycle', async () => {
-    const res = await server.dispatch(envelope('consolidate', {}));
-    expectSuccess(res);
-  });
-
-  await record('unknown op rejected', async () => {
-    const res = await server.dispatch(envelope('definitely-not-an-op', {}));
-    expectFailure(res);
-  });
-
-  await record('wrong protocol rejected', async () => {
-    const res = await server.dispatch(envelope('ping', {}, { protocol: 'mcp' as CPRequest['protocol'] }));
-    expectFailure(res);
-  });
-
-  await record('unsupported version rejected', async () => {
-    const res = await server.dispatch(envelope('ping', {}, { version: '9.0.0' }));
-    expectFailure(res);
-  });
-
-  await record('missing payload object rejected by parser', async () => {
-    const parsed = parseCPRequest({ protocol: CP_PROTOCOL_ID, version: CP_VERSION, op: 'ping' });
-    if (!parsed.error && parsed.request) {
-      if (!parsed.request.payload) throw new Error('payload not defaulted');
-    }
-  });
-
+function buildReport(results: ConformanceResult[]): ConformanceReport {
   const passed = results.filter((r) => r.passed).length;
   return {
     protocol: CP_PROTOCOL_ID,
@@ -174,6 +211,19 @@ export async function runConformance(server: CPServer): Promise<ConformanceRepor
     failed: results.length - passed,
     results,
   };
+}
+
+export async function runConformance(server: CPServer): Promise<ConformanceReport> {
+  const results: ConformanceResult[] = [];
+  for (const { name, run } of CONFORMANCE_CASES) {
+    try {
+      await run(server);
+      results.push({ case: name, passed: true });
+    } catch (err) {
+      results.push({ case: name, passed: false, error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+  return buildReport(results);
 }
 
 export function assertConformance(report: ConformanceReport): void {
