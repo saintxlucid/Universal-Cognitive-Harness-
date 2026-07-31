@@ -22,14 +22,80 @@ export interface CommandRunnerConfig {
   defaultTimeoutMs?: number;
   maxOutputBytes?: number;
   allowlist?: string[];
-  denylist?: string[];
+  denylist?: (string | RegExp)[];
   shell?: boolean;
 }
 
-const DEFAULT_DENYLIST = [
-  'rm -rf /', 'rm -rf ~', 'format c:', 'shutdown', 'reboot', 'mkfs',
-  'dd if=', ':(){', 'fork bomb', 'curl.*|.*sh', 'wget.*|.*sh',
+export function normalizeCommand(command: string): string {
+  return command.replace(/\s+/g, ' ').trim();
+}
+
+export function hasUnquotedShellMetachar(command: string): boolean {
+  let quote: string | null = null;
+  for (let i = 0; i < command.length; i++) {
+    const ch = command[i]!;
+    if (quote) {
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      continue;
+    }
+    if (ch === '`') return true;
+    if (ch === ';' || ch === '|' || ch === '&' || ch === '>' || ch === '<') return true;
+    if (ch === '\n' || ch === '\r') return true;
+    if (ch === '$' && command[i + 1] === '(') return true;
+  }
+  return false;
+}
+
+export function tokenize(command: string): string[] {
+  const tokens: string[] = [];
+  let current = '';
+  let quote: string | null = null;
+  for (const ch of command) {
+    if (quote) {
+      current += ch;
+      if (ch === quote) quote = null;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+      current += ch;
+    } else if (/\s/.test(ch)) {
+      if (current) {
+        tokens.push(current);
+        current = '';
+      }
+    } else {
+      current += ch;
+    }
+  }
+  if (current) tokens.push(current);
+  return tokens;
+}
+
+const DEFAULT_DENYLIST: RegExp[] = [
+  /\brm\s+-(?:[a-z]*[rf][a-z]*)\b/i,
+  /\bformat\s+c:\s*\/?/i,
+  /\bshutdown\b/i,
+  /\breboot\b/i,
+  /\bmkfs\b/i,
+  /\bdd\s+if=/i,
+  /:\s*\(\s*\)\s*\{/i,
+  /\bfork\s+bomb\b/i,
+  /\b(?:curl|wget)[^\r\n;|&<>]*\|\s*(?:ba)?sh\b/i,
+  /\b(?:curl|wget)[^\r\n;|&<>]*\|\s*powershell\b/i,
 ];
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function compileDenylist(entries: (string | RegExp)[]): RegExp[] {
+  return entries.map((entry) => (
+    entry instanceof RegExp ? entry : new RegExp(escapeRegExp(normalizeCommand(entry)), 'i')
+  ));
+}
 
 export class CommandRunner {
   private config: Required<Pick<CommandRunnerConfig, 'defaultTimeoutMs' | 'maxOutputBytes' | 'shell'>>;
@@ -43,19 +109,35 @@ export class CommandRunner {
       shell: config?.shell ?? true,
     };
     this.allowlist = config?.allowlist;
-    this.denylist = config?.denylist ?? DEFAULT_DENYLIST;
+    this.denylist = compileDenylist(config?.denylist ?? DEFAULT_DENYLIST);
   }
 
   isCommandAllowed(command: string): { allowed: boolean; reason?: string } {
+    const normalized = normalizeCommand(command);
+    if (!normalized) return { allowed: false, reason: 'Empty command' };
+
     for (const pattern of this.denylist) {
-      if (command.includes(pattern)) {
+      if (pattern.test(normalized)) {
         return { allowed: false, reason: `Command matches denylist pattern: ${pattern}` };
       }
     }
+
     if (this.allowlist && this.allowlist.length > 0) {
-      const firstToken = command.trim().split(/\s+/)[0] ?? '';
-      if (!this.allowlist.some((a) => firstToken === a || command.startsWith(a))) {
-        return { allowed: false, reason: `Command prefix not in allowlist: ${firstToken}` };
+      if (/\r|\n/.test(command)) {
+        return { allowed: false, reason: 'Command contains a line break' };
+      }
+      const tokens = tokenize(normalized);
+      if (tokens.length === 0) return { allowed: false, reason: 'Empty command' };
+      const matched = this.allowlist.some((entry) => {
+        const entryTokens = tokenize(normalizeCommand(entry));
+        if (entryTokens.length === 0 || tokens.length < entryTokens.length) return false;
+        for (let i = 0; i < entryTokens.length; i++) {
+          if (tokens[i] !== entryTokens[i]) return false;
+        }
+        return !hasUnquotedShellMetachar(normalized);
+      });
+      if (!matched) {
+        return { allowed: false, reason: `Command prefix not in allowlist: ${tokens[0]}` };
       }
     }
     return { allowed: true };
