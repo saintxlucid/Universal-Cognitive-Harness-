@@ -1,6 +1,6 @@
 import { CognitiveKernel } from '../kernel/cognitive-kernel.js';
 import { LLMClient } from '../llm/provider.js';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 export interface GitCommitInfo {
   hash: string;
@@ -34,12 +34,22 @@ export class GitIngester {
     this.maxHistory = config.maxHistory ?? 100;
   }
 
-  private execGit(args: string): string {
+  private execGit(args: string[]): string {
     try {
-      return execSync(`git ${args}`, { cwd: this.repoPath, encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 });
+      return execFileSync('git', args, { cwd: this.repoPath, encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 });
     } catch {
       return '';
     }
+  }
+
+  private sanitizeCount(count: number): number {
+    if (typeof count !== 'number' || !Number.isFinite(count)) return this.maxHistory;
+    return Math.max(1, Math.min(1000, Math.floor(count)));
+  }
+
+  private sanitizeHash(hash: string): string | null {
+    if (typeof hash !== 'string' || !/^[0-9a-f]{4,40}$/i.test(hash.trim())) return null;
+    return hash.trim();
   }
 
   parseConventionalCommit(message: string): { type: string; scope?: string; breaking: boolean; description: string } {
@@ -56,7 +66,11 @@ export class GitIngester {
   }
 
   getRecentCommits(count = 50): GitCommitInfo[] {
-    const log = this.execGit(`log --oneline --format="%H|%an|%ai|%s" --max-count=${count} ${this.lastIngestedHash ? `HEAD..${this.lastIngestedHash}` : `--max-count=${count}`}`);
+    const n = this.sanitizeCount(count);
+    const range = this.lastIngestedHash ? [`HEAD..${this.lastIngestedHash}`] : [];
+    const log = this.execGit([
+      'log', '--oneline', '--format=%H|%an|%ai|%s', `--max-count=${n}`, ...range,
+    ]);
     if (!log.trim()) return [];
 
     const lines = log.trim().split('\n').filter(Boolean);
@@ -71,7 +85,7 @@ export class GitIngester {
       const message = parts.slice(3).join('|');
       const parsed = this.parseConventionalCommit(message);
 
-      const files = this.execGit(`diff-tree --no-commit-id --name-only -r ${hash}`)
+      const files = this.execGit(['diff-tree', '--no-commit-id', '--name-only', '-r', hash])
         .trim().split('\n').filter(Boolean);
 
       commits.push({
@@ -142,7 +156,9 @@ export class GitIngester {
   }
 
   async ingestSince(hash: string): Promise<{ commits: number; episodes: number }> {
-    this.lastIngestedHash = hash;
+    const clean = this.sanitizeHash(hash);
+    if (!clean) return { commits: 0, episodes: 0 };
+    this.lastIngestedHash = clean;
     return this.ingestRecent(500);
   }
 }
