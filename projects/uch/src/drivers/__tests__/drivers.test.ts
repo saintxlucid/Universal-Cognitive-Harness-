@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { NeuralEventBus } from '../../event-bus/neural-event-bus.js';
+import type { NeuralEventBus } from '../../event-bus/neural-event-bus.js';
 import { FileSystemDriver } from '../filesystem/filesystem-driver.js';
 import { GitDriver } from '../git/git-driver.js';
 import { ACPDriver, type ACPMessage } from '../acp/acp-driver.js';
-import { AgentDriver, type AgentInstance } from '../agent/agent-driver.js';
+import { AgentDriver } from '../agent/agent-driver.js';
 import { IDEDriver } from '../ide/ide-driver.js';
 import { MCPDriver } from '../mcp/mcp-driver.js';
 import { RuntimeDriver } from '../runtime/runtime-driver.js';
@@ -34,7 +34,7 @@ describe('FileSystemDriver', () => {
   beforeEach(() => {
     mockPublish = vi.fn();
     testDir = createTempDir('fs');
-    driver = new FileSystemDriver({ publish: mockPublish } as any, {
+    driver = new FileSystemDriver({ publish: mockPublish } as unknown as NeuralEventBus, {
       rootPath: testDir,
     });
   });
@@ -45,7 +45,7 @@ describe('FileSystemDriver', () => {
   });
 
   it('uses default config when none provided', () => {
-    const d = new FileSystemDriver({ publish: mockPublish } as any);
+    const d = new FileSystemDriver({ publish: mockPublish } as unknown as NeuralEventBus);
     expect(d).toBeDefined();
     // Should not crash when methods are called with default rootPath
   });
@@ -156,26 +156,26 @@ describe('GitDriver', () => {
   });
 
   it('uses dot as default repo path', () => {
-    const d = new GitDriver({ publish: mockPublish } as any);
+    const d = new GitDriver({ publish: mockPublish } as unknown as NeuralEventBus);
     expect(d).toBeDefined();
   });
 
   it('getStatus returns empty array when not in a git repo', () => {
-    const driver = new GitDriver({ publish: mockPublish } as any, {
+    const driver = new GitDriver({ publish: mockPublish } as unknown as NeuralEventBus, {
       repoPath: testDir,
     });
     expect(driver.getStatus()).toEqual([]);
   });
 
   it('getRecentCommits returns empty array when not in a git repo', () => {
-    const driver = new GitDriver({ publish: mockPublish } as any, {
+    const driver = new GitDriver({ publish: mockPublish } as unknown as NeuralEventBus, {
       repoPath: testDir,
     });
     expect(driver.getRecentCommits(5)).toEqual([]);
   });
 
   it('handles non-git directory gracefully (branch and hash return empty)', () => {
-    const driver = new GitDriver({ publish: mockPublish } as any, {
+    const driver = new GitDriver({ publish: mockPublish } as unknown as NeuralEventBus, {
       repoPath: testDir,
     });
     expect(driver.getBranch()).toBe('');
@@ -194,7 +194,7 @@ describe('ACPDriver', () => {
   beforeEach(() => {
     mockPublish = vi.fn();
     driver = new ACPDriver(
-      { publish: mockPublish } as any,
+      { publish: mockPublish } as unknown as NeuralEventBus,
       { agentId: 'uch-test' },
     );
     driver.start();
@@ -206,7 +206,7 @@ describe('ACPDriver', () => {
 
   it('starts and stops without error', () => {
     const d = new ACPDriver(
-      { publish: mockPublish } as any,
+      { publish: mockPublish } as unknown as NeuralEventBus,
       { agentId: 'fresh' },
     );
     expect(() => d.start()).not.toThrow();
@@ -287,7 +287,7 @@ describe('AgentDriver', () => {
   beforeEach(() => {
     mockPublish = vi.fn();
     driver = new AgentDriver(
-      { publish: mockPublish } as any,
+      { publish: mockPublish } as unknown as NeuralEventBus,
       { maxAgents: 10, defaultTimeout: 5000 },
     );
     driver.start();
@@ -378,7 +378,7 @@ describe('IDEDriver', () => {
   beforeEach(() => {
     mockPublish = vi.fn();
     driver = new IDEDriver(
-      { publish: mockPublish } as any,
+      { publish: mockPublish } as unknown as NeuralEventBus,
       { maxOpenFiles: 10, workspacePath: '/test-workspace' },
     );
     driver.start();
@@ -502,7 +502,7 @@ describe('MCPDriver', () => {
   beforeEach(() => {
     mockPublish = vi.fn();
     driver = new MCPDriver(
-      { publish: mockPublish } as any,
+      { publish: mockPublish } as unknown as NeuralEventBus,
       { maxConnections: 5, defaultTimeout: 5000, reconnectOnError: true },
     );
     driver.start();
@@ -556,7 +556,7 @@ describe('MCPDriver', () => {
 
   it('handles connection error when max connections reached', async () => {
     const small = new MCPDriver(
-      { publish: mockPublish } as any,
+      { publish: mockPublish } as unknown as NeuralEventBus,
       { maxConnections: 1 },
     );
     small.start();
@@ -592,7 +592,7 @@ describe('RuntimeDriver', () => {
   beforeEach(() => {
     mockPublish = vi.fn();
     driver = new RuntimeDriver(
-      { publish: mockPublish } as any,
+      { publish: mockPublish } as unknown as NeuralEventBus,
       { sampleInterval: 60000, memoryWarningThreshold: 0.9, cpuSpikeThreshold: 0.95 },
     );
   });

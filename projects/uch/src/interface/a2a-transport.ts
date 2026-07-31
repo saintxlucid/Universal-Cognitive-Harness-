@@ -1,5 +1,5 @@
 import type { CognitiveExoskeleton, ExoskeletonTransport } from '../exoskeleton/exoskeleton.js';
-import type { AgentCapability, AgentRegistration, AgentStatus, HandoffRequest, DelegationRequest } from '../event-bus/agent-coordinator.js';
+import type { AgentCapability, HandoffRequest, DelegationRequest } from '../event-bus/agent-coordinator.js';
 
 export interface A2AMessage {
   jsonrpc: '2.0';
@@ -211,11 +211,6 @@ export class A2ATransport implements ExoskeletonTransport {
 
   private broadcastHeartbeat(): void {
     for (const peerId of this.peers.keys()) {
-      const msg: A2AMessage = {
-        jsonrpc: '2.0',
-        method: 'a2a.heartbeat',
-        params: { agentId: this.config.agentId },
-      };
       const peer = this.peers.get(peerId);
       if (peer) {
         peer.lastSeen = new Date();

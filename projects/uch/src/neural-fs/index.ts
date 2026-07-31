@@ -1,9 +1,11 @@
 import type { CognitiveKernel } from '../kernel/cognitive-kernel.js';
+import type { ConceptType } from '../kernel/types/concept.js';
 import { ConceptStore } from './concept-store.js';
 import { ExperienceStore } from './experience-store.js';
 import { SkillStore } from './skill-store.js';
 import { WorldModel } from './world-model.js';
 import { ProjectStore } from './project-store.js';
+import { VersionStore } from './version-store.js';
 
 export type FSEntryType = 'concept' | 'experience' | 'skill' | 'fact' | 'prediction' | 'project' | 'directory';
 
@@ -21,6 +23,7 @@ export class NeuralFS {
   readonly skills: SkillStore;
   readonly world: WorldModel;
   readonly projects: ProjectStore;
+  readonly version: VersionStore;
 
   constructor(private kernel: CognitiveKernel) {
     this.concepts = new ConceptStore(kernel);
@@ -28,6 +31,7 @@ export class NeuralFS {
     this.skills = new SkillStore(kernel);
     this.world = new WorldModel(kernel);
     this.projects = new ProjectStore(kernel);
+    this.version = new VersionStore(kernel);
   }
 
   ls(path = '/'): FSEntry[] {
@@ -113,7 +117,7 @@ export class NeuralFS {
         return entries.length > 0 ? entries[0] : null;
       }
       case 'skills':
-        return id ? this.skills.find(id) : null;
+        return id ? (this.skills.find(id) ?? this.skills.listAll().find((s) => s.id === id)) : null;
       default:
         return null;
     }
@@ -126,8 +130,8 @@ export class NeuralFS {
     const [domain] = parts;
     switch (domain) {
       case 'concepts': {
-        const d = data as { name: string; type: string; definition: string };
-        await this.concepts.create(d.name, d.type as any, d.definition);
+        const d = data as { name: string; type: ConceptType; definition: string };
+        await this.concepts.create(d.name, d.type, d.definition);
         return true;
       }
       case 'experiences': {
@@ -146,9 +150,7 @@ export class NeuralFS {
   }
 
   async observe(path: string, callback: (event: { type: string; path: string }) => void): Promise<() => void> {
-    const kernel = this.kernel;
     const interval = setInterval(() => {
-      const entries = this.ls(path);
       callback({ type: 'read', path: path || '/' });
     }, 5000);
     return () => clearInterval(interval);
@@ -160,3 +162,5 @@ export { ExperienceStore } from './experience-store.js';
 export { SkillStore } from './skill-store.js';
 export { WorldModel } from './world-model.js';
 export { ProjectStore } from './project-store.js';
+export { VersionStore, contentID, stableSerialize, captureKernelState } from './version-store.js';
+export type { SnapshotTree, NFSObject, NFSCommit, NFSDiff, RestoreResult } from './version-store.js';

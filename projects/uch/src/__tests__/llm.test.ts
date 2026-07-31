@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { LLMClient } from '../llm/provider.js';
 import { Embedder } from '../embeddings/embedder.js';
 import { SessionManager } from '../session/manager.js';
@@ -6,11 +6,36 @@ import { GitIngester } from '../git/ingester.js';
 import { CognitiveKernel } from '../kernel/cognitive-kernel.js';
 
 describe('LLMClient', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('creates without API key (no-op mode)', () => {
+    vi.stubEnv('OPENAI_API_KEY', undefined);
+    vi.stubEnv('ANTHROPIC_API_KEY', undefined);
     const llm = new LLMClient();
     expect(llm.isAvailable).toBe(false);
     expect(llm.provider).toBeDefined();
     expect(llm.modelName).toBeDefined();
+  });
+
+  it('passes through explicit model without rewriting', () => {
+    const llm = new LLMClient({ provider: 'anthropic', apiKey: 'test-key', model: 'my-custom-model' });
+    expect(llm.modelName).toBe('my-custom-model');
+    expect(llm.provider).toBe('anthropic');
+  });
+
+  it('uses provider default model when none given', () => {
+    const anthropic = new LLMClient({ provider: 'anthropic', apiKey: 'test-key' });
+    expect(anthropic.modelName).toBe('claude-sonnet-4-5');
+    const openai = new LLMClient({ provider: 'openai', apiKey: 'test-key' });
+    expect(openai.modelName).toBe('gpt-4o');
+  });
+
+  it('respects UCH_LLM_MODEL env override', () => {
+    vi.stubEnv('UCH_LLM_MODEL', 'my-env-model');
+    const llm = new LLMClient({ provider: 'openai', apiKey: 'test-key' });
+    expect(llm.modelName).toBe('my-env-model');
   });
 });
 
@@ -97,14 +122,14 @@ describe('SessionManager', () => {
 
   it('exports handoff document', () => {
     const sm = new SessionManager({ baseDir: '.uccp-test/sessions' });
-    sm.startSession('claude-code', 'ws-1');
+    sm.startSession('opencode', 'ws-1');
     sm.addMemory({ value: 'Use vitest for testing', type: 'convention', importance: 0.8 });
     sm.addMemory({ value: 'Switch to ESM modules', type: 'decision', importance: 0.9 });
     sm.addEntry({ role: 'user', content: 'fix the build' });
     sm.addEntry({ role: 'assistant', content: 'fixed' });
     const handoff = sm.exportSessionHandoff();
     expect(handoff).toContain('Session Handoff');
-    expect(handoff).toContain('claude-code');
+    expect(handoff).toContain('opencode');
     expect(handoff).toContain('Use vitest');
     expect(handoff).toContain('Switch to ESM');
   });

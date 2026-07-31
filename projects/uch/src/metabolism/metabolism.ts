@@ -1,13 +1,11 @@
 import {
   type EnergyAllocation,
   type ComponentBudget,
-  type MetabolicCost,
   zeroAllocation,
   subtractAllocation,
   canAfford,
 } from './metabolic-profile.js';
-import type { NervousSystemLayer } from '../nervous-system/signal.js';
-import { type EconomicProposal, type Confidence, type Timestamp, timestamp, confidence } from '../shared/branded-types.js';
+import { type EconomicProposal, type Timestamp, timestamp } from '../shared/branded-types.js';
 
 // ── Economic Constants ─────────────────────────────────────
 

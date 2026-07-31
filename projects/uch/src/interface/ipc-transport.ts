@@ -75,14 +75,14 @@ export class IPCTransport extends EventEmitter implements ExoskeletonTransport {
     }
 
     if (fs.existsSync(this.config.socketPath)) {
-      try { fs.unlinkSync(this.config.socketPath); } catch { }
+      try { fs.unlinkSync(this.config.socketPath); } catch { /* stale socket: ignore */ }
     }
 
     this.server = this.createServer();
     this.server.on('error', () => {});
     try {
       this.server.listen(this.config.socketPath);
-    } catch {}
+    } catch { /* listen may fail; client reconnect handles it */ }
   }
 
   private startTcp(): void {
@@ -90,7 +90,7 @@ export class IPCTransport extends EventEmitter implements ExoskeletonTransport {
     this.server.on('error', () => {});
     try {
       this.server.listen(this.config.port, this.config.host);
-    } catch {}
+    } catch { /* listen may fail; client reconnect handles it */ }
   }
 
   private createServer(): net.Server {
@@ -108,7 +108,7 @@ export class IPCTransport extends EventEmitter implements ExoskeletonTransport {
           try {
             const msg = JSON.parse(raw) as IPCMessage;
             this.handleMessage(socket, msg);
-          } catch { }
+          } catch { /* malformed frame: skip */ }
         }
       });
 
@@ -144,7 +144,7 @@ export class IPCTransport extends EventEmitter implements ExoskeletonTransport {
     }
 
     if (!isWindows && fs.existsSync(this.config.socketPath)) {
-      try { fs.unlinkSync(this.config.socketPath); } catch { }
+      try { fs.unlinkSync(this.config.socketPath); } catch { /* stale socket: ignore */ }
     }
   }
 
@@ -297,7 +297,7 @@ export class IPCTransport extends EventEmitter implements ExoskeletonTransport {
         } else {
           this.emit('message', msg);
         }
-      } catch { }
+      } catch { /* malformed frame: skip */ }
     }
   }
 
@@ -310,7 +310,7 @@ export class IPCTransport extends EventEmitter implements ExoskeletonTransport {
           clearInterval(this.reconnectTimer);
           this.reconnectTimer = null;
         }
-      } catch { }
+      } catch { /* reconnect will retry */ }
     }, this.config.reconnectIntervalMs);
   }
 

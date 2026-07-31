@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { EventLedger } from '../cognitive-recorder/event-ledger.js';
-import { createActivity } from '../cognitive-recorder/cognitive-activity.js';
+import { createActivity, type ActivityType } from '../cognitive-recorder/cognitive-activity.js';
 import { Conscience } from '../cognitive-brain/conscience.js';
 import { MemoryPipeline } from '../cognitive-brain/memory-pipeline.js';
 import { CognitiveKernel } from '../kernel/cognitive-kernel.js';
@@ -100,10 +100,10 @@ describe('Conscience', () => {
     const kernel = new CognitiveKernel({ agent_id: 'test', user_id: 'test', project_id: 'test' });
     const conscience = new Conscience(ledger, kernel);
 
-    const pattern = ['observe', 'plan', 'execute', 'observe', 'plan', 'execute'];
+    const pattern: ActivityType[] = ['observe', 'plan', 'execute', 'observe', 'plan', 'execute'];
     for (const type of pattern) {
       ledger.append(
-        createActivity({ type: type as any, context: testContext, provenance: testProvenance }),
+        createActivity({ type, context: testContext, provenance: testProvenance }),
       );
     }
 
@@ -149,7 +149,6 @@ describe('MemoryPipeline', () => {
     const pipeline = new MemoryPipeline(ledger, kernel);
 
     const past = new Date('2024-01-01');
-    const now = new Date();
 
     ledger.append(
       createActivity({

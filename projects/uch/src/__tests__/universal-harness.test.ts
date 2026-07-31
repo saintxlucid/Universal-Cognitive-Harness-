@@ -1,16 +1,26 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { UniversalCognitiveHarness } from '../harness-api/universal-harness.js';
 
 describe('UniversalCognitiveHarness', () => {
   let harness: UniversalCognitiveHarness;
+  let root: string;
 
   beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'uch-harness-'));
     harness = new UniversalCognitiveHarness({
       workspace_id: 'ws1',
       workspace_name: 'My Project',
-      workspace_root: '/path/to/project',
+      workspace_root: root,
       agent_id: 'uch-test',
     });
+  });
+
+  afterEach(() => {
+    harness.workspace.close();
+    rmSync(root, { recursive: true, force: true });
   });
 
   it('initializes all subsystems', () => {
@@ -120,13 +130,20 @@ describe('UniversalCognitiveHarness', () => {
 
 describe('BiologicalFunctions', () => {
   let harness: UniversalCognitiveHarness;
+  let root: string;
 
   beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), 'uch-harness-'));
     harness = new UniversalCognitiveHarness({
       workspace_id: 'bio-test',
       workspace_name: 'Bio Test',
-      workspace_root: '/test',
+      workspace_root: root,
     });
+  });
+
+  afterEach(() => {
+    harness.workspace.close();
+    rmSync(root, { recursive: true, force: true });
   });
 
   it('observes and stores episodes', async () => {

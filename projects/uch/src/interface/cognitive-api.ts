@@ -1,4 +1,6 @@
 import type { CognitiveExoskeleton } from '../exoskeleton/exoskeleton.js';
+import type { ConsciousnessLayer } from '../aether/consciousness.js';
+import type { FileProfile } from '../suit/litmus/code-scorer.js';
 
 export interface CognitiveAPIResponse<T = unknown> {
   success: boolean;
@@ -31,7 +33,7 @@ export class CognitiveAPI {
     if (!this.exoskeleton) {
       return { success: false, error: 'Not attached to exoskeleton', meta: { durationMs: 0, source: 'cognitive-api' } };
     }
-    this.exoskeleton.aether.observeThought(layer as any, content, source, tags);
+    this.exoskeleton.aether.observeThought(layer as ConsciousnessLayer, content, source, tags);
     return {
       success: true,
       meta: { durationMs: Date.now() - start, source: 'cognitive-api' },
@@ -56,7 +58,7 @@ export class CognitiveAPI {
     if (!this.exoskeleton) {
       return { success: false, error: 'Not attached to exoskeleton', meta: { durationMs: 0, source: 'cognitive-api' } };
     }
-    const result = this.exoskeleton.codeScorer.score(profile as any);
+    const result = this.exoskeleton.codeScorer.score(profile as unknown as FileProfile);
     return {
       success: true,
       data: result,

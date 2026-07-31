@@ -43,7 +43,7 @@ describe('MCPSSETransport', () => {
     }));
     const parsed = JSON.parse(response);
     expect(parsed.result.tools).toBeInstanceOf(Array);
-    const names = parsed.result.tools.map((t: any) => t.name);
+    const names = parsed.result.tools.map((t: { name: string }) => t.name);
     expect(names).toContain('observe');
     expect(names).toContain('retrieve');
   });

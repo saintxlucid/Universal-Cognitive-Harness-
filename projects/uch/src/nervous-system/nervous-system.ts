@@ -3,16 +3,13 @@ import {
   type SignalHandler,
   type SignalFilter,
   type NervousSystemLayer,
-  type SignalPriority,
   type InterruptLevel,
   type EntropyReductionResult,
   createSignal,
   priorityForLayer,
 } from './signal.js';
-import type { InformationMetrics } from '../shared/branded-types.js';
 import type { EventType, NeuralEvent } from '../event-bus/neural-event-bus.js';
-import type { MetabolicCost } from '../metabolism/metabolic-profile.js';
-import { type EnergyUnit, energyUnit, type ComponentID, componentID, type Entropy, entropy, type Novelty, novelty, type Timestamp, timestamp } from '../shared/branded-types.js';
+import { type EnergyUnit, type ComponentID, type Entropy, entropy, type Novelty, novelty, type Timestamp, timestamp } from '../shared/branded-types.js';
 
 // ── Entropy Reduction Pipeline ─────────────────────────────
 
@@ -155,7 +152,7 @@ export class NervousSystem {
     layer: NervousSystemLayer,
   ): { entropy: Entropy; novelty: Novelty } {
     let currentEntropy = signal.information.entropy;
-    let currentNovelty = signal.information.novelty;
+    const currentNovelty = signal.information.novelty;
 
     const reductionKey = this.layerToReductionStage(layer);
     const reductionRatio = ENTROPY_REDUCTION_RATIOS[reductionKey] ?? 0;

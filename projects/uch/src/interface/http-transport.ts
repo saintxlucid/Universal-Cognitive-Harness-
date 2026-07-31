@@ -3,7 +3,6 @@ import type { CognitiveExoskeleton, ExoskeletonTransport } from '../exoskeleton/
 import { CognitiveAPI } from './cognitive-api.js';
 import type { FileProfile } from '../suit/litmus/code-scorer.js';
 import type { ReflexContext } from '../suit/instinct/reflex-engine.js';
-import type { ConsciousnessLayer } from '../aether/consciousness.js';
 
 export interface HTTPTransportConfig {
   port: number;

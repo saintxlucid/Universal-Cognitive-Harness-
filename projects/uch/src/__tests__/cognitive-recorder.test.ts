@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { EventLedger } from '../cognitive-recorder/event-ledger.js';
 import { Recorder } from '../cognitive-recorder/recorder.js';
 import { createActivity, completeActivity } from '../cognitive-recorder/cognitive-activity.js';
-import type { CognitiveActivity } from '../cognitive-recorder/cognitive-activity.js';
 import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
 import { createProvenance } from '../kernel/types/provenance.js';
 

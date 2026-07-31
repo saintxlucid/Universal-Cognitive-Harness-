@@ -132,7 +132,6 @@ export class GitIngester {
     if (commits.length === 0) return { commits: 0, episodes: 0, concepts: 0 };
 
     const episodes = await this.ingestCommits(commits);
-    const beforeConcepts = this.kernel.getAllConcepts().length;
 
     const stats = this.kernel.getStats();
     return {

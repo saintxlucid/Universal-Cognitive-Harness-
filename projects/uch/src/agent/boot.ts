@@ -8,7 +8,7 @@
  *
  * ── Usage ──────────────────────────────────────────────
  *   import { bootUCH } from 'uch';
- *   const uch = await bootUCH({ toolName: 'claude-code' });
+ *   const uch = await bootUCH({ toolName: 'opencode' });
  *
  *   // Before each message:
  *   const ctx = await uch.getContext(userMessage, { currentFile });

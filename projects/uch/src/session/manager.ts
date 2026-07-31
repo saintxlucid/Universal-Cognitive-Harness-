@@ -115,7 +115,7 @@ export class SessionManager {
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
   }
 
-  exportSessionHandoff(name?: string): string {
+  exportSessionHandoff(_name?: string): string {
     if (!this.currentSession) throw new Error('No active session to export');
 
     const handoff: SessionSnapshot = this.currentSession;

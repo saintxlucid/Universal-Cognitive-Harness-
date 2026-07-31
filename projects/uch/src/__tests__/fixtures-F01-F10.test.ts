@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { CircuitBreaker, CircuitBreakerOpenError } from '../kernel/cic/circuit-breaker.js';
 import { T06RunawayProcessMitigation, T07CascadingPolicyMitigation, T13TokenExhaustionMitigation, ThreatMitigationEngine } from '../kernel/cic/threat-mitigations.js';
 import { A2ATransport, type A2AMessage } from '../interface/a2a-transport.js';
@@ -6,7 +6,7 @@ import { IPCTransport } from '../interface/ipc-transport.js';
 import { CLITransport } from '../interface/cli-transport.js';
 import { AttentionCortex } from '../cortex_kernel/attention-cortex.js';
 import { UnderstandingCortex } from '../cortex_kernel/understanding-cortex.js';
-import { ExecutiveCortex, type PlanProposal } from '../cortex_kernel/executive-cortex.js';
+import { ExecutiveCortex } from '../cortex_kernel/executive-cortex.js';
 import { MetaBrain } from '../cortex_kernel/meta-brain.js';
 import { ConsciousnessGate } from '../cortex_kernel/integrator.js';
 import { Consciousness } from '../aether/consciousness.js';
@@ -138,7 +138,7 @@ describe('F02: Threat Mitigations (T06, T07, T13)', () => {
 describe('F03: A2A Agent-to-Agent Transport', () => {
   it('handles handshake protocol', async () => {
     const transportA = new A2ATransport({ agentId: 'agent-a', agentName: 'Agent A', capabilities: ['observe'] });
-    const transportB = new A2ATransport({ agentId: 'agent-b', agentName: 'Agent B' });
+    new A2ATransport({ agentId: 'agent-b', agentName: 'Agent B' });
 
     const handshakeMsg: A2AMessage = {
       jsonrpc: '2.0',
@@ -282,7 +282,7 @@ describe('F06: Attention Cortex (Importance Scoring)', () => {
   });
 
   it('allows manual importance override', () => {
-    const signal = cortex.registerSignal({ sourceId: 'override-test', source: 'test', content: 'Override me' });
+    cortex.registerSignal({ sourceId: 'override-test', source: 'test', content: 'Override me' });
     const result = cortex.setImportance('override-test', 0.95);
     expect(result).toBe(true);
     const top = cortex.getTopSignals(5);
@@ -439,7 +439,7 @@ describe('F09: Meta Brain', () => {
   });
 
   it('marks insights as applied', () => {
-    const obs = brain.observe({ category: 'cognitive', aspect: 'test-marker', content: 'Test insight', valence: 0, arousal: 0.5 });
+    brain.observe({ category: 'cognitive', aspect: 'test-marker', content: 'Test insight', valence: 0, arousal: 0.5 });
     brain.reflect();
     const insights = brain.getInsights(10);
     if (insights.length > 0) {

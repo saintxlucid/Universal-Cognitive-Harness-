@@ -150,7 +150,7 @@ export class BiologicalFunctions {
     return { cycles_run: report.cycle };
   }
 
-  async sleep(duration_ms?: number): Promise<{ slept_ms: number }> {
+  async sleep(_duration_ms?: number): Promise<{ slept_ms: number }> {
     const report = await this.kernel.forceSleepCycle();
     return { slept_ms: report.duration_ms };
   }

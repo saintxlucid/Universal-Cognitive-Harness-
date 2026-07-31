@@ -11,8 +11,8 @@ import { TasteEngine } from '../cognitive-plane/taste/taste-engine.js';
 import { WorkspaceDreaming } from '../cognitive-plane/dreaming/workspace-dreaming.js';
 import { TraceLedger } from '../cognitive-plane/trace-engine/trace-ledger.js';
 import { createTrace, endTrace } from '../cognitive-plane/trace-engine/cognitive-trace.js';
-import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
-import { CognitiveOrganism } from '../cognitive-plane/organism/organism.js';
+import { NeuralEventBus, type NeuralEvent } from '../event-bus/neural-event-bus.js';
+import { CognitiveOrganism, type CognitiveOrganismConfig } from '../cognitive-plane/organism/organism.js';
 import { createWorkspaceIdentity } from '../workspace-brain/identity.js';
 
 // ── Cognitive Constitution ────────────────────────────────────
@@ -150,8 +150,8 @@ describe('WorkspaceGenome', () => {
     const g = new WorkspaceGenome({ workspaceId: 'ws-1', projectName: 'Test', description: '' });
     g.set('custom', 'patterns', 'CQRS');
     const exported = g.export() as Record<string, unknown>;
-    expect((exported as any).config).toBeDefined();
-    expect(((exported as any).entries as any[]).length).toBeGreaterThan(0);
+    expect(exported['config']).toBeDefined();
+    expect((exported['entries'] as unknown[]).length).toBeGreaterThan(0);
   });
 });
 
@@ -330,7 +330,7 @@ describe('CognitiveOrganism', () => {
           sleep_cycles: 0,
           neuromodulation: { novelty: 0, task_horizon: 0, uncertainty: 0, reward_history: [] },
         }),
-      } as any,
+      } as unknown as CognitiveOrganismConfig['kernel'],
       semanticMemory: new ScientificMemory(),
       identity: createWorkspaceIdentity({ workspace_id: 'ws-test', name: 'Test Workspace' }),
       constitution: new CognitiveConstitution(),
@@ -338,7 +338,7 @@ describe('CognitiveOrganism', () => {
       trustEngine: new TrustEngine(),
       conscience: {
         predict: async () => ({ predicted_type: 'observe', confidence: 0.5, context_basis: [] }),
-      } as any,
+      } as unknown as CognitiveOrganismConfig['conscience'],
     });
 
     await organism.initialize();
@@ -369,7 +369,7 @@ describe('CognitiveOrganism', () => {
           concepts: [],
           preceding_episode: undefined,
         }),
-      } as any,
+      } as unknown as CognitiveOrganismConfig['kernel'],
       semanticMemory: new ScientificMemory(),
       identity: createWorkspaceIdentity({ workspace_id: 'ws-test', name: 'Test Workspace' }),
       constitution: new CognitiveConstitution(),
@@ -377,14 +377,14 @@ describe('CognitiveOrganism', () => {
       trustEngine: new TrustEngine(),
       conscience: {
         predict: async () => ({ predicted_type: 'observe', confidence: 0.5, context_basis: [] }),
-      } as any,
+      } as unknown as CognitiveOrganismConfig['conscience'],
     });
 
     const event = {
       type: 'file:saved',
       source: 'editor',
       payload: { message: 'Saved README', path: 'README.md' },
-    } as any;
+    } as unknown as NeuralEvent;
 
     await organism.memory.ingestObservation(event, 0.7);
     expect(organism.memory.sensory.getRecent().length).toBe(1);
@@ -402,7 +402,7 @@ describe('TrustEngine', () => {
 
   it('assesses trust with verification success', () => {
     const te = new TrustEngine();
-    const entry = te.register('verified-source', 'source', 'standard');
+    te.register('verified-source', 'source', 'standard');
     te.recordSuccess('verified-source');
     const assessment = te.assess('verified-source');
     expect(assessment.verdict).toBe('trusted');

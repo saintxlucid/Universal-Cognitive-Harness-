@@ -80,7 +80,23 @@ export { MCPSSETransport } from './control-plane/transport/mcp-sse.js';
 export { SSEServer } from './control-plane/transport/sse-server.js';
 export type { SSESession, SSEServerOptions } from './control-plane/transport/sse-server.js';
 export { CapabilityRegistry } from './cognitive-runtime/capability-registry.js';
-export type { Capability } from './cognitive-runtime/capability-registry.js';
+export type {
+  Capability,
+  CapabilityScope,
+  CapabilityCost,
+  CapabilityRetention,
+  CapabilityDependencyCheck,
+  GrantOperation,
+} from './cognitive-runtime/capability-registry.js';
+export { GrantEngine, GRANT_SCHEMA_VERSION } from './cognitive-runtime/grants.js';
+export type {
+  GrantActor,
+  ActorType,
+  GrantConstraints,
+  IssueGrantRequest,
+  CapabilityGrant,
+  AuthorizationDecision,
+} from './cognitive-runtime/grants.js';
 export { ConfigLoader } from './control-plane/config/config-loader.js';
 export type { UCCPConfig } from './control-plane/config/config-loader.js';
 export { PluginLoader } from './control-plane/plugins/plugin-loader.js';
@@ -376,6 +392,11 @@ export type { SkillDefinition, SkillInvocation } from './cognitive-memory/skill-
 //   Workspace
 export { WorkspaceBrain } from './workspace-brain/workspace-brain.js';
 export type { WorkspaceBrainConfig } from './workspace-brain/workspace-brain.js';
+export { WorkspaceKnowledgeGraph } from './workspace-graphs/knowledge-graph.js';
+export { WorkspaceDecisionGraph, type DecisionRelation } from './workspace-graphs/decision-graph.js';
+export { WorkspaceTaskGraph } from './workspace-graphs/task-graph.js';
+export { WorkspaceEvolutionHistory, type CycleSummary } from './workspace-graphs/evolution-history.js';
+export { WorkspaceDNA, type DnaMutation } from './workspace-graphs/workspace-dna.js';
 export { CognitiveKernel } from './kernel/cognitive-kernel.js';
 export type { CognitiveKernelConfig, CognitiveKernelStats } from './kernel/cognitive-kernel.js';
 
@@ -476,7 +497,39 @@ export type { UCCPOptions } from './cli/uccp.js';
 
 // ── LLM Provider ────────────────────────────────────────────
 export { LLMClient } from './llm/provider.js';
-export type { LLMConfig, LLMProvider, CompletionParams, EmbeddingParams } from './llm/provider.js';
+export type { LLMConfig, LLMProviderType, CompletionParams, EmbeddingParams, MultiModalContent } from './llm/provider.js';
+export { AnthropicProvider } from './llm/anthropic-provider.js';
+export type { AnthropicModel, AnthropicMessage, AnthropicCompletionParams, AnthropicStreamChunk } from './llm/anthropic-provider.js';
+
+// ── Cognitive Accelerators + Inference Fabric ───────────────
+export { InferenceFabric, createDefaultFabric } from './accelerators/fabric.js';
+export type { ProviderHealth, DispatchOptions } from './accelerators/fabric.js';
+export { CognitiveScheduler, canonicalCacheKey, RISK_HUMAN_APPROVAL, FRUGALITY_MAX_COMPLEXITY } from './accelerators/scheduler.js';
+export type { ExecutionStrategy, ExecutionStrategyKind, ScheduledResult } from './accelerators/scheduler.js';
+export { normalizeProfile, DEFAULT_PROFILE } from './accelerators/profile.js';
+export type { CognitiveProfile, Urgency } from './accelerators/profile.js';
+export { ACCELERATORS } from './accelerators/implementations.js';
+export type {
+  Accelerator,
+  AcceleratorKind,
+  AcceleratorRequest,
+  AcceleratorResult,
+  InferenceProvider,
+  ProviderGateway,
+  GatewayCompletion,
+  AcceleratorCompletionParams,
+} from './accelerators/types.js';
+export type {
+  SemanticOutput,
+  CompressionOutput,
+  ReasoningOutput,
+  ReasoningStep as AcceleratorReasoningStep,
+  PredictionOutput,
+  MemoryMergeOutput,
+  Relationship,
+  OntologyOutput,
+  ClassificationOutput,
+} from './accelerators/implementations.js';
 
 // ── Embedding Pipeline ──────────────────────────────────────
 export { Embedder } from './embeddings/embedder.js';
@@ -533,7 +586,83 @@ export type {
 // ── NeuralFS (Cognitive Filesystem) ────────────────────────
 export { NeuralFS } from './neural-fs/index.js';
 export { ConceptStore, ExperienceStore, SkillStore, WorldModel, ProjectStore } from './neural-fs/index.js';
-export type { FSEntry, FSEntryType } from './neural-fs/index.js';
+export { VersionStore, contentID, stableSerialize, captureKernelState } from './neural-fs/index.js';
+export type { FSEntry, FSEntryType, SnapshotTree, NFSObject, NFSCommit, NFSDiff, RestoreResult } from './neural-fs/index.js';
+
+// ── Cognitive Protocol (CP) v1 — the versioned contract ────
+export {
+  CPServer,
+  CP_PROTOCOL_ID,
+  CP_VERSION,
+  CP_MAJOR,
+  CP_OPS,
+  parseCPRequest,
+  isCompatibleVersion,
+  createDefaultCPServer,
+  runConformance,
+  assertConformance,
+  createCPTools,
+  handleCPHTTP,
+  cpRouteInfo,
+} from './protocol/index.js';
+export type {
+  CPOp,
+  CPRequest,
+  CPResponse,
+  CPError,
+  CPErrorCode,
+  CPOpHandler,
+  CPHandlerSpec,
+  ConformanceReport,
+  ConformanceResult,
+  CPToolDef,
+} from './protocol/index.js';
+
+// ── Driver Registry (pluggable external world) ─────────────
+export { DriverRegistry } from './drivers/registry.js';
+export type { Driver, DriverEvent, DriverRegistration } from './drivers/registry.js';
+
+// ── Workspace Manifest (discovery + attachment) ────────────
+export {
+  MANIFEST_SCHEMA_VERSION,
+  MANIFEST_FILE_NAME,
+  MANIFEST_DIR_NAME,
+  MANIFEST_PATH,
+  validateManifest,
+  compareVersions,
+  negotiateVersion,
+  ManifestError,
+  parseManifest,
+  loadManifestFile,
+  createManifest,
+  writeManifest,
+  discoverManifest,
+  negotiate,
+  attach,
+  detach,
+  createStandardCapabilityRegistry,
+  UCH_RUNTIME_VERSION,
+  STANDARD_CAPABILITIES,
+} from './workspace-manifest/index.js';
+export type {
+  WorkspaceManifest,
+  ManifestCapabilityEntry,
+  ManifestDriverEntry,
+  ManifestEndpoint,
+  ManifestPolicyEntry,
+  ManifestValidationResult,
+  VersionNegotiation,
+  LoadedManifest,
+  CreateManifestOptions,
+  DiscoveryResult,
+  DiscoveryOptions,
+  NegotiatedCapability,
+  NegotiatedDriver,
+  NegotiationResult,
+  AttachOptions,
+  AttachmentResult,
+  AttachmentSession,
+} from './workspace-manifest/index.js';
 
 // ── Harness API (legacy) ────────────────────────────────────
 export { UniversalCognitiveHarness } from './harness-api/universal-harness.js';
@@ -556,8 +685,37 @@ export type {
   LedgerStats,
 } from './cognitive-recorder/index.js';
 
+// ── Reason Graph (Layer 4) ──────────────────────────────────
+export { ReasonGraph } from './cortex_kernel/reason-graph.js';
+export type { CausalLink, DependencyChain, ContradictionReport } from './cortex_kernel/reason-graph.js';
+
+// ── Belief / Goal / Reasoning Trace Stores ──────────────────
+export { BeliefStore } from './neural-fs/belief-store.js';
+export type { Belief, BeliefStatus } from './neural-fs/belief-store.js';
+export { GoalStore } from './neural-fs/goal-store.js';
+export type { Goal, GoalStatus, GoalPriority } from './neural-fs/goal-store.js';
+export { ReasoningTraceStore } from './neural-fs/reasoning-trace-store.js';
+export type { ReasoningTrace, ReasoningStep, TraceStepType } from './neural-fs/reasoning-trace-store.js';
+
+// ── WebSocket Transport ─────────────────────────────────────
+export { WebSocketServer } from './control-plane/transport/websocket-transport.js';
+
 // ── Kernel sub-exports ──────────────────────────────────────
 export * from './kernel/index.js';
+
+// ── Provenance-Weighted Retrieval ──────────────────────────
+export type { ProvenanceWeightConfig } from './kernel/retrieval/fusion.js';
+
+// ── Concept Genome DNA ────────────────────────────────────
+export { ConceptGenome } from './kernel/concept-genome/index.js';
+export type {
+  GeneMarker,
+  ConceptDNA,
+  MutationEvent,
+  FusionProposal,
+  GenomeComparison,
+  ConceptGenomeStats,
+} from './kernel/concept-genome/index.js';
 export { CognitiveMemorySystem } from './kernel/memory/cognitive-memory-system.js';
 export type {
   MemorySystemConfig,
@@ -568,3 +726,16 @@ export type {
   EngineeringJudgmentInput,
   EngineeringJudgmentResult,
 } from './kernel/constitution/engineering-judgment.js';
+
+// ── Agentic Cognition Engine (ported from Claude Code architecture) ──
+export * from './agentic/index.js';
+
+// ---------------------------------------------------------------------------
+// MNEMOSYNE - Cognitive Memory Brain (the memory supremacy system)
+// ---------------------------------------------------------------------------
+export * from './mnemosyne/index.js';
+
+// Resolve export-* ambiguity: kernel's EpistemicStatus is canonical at the
+// top level; mnemosyne's narrower union stays available under an alias.
+export type { EpistemicStatus } from './kernel/types/provenance.js';
+export type { EpistemicStatus as MnemosyneEpistemicStatus } from './mnemosyne/index.js';

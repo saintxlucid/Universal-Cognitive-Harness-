@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as os from 'node:os';
 import { execSync } from 'node:child_process';
 
 export interface WorkspaceContext {
@@ -213,8 +214,8 @@ export class WorkspaceContextGatherer {
       nodeVersion: process.version,
       platform: process.platform,
       arch: process.arch,
-      memoryGB: Math.round((require as any)?.('os')?.totalmem() / (1024 * 1024 * 1024) * 10) / 10 || 0,
-      cpus: (require as any)?.('os')?.cpus()?.length || 0,
+      memoryGB: Math.round(os.totalmem() / (1024 * 1024 * 1024) * 10) / 10 || 0,
+      cpus: os.cpus()?.length || 0,
       hasGit: this.checkCommand('git --version'),
       hasDocker: this.checkCommand('docker --version'),
       hasNpm: this.checkCommand('npm --version'),
@@ -280,8 +281,8 @@ export class WorkspaceContextGatherer {
     const globPart = parts[parts.length - 1] ?? '';
     if (globPart.includes('*')) return false;
     try {
-      const { Glob } = require('glob') as any;
-      const matches = await Glob(pattern, { cwd: this.rootPath, dot: false });
+      const { glob } = await import('glob');
+      const matches = await glob(pattern, { cwd: this.rootPath, dot: false });
       return matches.length > 0;
     } catch {
       return false;

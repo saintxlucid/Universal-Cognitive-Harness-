@@ -52,7 +52,6 @@ export class ProjectStore {
   }
 
   async recallProjectContext(projectId: string, query: string, limit = 5): Promise<string> {
-    const results = await this.kernel.recall({ text: query, limit });
     return this.kernel.recallFormatted({ text: query, limit });
   }
 }

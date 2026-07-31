@@ -12,7 +12,8 @@ import { CognitiveConstitution } from '../cognitive-plane/constitution/constitut
 import { DecisionLog } from '../cognitive-plane/decisions/decision-log.js';
 import { WorkspaceContextGatherer } from '../context/gatherer.js';
 import { MCPStdioServer } from '../mcp/stdio-server.js';
-import * as fs from 'node:fs';
+import { CodingToolkit } from '../coding/toolkit.js';
+import { InferenceFabric, ACCELERATORS, CognitiveScheduler } from '../accelerators/index.js';
 import * as path from 'node:path';
 
 export type AgentTool =
@@ -47,6 +48,9 @@ export class UCHAgentPlugin {
   readonly bio: BiologicalFunctions;
   readonly llm: LLMClient;
   readonly embedder: Embedder;
+  readonly fabric: InferenceFabric;
+  readonly scheduler: CognitiveScheduler;
+  readonly accelerators: typeof ACCELERATORS;
   readonly sessionManager: SessionManager;
   readonly gitIngester: GitIngester;
   readonly scientificMemory: ScientificMemory;
@@ -54,6 +58,7 @@ export class UCHAgentPlugin {
   readonly decisionLog: DecisionLog;
   readonly mcpStdio: MCPStdioServer;
   readonly contextGatherer: WorkspaceContextGatherer;
+  readonly coding: CodingToolkit;
 
   readonly config: Required<AgentPluginConfig>;
   readonly startedAt: Date;
@@ -95,6 +100,9 @@ export class UCHAgentPlugin {
     this.bio = new BiologicalFunctions(this.kernel, this.workspace, this.executive);
     this.llm = new LLMClient();
     this.embedder = new Embedder({ provider: this.llm });
+    this.fabric = new InferenceFabric(true);
+    this.scheduler = new CognitiveScheduler(this.fabric);
+    this.accelerators = ACCELERATORS;
     this.sessionManager = new SessionManager({ kernel: this.kernel });
     this.gitIngester = new GitIngester({ kernel: this.kernel, llm: this.llm, repoPath: this.config.workspaceRoot });
     this.scientificMemory = new ScientificMemory();
@@ -102,6 +110,8 @@ export class UCHAgentPlugin {
     this.decisionLog = new DecisionLog();
 
     this.contextGatherer = new WorkspaceContextGatherer(this.config.workspaceRoot);
+
+    this.coding = new CodingToolkit({ workspaceRoot: this.config.workspaceRoot });
 
     this.mcpStdio = new MCPStdioServer({
       kernel: this.kernel,
@@ -151,6 +161,8 @@ export class UCHAgentPlugin {
     } else {
       console.error('[uch] No API key — using local embeddings');
     }
+    const providers = this.fabric.healthStatus().length;
+    console.error(`[uch] Fabric: ${providers} provider(s) — ${this.fabric.isAvailable() ? 'inference ready' : 'deterministic only'}`);
 
     if (this.config.autoIngestGit && !this.autoIngestDone) {
       try {
@@ -217,21 +229,29 @@ export class UCHAgentPlugin {
 
   /** Called after every agent response — learns from the interaction */
   async learnFromInteraction(userMessage: string, assistantResponse: string): Promise<void> {
-    const episode = await this.kernel.remember({
+    await this.kernel.remember({
       content: { type: 'observation', observation: `Q: ${userMessage}\nA: ${assistantResponse.slice(0, 500)}` },
       provenance: { source: 'tool_output', reliability: 0.8 },
     });
 
-    if (this.llm.isAvailable && userMessage.length > 50) {
+    if (this.fabric.isAvailable() && userMessage.length > 50) {
       try {
-        const concepts = await this.llm.extractConcepts(userMessage);
-        for (const concept of concepts.slice(0, 5)) {
-          this.kernel.addConcept({
-            name: concept,
-            concept_type: 'entity',
-            definition: userMessage.slice(0, 200),
-            importance: 0.5,
-          });
+        const result = await this.scheduler.dispatch(
+          this.accelerators.semantic,
+          { text: userMessage },
+          { complexity: 0.4, reasoningNeeded: 0.3, verificationNeeded: 0.2, risk: 0.1 },
+          { maxTokens: 300 },
+        );
+        if (result.fired) {
+          const concepts = [...result.output.entities, ...result.output.topics].slice(0, 5);
+          for (const concept of concepts) {
+            this.kernel.addConcept({
+              name: concept,
+              concept_type: 'entity',
+              definition: userMessage.slice(0, 200),
+              importance: 0.5,
+            });
+          }
         }
       } catch {
         // Concept extraction is best-effort
@@ -240,7 +260,7 @@ export class UCHAgentPlugin {
   }
 
   /** Record a decision made during the session */
-  recordDecision(title: string, description: string, alternatives?: string[]): string {
+  recordDecision(title: string, description: string, _alternatives?: string[]): string {
     const id = crypto.randomUUID();
     this.sessionManager.addMemory({
       key: `decision-${id.slice(0, 8)}`,

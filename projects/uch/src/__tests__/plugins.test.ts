@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { PluginLoader } from '../control-plane/plugins/plugin-loader.js';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
 
 describe('PluginLoader', () => {
   it('starts empty', () => {

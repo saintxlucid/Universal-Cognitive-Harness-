@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { UniversalCognitiveHarness } from '../universal-harness.js';
 import { BiologicalFunctions } from '../biological-functions.js';
-import { NeuralEventBus } from '../../event-bus/neural-event-bus.js';
 
 describe('UniversalCognitiveHarness — edge cases', () => {
   it('initializes with minimal config', () => {

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import type { IncomingMessage } from 'node:http';
 import { MCPSSETransport } from '../control-plane/transport/mcp-sse.js';
 import { SSEServer } from '../control-plane/transport/sse-server.js';
 import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
@@ -43,7 +44,7 @@ describe('MCPSSETransport', () => {
     const parsed = JSON.parse(response);
     expect(parsed.result.tools).toBeInstanceOf(Array);
     expect(parsed.result.tools.length).toBeGreaterThanOrEqual(7);
-    const names = parsed.result.tools.map((t: any) => t.name);
+    const names = parsed.result.tools.map((t: { name: string }) => t.name);
     expect(names).toContain('observe');
     expect(names).toContain('remember');
     expect(names).toContain('retrieve');
@@ -100,7 +101,7 @@ describe('MCPSSETransport', () => {
   it('registers custom tools', async () => {
     transport.registerTool('custom', 'A custom tool', { type: 'object', properties: {} }, async () => 'done');
     const response = await transport.handleMessage('c1', JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }));
-    const names = JSON.parse(response).result.tools.map((t: any) => t.name);
+    const names = JSON.parse(response).result.tools.map((t: { name: string }) => t.name);
     expect(names).toContain('custom');
   });
 
@@ -130,15 +131,15 @@ describe('SSEServer', () => {
   });
 
   it('creates session on SSE connect', () => {
-    const req = { socket: { remoteAddress: '127.0.0.1' }, headers: { 'user-agent': 'test' }, on: vi.fn() } as any;
-    const res = { writeHead: vi.fn(), write: vi.fn(), on: vi.fn() } as any;
+    const req = { socket: { remoteAddress: '127.0.0.1' }, headers: { 'user-agent': 'test' }, on: vi.fn() } as unknown as IncomingMessage;
+    const res = { writeHead: vi.fn(), write: vi.fn(), on: vi.fn() } as unknown as IncomingMessage;
     sse.handleSSE(req, res);
     expect(sse.getTotalSessions()).toBe(1);
   });
 
   it('returns session by client ID', () => {
-    const req = { socket: { remoteAddress: '127.0.0.1' }, headers: {}, on: vi.fn() } as any;
-    const res = { writeHead: vi.fn(), write: vi.fn(), on: vi.fn() } as any;
+    const req = { socket: { remoteAddress: '127.0.0.1' }, headers: {}, on: vi.fn() } as unknown as IncomingMessage;
+    const res = { writeHead: vi.fn(), write: vi.fn(), on: vi.fn() } as unknown as IncomingMessage;
     sse.handleSSE(req, res);
     const sessions = sse.listSessions();
     expect(sessions).toHaveLength(1);
@@ -148,8 +149,8 @@ describe('SSEServer', () => {
   });
 
   it('returns stats', () => {
-    const req = { socket: { remoteAddress: '10.0.0.1' }, headers: {}, on: vi.fn() } as any;
-    const res = { writeHead: vi.fn(), write: vi.fn(), on: vi.fn() } as any;
+    const req = { socket: { remoteAddress: '10.0.0.1' }, headers: {}, on: vi.fn() } as unknown as IncomingMessage;
+    const res = { writeHead: vi.fn(), write: vi.fn(), on: vi.fn() } as unknown as IncomingMessage;
     sse.handleSSE(req, res);
     const stats = sse.getStats();
     expect(stats.totalSessions).toBe(1);

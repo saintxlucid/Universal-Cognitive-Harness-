@@ -1,4 +1,4 @@
-import type { NeuralEvent } from '../event-bus/neural-event-bus.js';
+import type { NeuralEvent, EventType } from '../event-bus/neural-event-bus.js';
 import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
 import { EventLedger } from './event-ledger.js';
 import { createActivity, completeActivity, type CognitiveActivity, type ActivityType, type ActivityContext } from './cognitive-activity.js';
@@ -46,7 +46,7 @@ export class Recorder {
 
   private wireEventBus(): void {
     const sub = this.eventBus.subscribe(
-      [...Object.keys(EVENT_TO_ACTIVITY)] as any,
+      [...Object.keys(EVENT_TO_ACTIVITY)] as EventType[],
       (event: NeuralEvent) => {
         const activityType = EVENT_TO_ACTIVITY[event.type];
         if (!activityType) return;

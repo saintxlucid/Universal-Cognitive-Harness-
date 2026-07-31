@@ -35,7 +35,7 @@ describe('Planner', () => {
     const plan = planner.createPlan('CI');
     const s1 = planner.addStep(plan.id, 'Lint')!;
     const s2 = planner.addStep(plan.id, 'Test', [s1.id])!;
-    const s3 = planner.addStep(plan.id, 'Deploy', [s2.id])!;
+    planner.addStep(plan.id, 'Deploy', [s2.id]);
 
     // Only lint should be ready
     let next = planner.getNextSteps(plan.id);
@@ -184,7 +184,7 @@ describe('DecisionEngine', () => {
   });
 
   it('filters by status', () => {
-    const d1 = engine.createDecision('D1', []);
+    engine.createDecision('D1', []);
     const d2 = engine.createDecision('D2', []);
     engine.revisitDecision(d2.id);
     expect(engine.getDecisionsByStatus('pending').length).toBe(1);

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NervousSystem } from '../nervous-system/nervous-system.js';
 import { createSignal } from '../nervous-system/signal.js';
-import type { Signal, NervousSystemLayer } from '../nervous-system/signal.js';
+import type { Signal } from '../nervous-system/signal.js';
 import { Metabolism } from '../metabolism/metabolism.js';
 
 describe('Signal creation', () => {

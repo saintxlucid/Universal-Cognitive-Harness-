@@ -3,13 +3,19 @@ import { CognitiveKernel } from '../kernel/cognitive-kernel.js';
 import { BiologicalFunctions } from '../harness-api/biological-functions.js';
 import { ExecutiveBrain } from '../executive-brain/executive-brain.js';
 import { WorkspaceBrain } from '../workspace-brain/workspace-brain.js';
-import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
 import { LLMClient } from '../llm/provider.js';
 import { Embedder } from '../embeddings/embedder.js';
 import { SessionManager } from '../session/manager.js';
 import { GitIngester } from '../git/ingester.js';
 import { ScientificMemory } from '../cognitive-plane/memory/scientific-memory.js';
 import { CognitiveConstitution } from '../cognitive-plane/constitution/constitution.js';
+import { InferenceFabric, ACCELERATORS, CognitiveScheduler } from '../accelerators/index.js';
+import type { Accelerator, AcceleratorKind, CognitiveProfile } from '../accelerators/index.js';
+import { CodingPrinciplesEngine } from '../kernel/constitution/coding-principles.js';
+import { OrganicScoreEngine } from '../kernel/constitution/organic-score.js';
+import { GapAnalysisEngine, type GapAnalysisResultItem } from '../kernel/retrieval/gap-analysis.js';
+import { ProgressiveMemorySearch } from '../memory/progressive-search.js';
+import { CPServer, createDefaultCPServer, createCPTools } from '../protocol/index.js';
 
 interface Tool {
   name: string;
@@ -29,6 +35,9 @@ export class MCPStdioServer {
   private gitIngester: GitIngester;
   private scientificMemory: ScientificMemory;
   private constitution: CognitiveConstitution;
+  private fabric: InferenceFabric;
+  private scheduler: CognitiveScheduler;
+  private protocol: CPServer;
   private tools: Map<string, Tool> = new Map();
   private initialized = false;
   private rl: readline.Interface | null = null;
@@ -44,6 +53,7 @@ export class MCPStdioServer {
     gitIngester?: GitIngester;
     scientificMemory?: ScientificMemory;
     constitution?: CognitiveConstitution;
+    protocol?: CPServer;
   }) {
     this.kernel = config.kernel;
     this.bio = config.bio;
@@ -55,6 +65,9 @@ export class MCPStdioServer {
     this.gitIngester = config.gitIngester ?? new GitIngester({ kernel: this.kernel, llm: this.llm });
     this.scientificMemory = config.scientificMemory ?? new ScientificMemory();
     this.constitution = config.constitution ?? new CognitiveConstitution();
+    this.fabric = new InferenceFabric(true);
+    this.scheduler = new CognitiveScheduler(this.fabric);
+    this.protocol = config.protocol ?? createDefaultCPServer(this.kernel);
     this.registerTools();
   }
 
@@ -223,19 +236,140 @@ export class MCPStdioServer {
       return { compliant: violations.length === 0, violations };
     });
 
-    this.registerTool('summarize', 'Summarize text using LLM', {
+    this.registerTool('summarize', 'Summarize text (compression accelerator)', {
       type: 'object', properties: { text: { type: 'string', description: 'Text to summarize' }, maxWords: { type: 'number', description: 'Max words' } }, required: ['text'],
     }, async (args) => {
-      if (!this.llm.isAvailable) return { error: 'No LLM configured. Set OPENAI_API_KEY.' };
-      return { summary: await this.llm.summarize(args.text as string, (args.maxWords as number) ?? 100) };
+      const result = await this.fabric.dispatch(
+        ACCELERATORS.compression,
+        { text: args.text as string, maxWords: (args.maxWords as number) ?? 100 },
+        { maxTokens: (args.maxWords as number) ?? 100, priority: 1 },
+      );
+      return { summary: result.output.summary, fired: result.fired, provider: result.provider };
     });
 
-    this.registerTool('extract-concepts', 'Extract key concepts from text', {
+    this.registerTool('extract-concepts', 'Extract key concepts from text (semantic accelerator)', {
       type: 'object', properties: { text: { type: 'string', description: 'Text to analyze' } }, required: ['text'],
     }, async (args) => {
-      if (!this.llm.isAvailable) return { error: 'No LLM configured' };
-      return { concepts: await this.llm.extractConcepts(args.text as string) };
+      const result = await this.fabric.dispatch(
+        ACCELERATORS.semantic,
+        { text: args.text as string },
+        { maxTokens: 300, priority: 1 },
+      );
+      return { concepts: [...result.output.entities, ...result.output.topics], fired: result.fired, provider: result.provider };
     });
+
+    this.registerTool('schedule', 'Dispatch an accelerator under a cognitive profile (cognitive scheduler decides the execution strategy)', {
+      type: 'object', properties: {
+        kind: { type: 'string', description: 'Accelerator kind: semantic, compression, reasoning, prediction, memory, ontology, classification' },
+        input: { type: 'object', description: 'Accelerator input (e.g. { text: "..." } or { memories: [...] })' },
+        complexity: { type: 'number', description: 'Task complexity 0-1' },
+        reasoningNeeded: { type: 'number', description: 'Deep reasoning required 0-1' },
+        verificationNeeded: { type: 'number', description: 'Independent verification required 0-1' },
+        creativityNeeded: { type: 'number', description: 'Divergent generation required 0-1' },
+        risk: { type: 'number', description: 'Consequence severity 0-1; >= 0.8 forces human approval' },
+      }, required: ['kind', 'input'],
+    }, async (args) => {
+      const kind = args.kind as string;
+      const accelerator = ACCELERATORS[kind as AcceleratorKind] as unknown as Accelerator<Record<string, unknown>, Record<string, unknown>> | undefined;
+      if (!accelerator) return { error: `unknown accelerator kind: ${kind}` };
+      const profile: Partial<CognitiveProfile> = {};
+      for (const field of ['complexity', 'reasoningNeeded', 'verificationNeeded', 'creativityNeeded', 'risk'] as const) {
+        const value = args[field];
+        if (typeof value === 'number') profile[field] = value;
+      }
+      const result = await this.scheduler.dispatch(accelerator, (args.input as Record<string, unknown>) ?? {}, profile);
+      return {
+        strategy: result.strategy.kind,
+        rationale: result.strategy.rationale,
+        fired: result.fired,
+        provider: result.provider,
+        confidence: result.confidence,
+        approvalNeeded: result.approvalNeeded,
+        cached: result.cached,
+        output: result.output,
+      };
+    });
+
+    this.registerTool('principles-check', 'Evaluate an intended change against the 4 coding principles (think before coding, simplicity first, surgical changes, goal-driven execution)', {
+      type: 'object', properties: {
+        intent: { type: 'string', description: 'The task or request as stated' },
+        proposedChange: { type: 'string', description: 'The proposed implementation change' },
+        plan: { type: 'array', items: { type: 'string' }, description: 'Optional planned steps' },
+      }, required: ['intent'],
+    }, async (args) => {
+      const engine = new CodingPrinciplesEngine();
+      const plan = args.plan as string[] | undefined;
+      return engine.evaluate({
+        intent: args.intent as string,
+        proposedChange: (args.proposedChange as string) ?? '',
+        context: plan ? { plan } : undefined,
+      });
+    });
+
+    this.registerTool('organic-score', 'Evaluate a code change against the 15-metric Organic Score rubric (gates: >=90 pass, 70-89 revise, <70 reject). Use before landing any generated code.', {
+      type: 'object', properties: {
+        change: { type: 'string', description: 'The proposed change — description or diff snippet' },
+        intent: { type: 'string', description: 'The task or request as stated' },
+        filesTouched: { type: 'array', items: { type: 'string' }, description: 'Files modified by the change' },
+        testsRun: { type: 'array', items: { type: 'string' }, description: 'Verification commands already run' },
+      }, required: ['change'],
+    }, async (args) => {
+      const engine = new OrganicScoreEngine();
+      return engine.evaluate({
+        change: args.change as string,
+        intent: (args.intent as string) ?? undefined,
+        context: {
+          filesTouched: (args.filesTouched as string[] | undefined) ?? [],
+          testsRun: (args.testsRun as string[] | undefined) ?? [],
+        },
+      });
+    });
+
+    this.registerTool('gap-analysis', 'Synthesize what memory knows about a query: citations, coverage gaps, contradictions, stale sources, and confidence', {
+      type: 'object', properties: {
+        query: { type: 'string', description: 'The question or topic to analyze' },
+        maxResults: { type: 'number', description: 'Max sources to consider' },
+      }, required: ['query'],
+    }, async (args) => {
+      const episodes = this.kernel.getRecentEpisodes(200);
+      const results: GapAnalysisResultItem[] = episodes.map((e) => ({
+        id: e.id,
+        text: typeof e.content === 'object' && e.content !== null ? JSON.stringify(e.content) : String(e.content),
+        timestamp: e.timestamp,
+        source: e.session_id,
+      }));
+      const engine = new GapAnalysisEngine();
+      return engine.analyze(args.query as string, results, {
+        maxResults: (args.maxResults as number | undefined) ?? 10,
+      });
+    });
+
+    this.registerTool('mem-search', 'Progressive memory search (layer 1): compact ranked index of matching episodes, token-efficient', {
+      type: 'object', properties: {
+        query: { type: 'string', description: 'Search query' },
+        limit: { type: 'number', description: 'Max results' },
+        projectId: { type: 'string', description: 'Filter by project' },
+      }, required: ['query'],
+    }, async (args) => {
+      const searcher = new ProgressiveMemorySearch(this.kernel.getEpisodicStore());
+      return searcher.search(args.query as string, {
+        limit: (args.limit as number | undefined) ?? 10,
+        projectId: args.projectId as string | undefined,
+      });
+    });
+
+    this.registerTool('mem-get', 'Fetch full observation details for specific memory IDs (layer 3 of progressive search)', {
+      type: 'object', properties: {
+        ids: { type: 'array', items: { type: 'string' }, description: 'Memory IDs from mem-search' },
+      }, required: ['ids'],
+    }, async (args) => {
+      const searcher = new ProgressiveMemorySearch(this.kernel.getEpisodicStore());
+      return searcher.getObservations((args.ids as string[]) ?? []);
+    });
+
+    for (const tool of createCPTools(this.protocol)) {
+      this.registerTool(tool.name, tool.description, tool.inputSchema, tool.handler);
+    }
   }
 
   private registerTool(name: string, description: string, inputSchema: Record<string, unknown>, handler: (args: Record<string, unknown>) => Promise<unknown>): void {

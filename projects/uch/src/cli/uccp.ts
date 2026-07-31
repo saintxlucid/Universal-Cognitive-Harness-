@@ -1,5 +1,4 @@
 import * as http from 'node:http';
-import type { AddressInfo } from 'node:net';
 import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
 import { CognitiveKernel } from '../kernel/cognitive-kernel.js';
 import { WorkspaceBrain } from '../workspace-brain/workspace-brain.js';
@@ -13,7 +12,7 @@ import { Auth } from '../control-plane/auth/auth.js';
 import { SecretsStore } from '../control-plane/secrets/secrets-store.js';
 import { PolicyEngine } from '../control-plane/policies.js';
 import { BudgetTracker } from '../control-plane/budgets/budgets.js';
-import { OTLPExporter } from '../control-plane/telemetry/otlp-exporter.js';
+import { OTLPExporter, traceToSpan } from '../control-plane/telemetry/otlp-exporter.js';
 import { Lifecycle } from '../control-plane/lifecycle.js';
 import { MCPSSETransport } from '../control-plane/transport/mcp-sse.js';
 import { PluginLoader } from '../control-plane/plugins/plugin-loader.js';
@@ -37,6 +36,7 @@ import { AttentionCortex } from '../cortex_kernel/attention-cortex.js';
 import { UnderstandingCortex } from '../cortex_kernel/understanding-cortex.js';
 import { ExecutiveCortex } from '../cortex_kernel/executive-cortex.js';
 import { MetaBrain } from '../cortex_kernel/meta-brain.js';
+import { CPServer, createDefaultCPServer, handleCPHTTP, cpRouteInfo } from '../protocol/index.js';
 
 export interface UCCPOptions {
   workspaceId: string;
@@ -86,6 +86,7 @@ export class UCCPServer {
   private understandingCortex: UnderstandingCortex;
   private executiveCortex: ExecutiveCortex;
   private metaBrain: MetaBrain;
+  private protocol: CPServer;
 
   constructor(options: UCCPOptions) {
     this.options = {
@@ -127,7 +128,7 @@ export class UCCPServer {
     this.secrets = new SecretsStore();
     this.policies = new PolicyEngine();
     this.budgets = new BudgetTracker();
-    this.otlp = new OTLPExporter(this.traceRecorder.ledger);
+    this.otlp = new OTLPExporter();
     this.mcpSse = new MCPSSETransport(this.bio, this.kernel, this.eventBus);
     this.persistence = new TracePersistence(this.options.traceFile);
     this.lifecycle = new Lifecycle();
@@ -149,7 +150,7 @@ export class UCCPServer {
     this.ipcTransport = new IPCTransport();
     this.cliTransport = new CLITransport();
     this.cortexKernel = new CortexKernel(
-      this.aether['cons'] as any,
+      this.aether.cons,
       this.kernel,
       this.executive,
       this.eventBus,
@@ -158,6 +159,7 @@ export class UCCPServer {
     this.understandingCortex = this.cortexKernel.understanding;
     this.executiveCortex = this.cortexKernel.executive;
     this.metaBrain = this.cortexKernel.metaBrain;
+    this.protocol = createDefaultCPServer(this.kernel);
 
     this.registerServices();
     this.setupPolicies();
@@ -341,7 +343,10 @@ export class UCCPServer {
     await this.harness.start();
     await this.lifecycle.startAll();
     this.startHttpServer();
-    this.otlp.enqueueRecent(50);
+    const recent = this.traceRecorder.ledger.getRecent(50);
+    for (const trace of recent) {
+      if (trace.end_timestamp) this.otlp.record(traceToSpan(trace));
+    }
 
     this.eventBus.publish({
       type: 'session:started',
@@ -520,6 +525,26 @@ export class UCCPServer {
         return;
       }
 
+      if (pathname === '/cp/v1') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(cpRouteInfo(this.protocol)));
+        return;
+      }
+
+      if (pathname.startsWith('/cp/v1/')) {
+        if (req.method !== 'POST') {
+          res.writeHead(405, { Allow: 'POST' });
+          res.end();
+          return;
+        }
+        const op = pathname.slice('/cp/v1/'.length);
+        const body = await readJsonBody();
+        const response = await handleCPHTTP(this.protocol, { ...(body ?? {}), op });
+        res.writeHead(response.success ? 200 : 400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(response));
+        return;
+      }
+
       if (pathname === '/api/status') {
         const authHeader = req.headers['authorization'];
         if (authHeader) {
@@ -621,7 +646,7 @@ export class UCCPServer {
           res.end(JSON.stringify({ error: 'Missing content in body' }));
           return;
         }
-        const thought = this.aether.observeThought(
+        this.aether.observeThought(
           (body.layer as ConsciousnessLayer) ?? 'working',
           body.content,
           (body.source as string) ?? 'api',

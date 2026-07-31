@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import * as fs from 'node:fs';
 import { TraceLedger } from '../cognitive-plane/trace-engine/trace-ledger.js';
 import {
   createTrace,
@@ -171,48 +172,44 @@ describe('RateLimiter', () => {
 
 // ── Webhook Dispatcher ────────────────────────────────────────
 describe('WebhookDispatcher', () => {
+  const signal = {
+    id: 's1',
+    type: 'error:occurred',
+    timestamp: new Date(),
+    source: 'test',
+    payload: {},
+    importance: 0.5,
+    acknowledged: false,
+  };
+
   it('registers and lists webhooks', () => {
     const wd = new WebhookDispatcher();
-    wd.register({
-      id: 'wh1',
+    wd.register('wh1', {
       url: 'https://example.com/hook',
-      signalTypes: ['error:occurred', 'session:started'],
-      enabled: true,
+      events: ['error:occurred', 'session:started'],
     });
     expect(wd.getWebhooks()).toHaveLength(1);
   });
 
   it('unregisters webhooks', () => {
     const wd = new WebhookDispatcher();
-    wd.register({
-      id: 'wh1',
+    wd.register('wh1', {
       url: 'https://example.com/hook',
-      signalTypes: ['error:occurred'],
-      enabled: true,
+      events: ['error:occurred'],
     });
-    expect(wd.unregister('wh1')).toBe(true);
+    expect(() => wd.unregister('wh1')).not.toThrow();
     expect(wd.getWebhooks()).toHaveLength(0);
   });
 
   it('dispatches to matching webhooks (gracefully handles failure)', async () => {
     const wd = new WebhookDispatcher();
-    wd.register({
-      id: 'wh1',
+    wd.register('wh1', {
       url: 'https://localhost:1/nonexistent',
-      signalTypes: ['error:occurred'],
-      enabled: true,
+      events: ['error:occurred'],
       retryCount: 1,
       retryDelayMs: 1,
     });
-    const results = await wd.dispatch({
-      id: 's1',
-      type: 'error:occurred',
-      timestamp: new Date(),
-      source: 'test',
-      payload: {},
-      importance: 0.5,
-      acknowledged: false,
-    });
+    const results = await wd.dispatch(signal.type, signal);
     expect(results).toHaveLength(1);
     expect(results[0]!.status).toBe('failed');
     expect(results[0]!.attempts).toBe(1);
@@ -220,67 +217,38 @@ describe('WebhookDispatcher', () => {
 
   it('skips non-matching signal types', async () => {
     const wd = new WebhookDispatcher();
-    wd.register({
-      id: 'wh1',
+    wd.register('wh1', {
       url: 'https://localhost:1/nonexistent',
-      signalTypes: ['session:started'],
-      enabled: true,
+      events: ['session:started'],
       retryCount: 1,
       retryDelayMs: 1,
     });
-    const results = await wd.dispatch({
-      id: 's1',
-      type: 'error:occurred',
-      timestamp: new Date(),
-      source: 'test',
-      payload: {},
-      importance: 0.5,
-      acknowledged: false,
-    });
+    const results = await wd.dispatch(signal.type, signal);
     expect(results).toHaveLength(0);
   });
 
   it('skips disabled webhooks', async () => {
     const wd = new WebhookDispatcher();
-    wd.register({
-      id: 'wh1',
+    wd.register('wh1', {
       url: 'https://localhost:1/nonexistent',
-      signalTypes: ['error:occurred'],
+      events: ['error:occurred'],
       enabled: false,
       retryCount: 1,
       retryDelayMs: 1,
     });
-    const results = await wd.dispatch({
-      id: 's1',
-      type: 'error:occurred',
-      timestamp: new Date(),
-      source: 'test',
-      payload: {},
-      importance: 0.5,
-      acknowledged: false,
-    });
+    const results = await wd.dispatch(signal.type, signal);
     expect(results).toHaveLength(0);
   });
 
   it('tracks delivery stats', async () => {
     const wd = new WebhookDispatcher();
-    wd.register({
-      id: 'wh1',
+    wd.register('wh1', {
       url: 'https://localhost:1/nonexistent',
-      signalTypes: ['error:occurred'],
-      enabled: true,
+      events: ['error:occurred'],
       retryCount: 1,
       retryDelayMs: 1,
     });
-    await wd.dispatch({
-      id: 's1',
-      type: 'error:occurred',
-      timestamp: new Date(),
-      source: 'test',
-      payload: {},
-      importance: 0.5,
-      acknowledged: false,
-    });
+    await wd.dispatch(signal.type, signal);
     expect(wd.getDeliveries()).toHaveLength(1);
     const stats = wd.getStats();
     expect(stats.totalDeliveries).toBe(1);
@@ -1324,7 +1292,6 @@ describe('ExportEngine', () => {
     const filePath = '/tmp/uccp-export-test.json';
     ee.exportToFile({ format: 'json', scope: 'traces', filePath });
 
-    const fs = require('node:fs');
     const content = fs.readFileSync(filePath, 'utf-8');
     const parsed = JSON.parse(content);
     expect(parsed.traces).toHaveLength(1);

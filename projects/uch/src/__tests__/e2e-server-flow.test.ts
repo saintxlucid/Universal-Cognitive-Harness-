@@ -480,7 +480,6 @@ describe('E2E: UCCPServer Flow', () => {
 
   it('returns 204 for OPTIONS preflight on any route', async () => {
     await withServer(async (baseUrl) => {
-      const json = JSON.stringify({});
       const res = await new Promise<{ status: number; headers: Record<string, string | undefined> }>(
         (resolve, reject) => {
           const req = http.request(
@@ -491,8 +490,7 @@ describe('E2E: UCCPServer Flow', () => {
               headers['access-control-allow-origin'] = res.headers['access-control-allow-origin'] as string | undefined;
               headers['access-control-allow-methods'] = res.headers['access-control-allow-methods'] as string | undefined;
               headers['access-control-allow-headers'] = res.headers['access-control-allow-headers'] as string | undefined;
-              let data = '';
-              res.on('data', (chunk: string) => { data += chunk; });
+              res.resume();
               res.on('end', () => resolve({ status: res.statusCode ?? 0, headers }));
             },
           );
@@ -544,8 +542,7 @@ describe('E2E: UCCPServer Flow', () => {
     await withServer(async (baseUrl) => {
       const res = await new Promise<{ status: number }>((resolve, reject) => {
         http.get(`${baseUrl}/mcp`, (res) => {
-          let data = '';
-          res.on('data', (chunk: string) => { data += chunk; });
+          res.resume();
           res.on('end', () => resolve({ status: res.statusCode ?? 0 }));
         }).on('error', reject);
       });
