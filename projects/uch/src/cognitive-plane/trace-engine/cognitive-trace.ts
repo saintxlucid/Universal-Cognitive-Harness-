@@ -44,6 +44,36 @@ export interface CognitiveTrace {
   links: Array<{ trace_id: string; span_id: string; attributes?: TraceAttribute[] }>;
 }
 
+function randomHexBytes(byteLength: number): string {
+  const bytes = new Uint8Array(byteLength);
+  crypto.getRandomValues(bytes);
+  let out = '';
+  for (const b of bytes) out += b.toString(16).padStart(2, '0');
+  return out;
+}
+
+/** 128-bit trace id, 32 lowercase hex chars — W3C `traceparent` field 1. */
+export function generateTraceId(): string {
+  return randomHexBytes(16);
+}
+
+/** 64-bit span id, 16 lowercase hex chars — W3C `traceparent` field 2. */
+export function generateSpanId(): string {
+  return randomHexBytes(8);
+}
+
+/** Strip non-hex characters and normalize to exactly 32 hex chars (trace id). */
+export function normalizeTraceId(traceId: string): string {
+  const hex = traceId.replace(/[^0-9a-fA-F]/g, '').toLowerCase();
+  return (hex + '0'.repeat(32)).slice(0, 32);
+}
+
+/** Strip non-hex characters and normalize to exactly 16 hex chars (span id). */
+export function normalizeSpanId(spanId: string): string {
+  const hex = spanId.replace(/[^0-9a-fA-F]/g, '').toLowerCase();
+  return (hex + '0'.repeat(16)).slice(0, 16);
+}
+
 export function createTrace(params: {
   name: string;
   kind?: SpanKind;
@@ -52,9 +82,9 @@ export function createTrace(params: {
   attributes?: TraceAttribute[];
 }): CognitiveTrace {
   return {
-    trace_id: params.trace_id ?? crypto.randomUUID(),
-    span_id: crypto.randomUUID(),
-    parent_span_id: params.parent_span_id ?? null,
+    trace_id: normalizeTraceId(params.trace_id ?? generateTraceId()),
+    span_id: generateSpanId(),
+    parent_span_id: params.parent_span_id ? normalizeSpanId(params.parent_span_id) : null,
     name: params.name,
     kind: params.kind ?? 'internal',
     timestamp: new Date(),

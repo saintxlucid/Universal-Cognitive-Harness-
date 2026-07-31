@@ -93,6 +93,17 @@ No implementation is approved until the design can demonstrate:
 5. A client decline or detach path that leaves its native workflow intact.
 6. Tests for cross-project isolation, deletion propagation, stale-event handling, and unauthorized action denial.
 
+## Phase-I status (2026-07-31)
+
+| Criterion | Status |
+| --- | --- |
+| 1. Manifest + discovery contract | ✅ Implemented — see [WORKSPACE-MANIFEST.md](WORKSPACE-MANIFEST.md); `src/workspace-manifest/` (manifest, discovery, negotiation, attach lifecycle); CLI `uch attach` / `uch manifest init|show`; 21 tests |
+| 2. Capability registry with scopes/authority/cost | ✅ Implemented — `src/cognitive-runtime/capability-registry.ts` (scope cascade, authority/operation families, cost budgets, retention); `src/cognitive-runtime/grants.ts` (GrantEngine: issue, authorize, revoke, scope cascade, rate limit, budget, retention); attach issues a per-agent scoped grant and detach revokes it; 29 grant/registry tests |
+| 3. Provenance-linked driver event path | ✅ Implemented — see [EVENT-GOVERNANCE.md](EVENT-GOVERNANCE.md); `src/control-plane/event-governance.ts` (EventGovernance: provenance chains, idempotency dedupe, PolicyEngine checks, GrantEngine checks, staleness, audit ledger, `governance:event_denied` observability); attach wires the session gate into the lifecycle; 17 governance/policy tests |
+| 4. Two clients with different projections | ✅ Implemented — see [PROJECTIONS.md](PROJECTIONS.md); `src/control-plane/projections.ts` (ProjectionEngine: scope containment + capability authority intersection), attach issues per-agent grants and returns `result.projection`; 14 tests incl. two clients receiving different projections of the same workspace state |
+| 5. Client decline/detach path | ✅ Implemented — `attached: false` is a normal outcome; `detach()` stops drivers and emits `agent:detached` / `workspace:closed` |
+| 6. Isolation/deletion/stale-event/denial tests | ✅ Implemented — unauthorized-action denial, cross-project isolation (out-of-scope events denied), deletion propagation (revoked grants deny subsequent events), and stale-event rejection covered by grant + governance tests; projection-level isolation covered by projections tests (broad view ⊇ narrow view, containment, per-client independence) |
+
 ## Evidence and limits
 
 The decision is supported by evidence that harness choice can affect coding-agent token use, latency, and oversight even when the underlying model is unchanged. The cited study is preliminary and does not validate UCH; it motivates treating the harness as an independently evaluated engineering layer. OpenClaw's ACP documentation supports the narrower claim that it can manage external coding-harness sessions while retaining separate ownership boundaries. MCP supports lifecycle, capability negotiation, and server-side resources, prompts, and tools; it does not imply a universal memory model.

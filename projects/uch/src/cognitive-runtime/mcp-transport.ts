@@ -18,12 +18,6 @@ interface JSONRPCResponse {
   error?: { code: number; message: string; data?: unknown };
 }
 
-interface JSONRPCNotification {
-  jsonrpc: '2.0';
-  method: string;
-  params?: Record<string, unknown>;
-}
-
 // ── MCP Protocol types ─────────────────────────────────────
 
 interface MCPTool {

@@ -72,7 +72,7 @@ describe('TraceLedger', () => {
     const ledger = new TraceLedger();
     ledger.append(createTrace({ name: 'a' }));
     ledger.append(createTrace({ name: 'b' }));
-    const results: any[] = [];
+    const results: ReturnType<typeof createTrace>[] = [];
     for await (const t of ledger.stream()) {
       results.push(t);
     }

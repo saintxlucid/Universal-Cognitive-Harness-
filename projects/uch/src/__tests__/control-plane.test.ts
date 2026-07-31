@@ -96,6 +96,18 @@ describe('PolicyEngine', () => {
     expect(engine.evaluate({ principal: 'agent-1', action: 'write', resource: 'any' }).allowed).toBe(false);
   });
 
+  it('matches namespaced wildcard actions like git:*', () => {
+    const engine = new PolicyEngine();
+    engine.addRule({ id: 'allow-git', effect: 'allow', principals: ['agent-*'], actions: ['git:*'], resources: ['ws-*'], priority: 1 });
+
+    expect(engine.evaluate({ principal: 'agent-1', action: 'git:commit', resource: 'ws-test' }).allowed).toBe(true);
+    expect(engine.evaluate({ principal: 'agent-1', action: 'git:push', resource: 'ws-test' }).allowed).toBe(true);
+    expect(engine.evaluate({ principal: 'agent-2', action: 'git:commit', resource: 'ws-other' }).allowed).toBe(true);
+    expect(engine.evaluate({ principal: 'agent-1', action: 'deployment:started', resource: 'ws-test' }).allowed).toBe(false);
+    expect(engine.evaluate({ principal: 'other', action: 'git:commit', resource: 'ws-test' }).allowed).toBe(false);
+    expect(engine.evaluate({ principal: 'agent-1', action: 'git:commit', resource: 'other-ws' }).allowed).toBe(false);
+  });
+
   it('evaluates conditions', () => {
     const engine = new PolicyEngine();
     engine.addRule({

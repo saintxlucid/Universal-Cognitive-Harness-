@@ -2,6 +2,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import type { CognitiveTrace } from '../trace-engine/cognitive-trace.js';
 import { TraceLedger } from '../trace-engine/trace-ledger.js';
+import { normalizeSpanId, normalizeTraceId } from '../trace-engine/cognitive-trace.js';
 
 export class TracePersistence {
   private filePath: string;
@@ -25,6 +26,11 @@ export class TracePersistence {
     for (const line of lines) {
       try {
         const trace = JSON.parse(line) as CognitiveTrace;
+        // Normalize legacy ids (pre-ADR-002 32-hex UUIDs) to W3C shape so
+        // parent/child linkage survives across versions.
+        trace.trace_id = normalizeTraceId(trace.trace_id);
+        trace.span_id = normalizeSpanId(trace.span_id);
+        if (trace.parent_span_id) trace.parent_span_id = normalizeSpanId(trace.parent_span_id);
         trace.timestamp = new Date(trace.timestamp);
         if (trace.end_timestamp) trace.end_timestamp = new Date(trace.end_timestamp);
         for (const evt of trace.events) {

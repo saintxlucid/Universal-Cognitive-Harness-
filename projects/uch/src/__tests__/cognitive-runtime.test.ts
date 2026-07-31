@@ -203,7 +203,7 @@ describe('MCPTransport', () => {
     }));
     const parsed = JSON.parse(response!);
     expect(parsed.result.tools).toBeInstanceOf(Array);
-    const toolNames = parsed.result.tools.map((t: any) => t.name);
+    const toolNames = parsed.result.tools.map((t: { name: string }) => t.name);
     expect(toolNames).toContain('observe');
     expect(toolNames).toContain('retrieve');
     expect(toolNames).toContain('plan');
