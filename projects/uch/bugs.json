@@ -1,0 +1,108 @@
+{
+  "meta": {
+    "project": "uch",
+    "branch": "fix/uch-audit-2026-07-31",
+    "generated": "2026-07-31",
+    "source": "BUG-REPORT.md",
+    "baseline": { "testFiles": 136, "tests": 2165 },
+    "final": { "testFiles": 141, "tests": 2232, "auditVulnerabilities": 0 }
+  },
+  "bugs": [
+    {
+      "id": "BUGA-001",
+      "severity": "HIGH",
+      "theme": "Shell injection via execSync string interpolation (git/ingester)",
+      "owasp": "A03 Injection",
+      "status": "fixed",
+      "fixCommit": "0dbe8ef",
+      "location": "src/git/ingester.ts",
+      "rootCause": "Command strings built by concatenation and executed through a shell; count/hash inputs accepted raw values.",
+      "fix": "execFileSync('git', args[]) with no shell; sanitizeCount (finite, 1-1000) and sanitizeHash (^[0-9a-f]{4,40}$) guards.",
+      "test": "src/__tests__/ingester-injection.test.ts"
+    },
+    {
+      "id": "BUGB-001",
+      "severity": "HIGH",
+      "theme": "Denylist bypass — regex-shaped patterns matched as literals",
+      "owasp": "A03 Injection",
+      "status": "fixed",
+      "fixCommit": "f6dedfa",
+      "location": "src/coding/command-runner.ts",
+      "rootCause": "Regex-shaped denylist entries matched with command.includes(pattern) made them dead code; case/whitespace-sensitive matching.",
+      "fix": "Denylist entries compiled as RegExp (flag i); whitespace normalized before checks.",
+      "test": "src/coding/__tests__/command-runner-security.test.ts"
+    },
+    {
+      "id": "BUGB-002",
+      "severity": "HIGH",
+      "theme": "Allowlist bypass — prefix match + shell:true metacharacter injection",
+      "owasp": "A03 Injection",
+      "status": "fixed",
+      "fixCommit": "f6dedfa",
+      "location": "src/coding/command-runner.ts",
+      "rootCause": "command.startsWith(a) prefix match with spawn shell:true permitted chained commands (git status; rm -rf /).",
+      "fix": "Token-based first-token exact match + unquoted-shell-metacharacter rejection.",
+      "test": "src/coding/__tests__/command-runner-security.test.ts"
+    },
+    {
+      "id": "BUGC-001",
+      "severity": "HIGH",
+      "theme": "Shell injection — git-driver execSync string interpolation",
+      "owasp": "A03 Injection",
+      "status": "fixed",
+      "fixCommit": "505faae",
+      "location": "src/drivers/git/git-driver.ts",
+      "rootCause": "execSync('git ' + args); commit/push/pull/checkout interpolated raw message/branch/hash/author.",
+      "fix": "execFileSync('git', args[]) arg arrays for every call; hash/branch/remote/author validated before use.",
+      "test": "src/drivers/git/__tests__/git-driver-security.test.ts"
+    },
+    {
+      "id": "BUGD-001",
+      "severity": "HIGH",
+      "theme": "Bash tool — full shell exec with no denylist, no containment",
+      "owasp": "A03 Injection",
+      "status": "fixed",
+      "fixCommit": "5d87e34",
+      "location": "src/agentic/tools/implementations.ts",
+      "rootCause": "exec(command, { shell }) with no denylist; destructive classification advisory only.",
+      "fix": "Shared DEFAULT_DENYLIST + bash-specific patterns (download-execute chains, Remove-Item -Recurse/-Force, del /s, rm -rf ~); unquoted injection metacharacters rejected; timeout capped at 600s; blocked commands surface as isError.",
+      "test": "src/agentic/tools/__tests__/bash-tool-security.test.ts"
+    },
+    {
+      "id": "BUGD-002",
+      "severity": "HIGH",
+      "theme": "File Read/Write/Edit tools — no path containment",
+      "owasp": "A01 Broken Access Control",
+      "status": "fixed",
+      "fixCommit": "5d87e34",
+      "location": "src/agentic/tools/implementations.ts",
+      "rootCause": "path.resolve(context.cwd, file_path) with no containment check; Write mkdir -p'd parents.",
+      "fix": "resolveWithinRoot rejects path.relative results starting with '..' or absolute; applied to Read/Write/Edit/Glob/Grep.",
+      "test": "src/agentic/tools/__tests__/bash-tool-security.test.ts"
+    },
+    {
+      "id": "BUG-201",
+      "severity": "HIGH",
+      "theme": "FileEditor prefix-collision path escape",
+      "owasp": "A01 Broken Access Control",
+      "status": "fixed",
+      "fixCommit": "3e90f0d",
+      "location": "src/coding/file-editor.ts",
+      "rootCause": "resolved.startsWith(rootResolved) prefix collision; Windows case-insensitivity and symlink/junction escapes unhandled.",
+      "fix": "Lexical path.relative + separator-aware case-folded prefix check + realpath walk to nearest existing ancestor with case-folded re-check.",
+      "test": "src/__tests__/file-editor-containment.test.ts"
+    },
+    {
+      "id": "BUG-204",
+      "severity": "MEDIUM",
+      "theme": "FileEditor undo of created file writes empty file",
+      "owasp": "A08 Data Integrity",
+      "status": "fixed",
+      "fixCommit": "3e90f0d",
+      "location": "src/coding/file-editor.ts",
+      "rootCause": "backup() stored content ?? ''; undo() null-check was dead code.",
+      "fix": "FileBackup.existed boolean recorded; undo removes the file when it did not exist.",
+      "test": "src/__tests__/file-editor-containment.test.ts"
+    }
+  ]
+}

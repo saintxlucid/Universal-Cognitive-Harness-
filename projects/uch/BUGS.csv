@@ -1,0 +1,9 @@
+id,severity,theme,owasp,status,fixCommit,location
+BUGA-001,HIGH,Shell injection via execSync string interpolation (git/ingester),A03 Injection,fixed,0dbe8ef,src/git/ingester.ts
+BUGB-001,HIGH,Denylist bypass - regex-shaped patterns matched as literals,A03 Injection,fixed,f6dedfa,src/coding/command-runner.ts
+BUGB-002,HIGH,Allowlist bypass - prefix match + shell:true metacharacter injection,A03 Injection,fixed,f6dedfa,src/coding/command-runner.ts
+BUGC-001,HIGH,Shell injection - git-driver execSync string interpolation,A03 Injection,fixed,505faae,src/drivers/git/git-driver.ts
+BUGD-001,HIGH,Bash tool - full shell exec with no denylist no containment,A03 Injection,fixed,5d87e34,src/agentic/tools/implementations.ts
+BUGD-002,HIGH,File Read/Write/Edit tools - no path containment,A01 Broken Access Control,fixed,5d87e34,src/agentic/tools/implementations.ts
+BUG-201,HIGH,FileEditor prefix-collision path escape,A01 Broken Access Control,fixed,3e90f0d,src/coding/file-editor.ts
+BUG-204,MEDIUM,FileEditor undo of created file writes empty file,A08 Data Integrity,fixed,3e90f0d,src/coding/file-editor.ts
