@@ -186,7 +186,15 @@ synchronization, cognitive silicon, operating contracts, cognitive units
 discipline intake (IDEA-0024…0032): cognitive systems engineering, ambient
 cognition/CDE, cognitive mathematics, cognitive sociology, cognitive
 motherboard, cache hierarchy, cognitive speculation, reality compiler,
-consciousness levels.
+consciousness levels; and the 2026-08-01 firmware-compute intake
+(IDEA-0033…0047): cognitive firmware (a permanent-behavior tier in the
+capability hierarchy Laws → Kernel → Firmware → Accelerators → Organs →
+Skills → Drivers → Applications), the unified decision law (Theory of
+Intelligence), cognitive information theory, topology, thermodynamics,
+immunology, embryology, jurisprudence, anthropology, archaeology,
+astronomy + instruments, candidate law expansion (32 → 50–100 laws), the
+Cognitive Virtual Machine, the accelerator catalog, and Universal
+Engineering Replay (one causal engineering graph across every host).
 
 A second framing of the same universe is the **discipline ladder** — the
 eight formal disciplines from which every feature should be derivable:

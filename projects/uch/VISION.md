@@ -165,3 +165,88 @@ cognition/CDE, cognitive mathematics, cognitive sociology, cognitive
 motherboard, cache hierarchy, cognitive speculation, reality compiler,
 consciousness levels). The eight-discipline ladder is recorded in
 GENESIS.md chapter 3 as framing with corpus mappings.
+
+## 10. The firmware-compute claim (2026-08-01 intake, round 7)
+
+Verdict after repo-wide mapping: ~65% of the round-7 vision already has
+ancestors executed or tracked — the firmware engines map onto integrity
+laws + structuredFacts (truth), gatherer + sensors + IDEA-0017/0031
+(reality sync), context compressor (context), sleep cycle + vmem
+(memory), engineering-intelligence (architecture + refactoring),
+OrganicScoreEngine (organic code), IDEA-0012 (simulation), meta-cognition
+DBs (meta), IDEA-0016 (economics), IDEA-0008 (genetics), IDEA-0009
+(time), IDEA-0014 (observatory), RFC-0004 + ADR-006 (CIR/microkernel),
+ADR-004 (virtual processors). The genuine delta is 15 proposals, tracked
+as idea notes IDEA-0033…0047.
+
+The category claim: a capability hierarchy that gives every new feature a
+home instead of another isolated module — **Laws** (immutable rules) →
+**Kernel Services** (ADR-006 primitives) → **Firmware** (permanent
+cognitive behaviors; IDEA-0033) → **Accelerators** (optimized execution
+pipelines; IDEA-0046) → **Organs** (specialized systems) → **Skills**
+(composable workflows) → **Drivers** (host adapters) → **Applications**.
+Firmware is the new tier: behavior that changes how the organism
+behaves, not what it knows.
+
+The science claim: a Theory of Intelligence (IDEA-0034) — one decision
+law (maximize Expected Utility + Information Gain under Energy + Risk +
+Latency costs) from which planning, memory, learning, reflection,
+scheduling, and verification derive as special cases — plus named
+disciplines: Cognitive Information Theory (IDEA-0035), Topology
+(IDEA-0036), Thermodynamics (IDEA-0037), Immunology (IDEA-0038),
+Embryology (IDEA-0039), Jurisprudence (IDEA-0040), Anthropology
+(IDEA-0041), Archaeology (IDEA-0042), Astronomy + Instruments
+(IDEA-0043), law expansion (IDEA-0044), and the Cognitive Virtual
+Machine (IDEA-0045) — CIR as the LLVM IR of cognition, CVM as the JVM,
+CABI as the POSIX, Signal Fabric as the TCP/IP.
+
+The utility-classes framing (14 classes: engineering, cognitive,
+research, simulation, reality, intelligence, manufacturing,
+verification, biological, executive, creative, evolution, observatory,
+civilization) is recorded as a cataloging convention, not a new
+component set: each class maps onto the existing CLI/MCP/skill/subagent
+surface or an idea note.
+
+The strongest differentiator is **Universal Engineering Replay**
+(IDEA-0047): one causal engineering graph across every host (VS Code,
+Claude Code, Codex, OpenCode, JetBrains, Copilot, terminal, git,
+browser, MCPs), extending the ADR-002 trace ledger with cross-host
+episode capture and influence-path/change-point queries. This is the
+candidate category-defining primitive: it turns today's host-local
+chat/edit silos into one evidence-attached causal graph of engineering
+knowledge — the acceptance test of Law 12 applied across tools.
+
+## 11. The foundations intake (2026-08-01, round 8)
+
+Verdict after repo-wide mapping: the "40% designed / 60% missing" split
+is optimistic about the delta — roughly 70% of the 21 foundations
+already have ancestors executed or tracked (F0 spec stack; F1 CVM →
+IDEA-0045; F2 driver architecture → `src/drivers/` + CIC + compliance;
+F5 reality → IDEA-0017/0031 + sensors; F6/F16 simulation + twin →
+IDEA-0012/0013; F7 benchmark → IDEA-0018 + EI benchmark runner; F8
+observatory → IDEA-0014; F10 packages → WS-P + IDEA-0019; F13 research
+→ IDEA-0033 Layer 9 + research registers; F15 manufacturing → IDEA-0013
++ organic-code gates; F17 economy → IDEA-0016 + budgets; F18 evolution
+→ IDEA-0008 + DNA; F20 civilization → CIC + attach + merge + IDEA-0007;
+F14 graph → IDEA-0050). The user's deeper claim holds: the missing
+material is infrastructure, not AI features.
+
+The true delta is 8 proposals, tracked as idea notes IDEA-0048…0055:
+
+| Foundation | Delta |
+|---|---|
+| F0 Formal Specification | IDEA-0048 — one consolidated normative document set (POSIX-style) + normative timing/determinism/persistence sections; spec/ + STACK.md exist, consolidation does not |
+| F3 Storage Engine | IDEA-0049 — unified storage contract over pluggable backends (file/sqlite/postgres/neo4j/vector/object/git); today stores are directly addressed |
+| F4 + F14 Knowledge Fabric | IDEA-0050 — typed artifact nodes + cross-domain edges (conversation→decision→benchmark); per-domain graphs exist, the shared fabric does not |
+| F9 Engineering Database | IDEA-0051 — typed artifact store (tradeoffs, meetings, successes, experiments as first-class records) |
+| F11 Skill Compiler | IDEA-0052 — Skill DSL → Skill IR → optimizer → runtime; skills are prose today |
+| F12 Constitution Engine | IDEA-0053 — central execute-time enforcement so no subsystem can violate the Laws (checks exist at evaluation points only) |
+| F2 + F19 Driver Ecosystem + Interop Lab | IDEA-0054 — per-IDE adapter catalog + automated cross-host/OS certification matrix as a release gate |
+| CEL | IDEA-0055 — a cognitive engineering language: mission → CIR → CVM; makes UCH programmable, not just configurable |
+
+The CEL claim is the round's headline: with CEL compiling through CIR
+to the CVM, models become execution backends of user-written programs,
+and UCH shifts from "an implementation" to "a programmable cognitive
+platform" — the C-to-LLVM relationship for cognition. Like every
+proposal here it stays at SOP-08 stage 1 until a spike proves it
+absorbs the problem class.
