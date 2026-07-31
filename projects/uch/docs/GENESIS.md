@@ -126,6 +126,85 @@ backends are replaceable).
 
 ---
 
+### The Cognitive Universe — the layer model
+
+A cognitive substrate, like an operating system, needs its own universe:
+not software shaped like physics, but a layer model in which every lower
+layer constrains the upper layers until behavior becomes inevitable rather
+than designed. The model:
+
+```text
+Constants      what never changes — identity uniqueness, timestamp
+               precision, trust/confidence ranges, energy units,
+               priority levels, time units (candidate: FORMAL_FOUNDATIONS)
+     ↓
+Laws           what is impossible — the 32 Laws of Cognitive Physics in
+               five families (Physics · Biology · Psychology · Society ·
+               Computing); law numbers are permanent
+     ↓
+Physics        the mathematics — units, conservation, failure physics,
+               calculus (RFC-0005, draft in FORMAL_FOUNDATIONS Part VIII)
+     ↓
+Matter         the ontology — everything that exists inherits properties
+               from the laws (spec/COGNITIVE_ONTOLOGY.md)
+     ↓
+Life           the organs — memory, scheduler, nervous system,
+               metabolism, governance; organs do not define behavior,
+               they obey the universe (MANIFESTO §6)
+     ↓
+Civilization   the ecosystem — drivers (Claude, Codex, Cursor, Copilot,
+               OpenCode, JetBrains), pilots living inside the universe
+               (src/drivers/, design/integrations/)
+```
+
+The design test this implies: instead of asking "how do we build a memory
+organ?", ask "given the laws of this universe, what is the inevitable
+behavior of a memory organ?" Every organ should be derivable from the layers
+below it; anything that cannot be derived is either a new law or a bug.
+
+A compact summary of the same idea as five engines, each already present in
+embryo:
+
+| Engine | Function | Current embryo |
+| --- | --- | --- |
+| Physics | runs the laws | constitution + trace ledger |
+| Evolution | changes the organism under governance | sleep cycle + self-evolution DBs |
+| Meaning | maintains semantic coherence | connectome + context compressor |
+| Civilization | coordinates multiple organisms | CIC, attach, cognitive merge |
+| Reality | synchronizes with the external world | drivers, sensors, effectors |
+
+The layer model and the five engines are conceptual framings, not new
+components; they are recorded here so future features state which layer they
+extend. The formalization of Constants and Physics is RFC-0005; the remaining
+new disciplines are tracked as idea notes in `rfc/ideas/`: chemistry
+(IDEA-0002), cells and ecology (IDEA-0007), genome evolution (IDEA-0008),
+fields (IDEA-0006), cognitive time (IDEA-0009), the 2026-08-01 primitive
+intake (IDEA-0010…0023): signal fabric, physiology, digital twin,
+manufacturing, observatory, engineering gravity, cognitive economics, reality
+synchronization, cognitive silicon, operating contracts, cognitive units
+(COC), hypervisor, review board, elemental primitives; and the 2026-08-01
+discipline intake (IDEA-0024…0032): cognitive systems engineering, ambient
+cognition/CDE, cognitive mathematics, cognitive sociology, cognitive
+motherboard, cache hierarchy, cognitive speculation, reality compiler,
+consciousness levels.
+
+A second framing of the same universe is the **discipline ladder** — the
+eight formal disciplines from which every feature should be derivable:
+Mathematics (definitions, operators, proofs) → Physics (movement, signals,
+energy, time, entropy) → Chemistry (interaction, binding, transformation,
+reaction, decay, catalysts) → Biology (cells, organs, evolution, metabolism,
+immune, repair) → Ecology (competition, symbiosis, resource allocation,
+emergent equilibrium) → Economics (attention, investment, opportunity cost,
+expected value) → Sociology (trust, reputation, authority, negotiation,
+consensus, organizations) → Civilization (standards, culture, institutions,
+inheritance, collective memory). The ladder is a framing, not a new
+component set: each rung maps to existing corpus work or an idea note
+(Mathematics → FORMAL_FOUNDATIONS Part I + IDEA-0026; Chemistry → IDEA-0002;
+Biology → IDEA-0007; Ecology → IDEA-0007; Economics → IDEA-0016; Sociology →
+IDEA-0027; Civilization → ADR-005 + IDEA-0024).
+
+---
+
 ## Chapter 4 — Market Analysis
 
 *Stub. To be written under RFC governance. Scope: the current AI stack

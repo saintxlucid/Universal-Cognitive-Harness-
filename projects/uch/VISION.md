@@ -12,6 +12,18 @@
 > autonomous system to attach to the same persistent organism through standardized
 > drivers, cognitive protocols, and event semantics.**
 
+And why — the purpose clause:
+
+> **UCH exists to preserve and compound cognitive capital independently of any
+> model, application, vendor, or human lifetime. It treats cognition as durable
+> infrastructure rather than transient computation.**
+
+The one-sentence vision states the **mechanism** (any tool attaches to one
+persistent organism). The purpose clause states the **end**: engineering
+judgment accumulates across models, teams, and years instead of leaving with
+the session that produced it. A product may satisfy the mechanism and still
+fail the purpose; the purpose is the acceptance test.
+
 ## 2. The strategic thesis
 
 TCP/IP, POSIX, LLVM, Docker, Kubernetes — none of them won by having more features.
@@ -105,3 +117,51 @@ history); every host participates at the integration level it actually exposes
   `design/PROPOSED-LAW-OWNERSHIP-OF-COGNITION.md`, adoption belongs to the community
   process governing the Laws.
 - Marketplace as a business — product roadmap, depends on Cognitive Packages.
+
+## 8. The primitive-first principle
+
+UCH's operating question is not "how do we build this feature?" but **"what new
+primitive would make this feature unnecessary?"** Files, git objects,
+containers, and LLVM IR changed computing because each introduced a primitive
+that absorbed an entire class of problems. The same test applies here: every
+proposal must state the primitive it introduces; features are acceptable only
+when no primitive can absorb the problem.
+
+The primitive candidates currently on the table are catalogued as idea notes in
+`rfc/ideas/` (the 2026-08-01 intake, IDEA-0010…0023): signal fabric, cognitive
+physiology, the executable digital twin, cognitive manufacturing, the
+observatory, engineering gravity, cognitive economics, reality synchronization,
+cognitive silicon, cognitive operating contracts, cognitive units (COC), the
+cognitive hypervisor, the architecture review board, and elemental cognitive
+primitives. None of these is approved work — each is a candidate primitive
+waiting for the spike discipline (SOP-08) to prove it absorbs a class of
+problems before it earns implementation.
+
+## 9. The discipline claim (2026-08-01 intake, round 6)
+
+The next step past primitives is a discipline: **Cognitive Systems
+Engineering** — deriving everything from Laws → Mathematics → Specifications →
+Protocols → Compilers → Reference Implementations → SDKs → Applications, the
+way TCP/IP, LLVM, POSIX, USB, OpenGL, Vulkan, and OCI are ecosystems rather
+than software. Two consequences are recorded as *proposals*, not decisions:
+
+- **Ambient endgame** — the runtime disappears; developers experience
+  Workspace Intelligence through any viewport (the CDE — Cognitive
+  Development Environment), the way TCP and virtual memory are invisible.
+- **Roadmap revision** — the five products become Specification, Reference
+  Runtime, Cognitive Engineering Suite (compiler, simulator, observatory,
+  analysis, verification), Universal Driver Layer, and Cognitive Standard
+  (conformance, certification, benchmarks, SDKs, governance) — replacing
+  "Marketplace" with Engineering Suite + Standard.
+- **Repository restructure** into a platform layout (`specs/`, `math/`,
+  `physics/`, `compiler/`, `isa/`, `abi/`, `runtime/`, `sdk/`, `drivers/`,
+  `reference/`, `research/`, `compliance/`, `certification/`, `simulator/`,
+  `benchmarks/`) — explicitly **not decided** here: it is a high-churn
+  governance decision (build, tests, docs, tooling all key to `src/`), to be
+  evaluated with a migration plan like the rename decision in §7.
+
+The round-6 intake is tracked as idea notes IDEA-0024…0032 (CSE, ambient
+cognition/CDE, cognitive mathematics, cognitive sociology, cognitive
+motherboard, cache hierarchy, cognitive speculation, reality compiler,
+consciousness levels). The eight-discipline ladder is recorded in
+GENESIS.md chapter 3 as framing with corpus mappings.
