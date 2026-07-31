@@ -1,7 +1,9 @@
 # CONNECTOME.md — Concept Store Design
 
-Status: design reference for the scaffolded `src/connectome/` organ (expanded
-from ledger research — graph-memory / MRAgent framing, ledger 3.2).
+Status: design reference for `src/connectome/` (expanded from ledger research —
+graph-memory / MRAgent framing, ledger 3.2). Expansion path §4 implemented
+2026-07-31 (weighted edges, activation propagation, auto-wiring, integrity
+check, persistence).
 
 ## 1. Contract (MANIFESTO §6)
 
@@ -37,31 +39,48 @@ not a single node.
 
 ## 3. Current implementation (`src/connectome/wiring.ts`)
 
-Scaffold state as of 2026-07-31:
+Implemented as of 2026-07-31:
 
-- `registerConnection` / `removeConnection` — typed edges with description and
-  optional metadata.
-- `getConnectionsFrom/To` — adjacency queries.
+- `registerConnection` / `removeConnection` — typed edges with description,
+  optional metadata, and **weight** (default 1, clamped to `[0, maxWeight]`).
+- `link(from, to, type, description?, weight?)` — register-or-strengthen: an
+  existing edge of the same endpoints/type gets its weight increased
+  (capped at `maxWeight`) instead of duplicated; endpoints are registered as
+  nodes. This is the auto-wiring primitive.
+- `getConnectionsFrom/To` — adjacency queries (activation-ordered from source).
+- `activate(cue, strength)` — cue-tag-content activation propagation: BFS with
+  per-hop decay (`activationDecayPerHop`), sets edge activation +
+  `lastActivatedAt`; returns the activation-ordered neighborhood.
+- `getNeighborhood(cue, maxDepth?)` — activation-ordered reachable set
+  (the reconstruction query).
 - `findPaths(from, to, maxDepth)` — DFS path enumeration (the reconstruction
   primitive).
-- `getStats` — integrity metrics (total + by-type counts).
+- `rankPaths(from, to)` — paths ranked by summed edge weight.
+- `checkIntegrity()` — weak connectivity, connected components,
+  dangling-edge count, and the **emergency broadcast flag** (partitioned
+  components per FORMAL_FOUNDATIONS).
+- `persist(filePath)` / `load(filePath)` — `Storable` contract; connections,
+  weights, activation, and node set survive a round trip.
+- `getStats` — integrity metrics (total + by-type counts, node count).
 
 ## 4. Expansion path (per ADR-001 Phase-I criterion #5: connectome wiring)
 
-1. **Weighted edges** — `FORMAL_FOUNDATIONS` requires edge weights; add
-   `weight: number` to `Connection` and use it for path ranking.
-2. **Activation propagation** — cue-tag-content reconstruction with decaying
-   activation (nearest-neighbor activation like the kernel's `ActivationField`)
-   so `getConnectionsFrom` can return activation-ordered neighborhoods.
-3. **Auto-wiring** — subscribe to `wireConnectome` in the exoskeleton (already
-   invoked) and let organ registration emit `connectome:link` signals; the
-   Connectome learns the substrate's shape from events, not hand-registration.
-4. **Graph integrity tests** — the organ's own benchmark (`graph integrity`)
-   needs regression tests for weak connectivity and the emergency-broadcast
-   invariant in `LAWS_OF_COGNITIVE_PHYSICS.md`.
-5. **Persistence** — the Connectome should persist to `.uccp/persist/`
-   alongside the other cognitive-plane stores so `state restore integrity`
-   (Persistence Engine contract) covers the graph.
+1. **Weighted edges** — implemented: `weight` on `Connection`, clamped by
+   `maxWeight`, used by `rankPaths` and integrity reporting.
+2. **Activation propagation** — implemented: `activate()` BFS with decaying
+   activation, activation-ordered neighborhoods via `getNeighborhood()`; edge
+   activation + `lastActivatedAt` tracked.
+3. **Auto-wiring** — implemented: the exoskeleton subscribes to
+   `connectome:link` signals (`nervousSystem.subscribeToAll`) and emits boot
+   seed links as events; the Connectome learns the substrate's shape from
+   events, not hand-registration.
+4. **Graph integrity tests** — implemented: `checkIntegrity()` covers weak
+   connectivity, connected components, dangling edges, and the
+   emergency-broadcast invariant; regression tests in
+   `src/__tests__/connectome-expansion.test.ts`.
+5. **Persistence** — implemented: `Storable` `persist`/`load` to
+   `.uccp/persist/` alongside the other cognitive-plane stores, so
+   `state restore integrity` (Persistence Engine contract) covers the graph.
 
 ## 5. Relationship to other organs
 

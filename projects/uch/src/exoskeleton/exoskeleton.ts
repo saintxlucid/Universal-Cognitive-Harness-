@@ -24,7 +24,7 @@ import { ImmuneSystem } from './immune.js';
 import { EndocrineSystem } from './endocrine.js';
 import { SleepCycle, createKernelMemorySource } from '../sleep_cycle/cycle.js';
 import { ActionSelector } from '../basal_ganglia/action-selector.js';
-import { Connectome } from '../connectome/wiring.js';
+import { Connectome, type ConnectionType } from '../connectome/wiring.js';
 import { Hippocampus } from '../hippocampus/consolidator.js';
 import { Neocortex } from '../neocortex/pattern-learner.js';
 import { CortexKernel } from '../cortex_kernel/integrator.js';
@@ -385,36 +385,44 @@ export class CognitiveExoskeleton {
   }
 
   private wireConnectome(): void {
-    this.connectome.registerConnection({
-      from: 'eventBus',
-      to: 'traceRecorder',
-      type: 'event-driven',
-      description: 'Events flow from bus to recorder',
-    });
-    this.connectome.registerConnection({
-      from: 'traceRecorder',
-      to: 'signals',
-      type: 'data-flow',
-      description: 'Trace ledger feeds signal detection',
-    });
-    this.connectome.registerConnection({
-      from: 'eventBus',
-      to: 'endocrine',
-      type: 'event-driven',
-      description: 'Events trigger neuromodulation updates',
-    });
-    this.connectome.registerConnection({
-      from: 'aether',
-      to: 'consciousness',
-      type: 'control',
-      description: 'Aether orchestrates consciousness layers',
-    });
-    this.connectome.registerConnection({
-      from: 'fsDriver',
-      to: 'eventBus',
-      type: 'event-driven',
-      description: 'Filesystem changes propagate as events',
-    });
+    // Auto-wiring: the Connectome learns the substrate's shape from
+    // `connectome:link` signals rather than hand-registration (CONNECTOME §4.3).
+    this.nervousSystem.subscribeToAll(
+      (signal) => {
+        if (signal.type !== 'connectome:link') return;
+        const { from, to, type, description } = signal.payload as {
+          from?: string;
+          to?: string;
+          type?: ConnectionType;
+          description?: string;
+        };
+        if (typeof from !== 'string' || typeof to !== 'string' || from.length === 0 || to.length === 0) {
+          return;
+        }
+        this.connectome.link(
+          from,
+          to,
+          type ?? 'reference',
+          typeof description === 'string' ? description : '',
+        );
+      },
+      (signal) => signal.type === 'connectome:link',
+      'connectome-auto-wiring',
+    );
+
+    // Seed wiring emitted as events — boot organ registration drives the graph.
+    const seeds: Array<{ from: string; to: string; type: ConnectionType; description: string }> = [
+      { from: 'eventBus', to: 'traceRecorder', type: 'event-driven', description: 'Events flow from bus to recorder' },
+      { from: 'traceRecorder', to: 'signals', type: 'data-flow', description: 'Trace ledger feeds signal detection' },
+      { from: 'eventBus', to: 'endocrine', type: 'event-driven', description: 'Events trigger neuromodulation updates' },
+      { from: 'aether', to: 'consciousness', type: 'control', description: 'Aether orchestrates consciousness layers' },
+      { from: 'fsDriver', to: 'eventBus', type: 'event-driven', description: 'Filesystem changes propagate as events' },
+    ];
+    for (const seed of seeds) {
+      void this.nervousSystem.emit(
+        createSignal('connectome:link', 'exoskeleton', seed),
+      );
+    }
   }
 
   attachTransport(transport: ExoskeletonTransport): void {

@@ -75,6 +75,7 @@ export type EventType =
   | 'runtime:memory_warning'
   | 'runtime:cpu_spike'
   | 'runtime:health_check'
+  | 'connectome:link'
   | 'governance:event_denied';
 
 export interface NeuralEvent {
