@@ -1,4 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { CognitiveExoskeleton } from '../exoskeleton/exoskeleton.js';
 import { Connectome } from '../connectome/wiring.js';
 import { ActionSelector } from '../basal_ganglia/action-selector.js';
 import { Neocortex } from '../neocortex/pattern-learner.js';
@@ -13,7 +17,7 @@ import { ImmuneSystem } from '../exoskeleton/immune.js';
 import { PolicyEngine } from '../control-plane/policies.js';
 import { Auth } from '../control-plane/auth/auth.js';
 import { ReflexEngine } from '../suit/instinct/reflex-engine.js';
-import { SleepCycle } from '../sleep_cycle/cycle.js';
+import { SleepCycle, type SleepMemorySource, type DistilledSkill, type SleepSkillSink } from '../sleep_cycle/cycle.js';
 import { AetherCore } from '../aether/aether-core.js';
 
 describe('Connectome', () => {
@@ -24,7 +28,7 @@ describe('Connectome', () => {
   });
 
   it('registers and retrieves connections', () => {
-    const id = c.registerConnection({
+    c.registerConnection({
       from: 'a', to: 'b', type: 'event-driven', description: 'test',
     });
     expect(c.getConnections()).toHaveLength(1);
@@ -261,7 +265,7 @@ describe('SleepCycle', () => {
     ns = new NervousSystem({ trackEnergy: false });
     eventBus = new NeuralEventBus();
     aether = new AetherCore(eventBus, { tickIntervalMs: 50000 });
-    sleep = new SleepCycle(ns, aether, 60000);
+    sleep = new SleepCycle(ns, aether, null, null, undefined, 60000);
   });
 
   afterEach(() => {
@@ -296,5 +300,77 @@ describe('SleepCycle', () => {
   it('returns reports', async () => {
     await sleep.nap();
     expect(sleep.getReports(1)).toHaveLength(1);
+  });
+
+  it('distills skills from a memory source', async () => {
+    const source: SleepMemorySource = {
+      async listUnconsolidated() {
+        return [
+          { id: 'e1', content: 'debugging failed test runs requires reproducing the failure first', importance: 0.8, timestamp: new Date() },
+          { id: 'e2', content: 'reproducing failed test runs before fixing avoids wasted effort', importance: 0.9, timestamp: new Date() },
+          { id: 'e3', content: 'failed test runs reproduce locally then fix incrementally', importance: 0.7, timestamp: new Date() },
+        ];
+      },
+      async markConsolidated(ids: string[]) {
+        expect(ids.length).toBeGreaterThan(0);
+      },
+    };
+    const published: DistilledSkill[] = [];
+    const sink: SleepSkillSink = {
+      async publish(skill: DistilledSkill) {
+        published.push(skill);
+      },
+    };
+
+    const distilling = new SleepCycle(ns, aether, source, sink);
+    const report = await distilling.nap();
+
+    expect(report.memoriesConsolidated).toBe(3);
+    expect(report.patternsLearned).toBeGreaterThan(0);
+    expect(report.skillsBenchmarked).toBeGreaterThan(0);
+    expect(report.tokenReductionPct).toBeGreaterThanOrEqual(50);
+    expect(published.length).toBeGreaterThan(0);
+    expect(published[0]!.provenance.length).toBeGreaterThanOrEqual(2);
+    expect(distilling.getDistilledSkills().length).toBe(published.length);
+  });
+
+  it('reports zero consolidation when no memory source is attached', async () => {
+    const bare = new SleepCycle(ns, aether);
+    const report = await bare.nap();
+    expect(report.memoriesConsolidated).toBe(0);
+    expect(report.skillsDistilled).toBe(0);
+  });
+});
+
+describe('CognitiveExoskeleton fast path', () => {
+  it('resolves status and health requests without an LLM', () => {
+    const root = mkdtempSync(join(tmpdir(), 'uch-exo-'));
+    try {
+      const exo = new CognitiveExoskeleton({
+        workspaceId: 'ws-test',
+        workspaceName: 'Test Workspace',
+        workspaceRoot: root,
+      });
+      const status = exo.resolveFastPath('what is the current status?');
+      expect(status?.routine).toBe('status-routine');
+      expect(status?.output).toContain('running=');
+
+      const health = exo.resolveFastPath('is the system healthy?');
+      expect(health?.routine).toBe('health-routine');
+
+      const miss = exo.resolveFastPath('write a sonnet about retrieval');
+      expect(miss).toBeNull();
+
+      const stats = exo.getStats().reflex as {
+        totalCalls: number;
+        resolved: number;
+        routines: string[];
+      };
+      expect(stats.totalCalls).toBe(3);
+      expect(stats.resolved).toBe(2);
+      expect(stats.routines).toContain('status-routine');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

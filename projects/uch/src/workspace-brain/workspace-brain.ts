@@ -4,26 +4,31 @@ import { createWorkspaceIdentity, type WorkspaceIdentity } from './identity.js';
 import {
   createWorldModel,
   addDecision,
-  addSubsystem,
   worldModelSummary,
   type WorkspaceWorldModel,
   type DecisionRecord,
-  type Subsystem,
 } from './world-model.js';
 import {
   ArchitectureGraph,
   type ArchitectureNode,
   type ArchitectureEdge,
 } from './architecture-graph.js';
-import { WorkspaceTimeline, type TimelineEvent, type TimelineEventType } from './timeline.js';
-import { WorkspaceHealth, type HealthMetric } from './health.js';
+import { WorkspaceTimeline, type TimelineEvent } from './timeline.js';
+import { WorkspaceHealth } from './health.js';
 import { MistakeLogger } from '../shared/mistake-logger.js';
+import { WorkspaceKnowledgeGraph } from '../workspace-graphs/knowledge-graph.js';
+import { WorkspaceDecisionGraph } from '../workspace-graphs/decision-graph.js';
+import { WorkspaceTaskGraph } from '../workspace-graphs/task-graph.js';
+import { WorkspaceEvolutionHistory } from '../workspace-graphs/evolution-history.js';
+import { WorkspaceDNA } from '../workspace-graphs/workspace-dna.js';
+import { join } from 'node:path';
 
 export interface WorkspaceBrainConfig {
   workspace_id: string;
   name: string;
   root_path: string;
   eventBus: NeuralEventBus;
+  organsBasePath?: string;
 }
 
 export class WorkspaceBrain {
@@ -35,6 +40,43 @@ export class WorkspaceBrain {
   readonly health: WorkspaceHealth;
   readonly mistakeLogger: MistakeLogger;
   private eventBus: NeuralEventBus;
+
+  private _knowledgeGraph: WorkspaceKnowledgeGraph | null = null;
+  private _decisionGraph: WorkspaceDecisionGraph | null = null;
+  private _taskGraph: WorkspaceTaskGraph | null = null;
+  private _evolutionHistory: WorkspaceEvolutionHistory | null = null;
+  private _dna: WorkspaceDNA | null = null;
+  private readonly organsBase: string;
+
+  // Lazy organ getters: eager GraphStore construction would write SQLite at
+  // construction time — the existing suite constructs WorkspaceBrain with fake
+  // root_paths, so eager construction would create drive-root directories.
+  // Lazy getters preserve the attach-point semantics with zero I/O until first
+  // access or first matching event.
+  get knowledgeGraph(): WorkspaceKnowledgeGraph {
+    if (!this._knowledgeGraph) this._knowledgeGraph = new WorkspaceKnowledgeGraph(join(this.organsBase, 'graphs'));
+    return this._knowledgeGraph;
+  }
+
+  get decisionGraph(): WorkspaceDecisionGraph {
+    if (!this._decisionGraph) this._decisionGraph = new WorkspaceDecisionGraph(join(this.organsBase, 'graphs'));
+    return this._decisionGraph;
+  }
+
+  get taskGraph(): WorkspaceTaskGraph {
+    if (!this._taskGraph) this._taskGraph = new WorkspaceTaskGraph(join(this.organsBase, 'graphs'));
+    return this._taskGraph;
+  }
+
+  get evolutionHistory(): WorkspaceEvolutionHistory {
+    if (!this._evolutionHistory) this._evolutionHistory = new WorkspaceEvolutionHistory(join(this.organsBase, 'graphs'));
+    return this._evolutionHistory;
+  }
+
+  get dna(): WorkspaceDNA {
+    if (!this._dna) this._dna = new WorkspaceDNA(this.identity.workspace_id, this.identity.name);
+    return this._dna;
+  }
 
   constructor(config: WorkspaceBrainConfig) {
     this.genome = createGenome({
@@ -52,6 +94,7 @@ export class WorkspaceBrain {
     this.health = new WorkspaceHealth();
     this.mistakeLogger = new MistakeLogger();
     this.eventBus = config.eventBus;
+    this.organsBase = config.organsBasePath ?? join(config.root_path, '.uccp', 'persist');
 
     // Initialize health metrics
     this.health.setMetric('test_pass_rate', 1.0, 0.8, '%');
@@ -115,6 +158,63 @@ export class WorkspaceBrain {
         metadata: { intent, message },
       });
     });
+
+    this.dna.recompute(this.dnaInputs());
+
+    this.eventBus.subscribe('file:saved', async (event) => {
+      const path = String(event.payload?.path ?? '');
+      if (!path) return;
+      this.knowledgeGraph.recordArtifact(path, {
+        language: String(event.payload?.language ?? ''),
+        lines: typeof event.payload?.lines === 'number' ? event.payload.lines : undefined,
+      });
+    });
+
+    this.eventBus.subscribe('git:commit', async (event) => {
+      const hash = String(event.payload?.hash ?? `commit-${event.timestamp.getTime()}`);
+      const message = String(event.payload?.message ?? '');
+      const files = Array.isArray(event.payload?.files)
+        ? (event.payload.files as unknown[]).map((f) => String(f)).filter(Boolean)
+        : [];
+      this.knowledgeGraph.recordCommit(hash, message, files);
+    });
+
+    this.eventBus.subscribe('build:finished', async (event) => {
+      this.knowledgeGraph.recordBuild(String(event.payload?.id ?? event.id));
+    });
+
+    this.eventBus.subscribe(['test:failed', 'error:occurred'], async (event) => {
+      const message = String(event.payload?.message ?? event.payload?.test ?? '');
+      if (!message) return;
+      this.knowledgeGraph.recordFailure(event.id, message, event.type === 'test:failed' ? 'test' : 'error');
+    });
+
+    this.eventBus.subscribe('pr:created', async (event) => {
+      this.knowledgeGraph.recordPr(
+        String(event.payload?.number ?? event.payload?.id ?? event.id),
+        String(event.payload?.title ?? ''),
+        String(event.payload?.url ?? ''),
+      );
+    });
+
+    this.eventBus.subscribe('review:requested', async (event) => {
+      this.knowledgeGraph.recordReview(
+        String(event.payload?.id ?? event.id),
+        String(event.payload?.pr_number ?? event.payload?.pr_id ?? ''),
+      );
+    });
+  }
+
+  private dnaInputs(): Record<string, unknown> {
+    const byStatus: Record<string, number> = {};
+    for (const d of this.worldModel.decisions) {
+      byStatus[d.status] = (byStatus[d.status] ?? 0) + 1;
+    }
+    return {
+      genome: this.genome,
+      standards: this.worldModel.standards,
+      decisions: { count: this.worldModel.decisions.length, byStatus },
+    };
   }
 
   addDecision(decision: Omit<DecisionRecord, 'id' | 'date'>): DecisionRecord {
@@ -127,6 +227,8 @@ export class WorkspaceBrain {
       tags: ['decision'],
       metadata: { decision_id: record.id },
     });
+    this.decisionGraph.recordDecision(record.id, record.title);
+    this.dna.recompute(this.dnaInputs());
     return record;
   }
 
@@ -137,6 +239,38 @@ export class WorkspaceBrain {
 
   recordArchitectureEdge(edge: ArchitectureEdge): void {
     this.architecture.addEdge(edge);
+  }
+
+  async persistWorkspace(): Promise<void> {
+    const base = join(this.organsBase);
+    this.dna.recompute(this.dnaInputs());
+    await this.knowledgeGraph.persist(join(base, 'knowledge-graph.json'));
+    await this.decisionGraph.persist(join(base, 'decision-graph.json'));
+    await this.taskGraph.persist(join(base, 'task-graph.json'));
+    await this.evolutionHistory.persist(join(base, 'evolution-history.json'));
+    await this.dna.persist(join(base, 'workspace-dna.json'));
+  }
+
+  async loadWorkspace(): Promise<number> {
+    const base = join(this.organsBase);
+    let restored = 0;
+    restored += await this.knowledgeGraph.load(join(base, 'knowledge-graph.json'));
+    restored += await this.decisionGraph.load(join(base, 'decision-graph.json'));
+    restored += await this.taskGraph.load(join(base, 'task-graph.json'));
+    restored += await this.evolutionHistory.load(join(base, 'evolution-history.json'));
+    restored += await this.dna.load(join(base, 'workspace-dna.json'));
+    return restored;
+  }
+
+  close(): void {
+    this._knowledgeGraph?.close();
+    this._decisionGraph?.close();
+    this._taskGraph?.close();
+    this._evolutionHistory?.close();
+    this._knowledgeGraph = null;
+    this._decisionGraph = null;
+    this._taskGraph = null;
+    this._evolutionHistory = null;
   }
 
   logTimelineEvent(event: Omit<TimelineEvent, 'id'>): TimelineEvent {

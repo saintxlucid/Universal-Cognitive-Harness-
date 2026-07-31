@@ -21,7 +21,7 @@ created: 2026-07-31
 | **Config file** | `vitest.config.ts` — include `src/**/*.test.ts`, v8 coverage thresholds (statements 70 / branches 75 / functions 78 / lines 70) |
 | **Quick run command** | `npx vitest run src/__tests__/workspace-graphs-<organ>.test.ts` |
 | **Full suite command** | `npm test` (vitest run) |
-| **Estimated runtime** | ~12 seconds (baseline re-verified 2026-07-31 by orchestrator run: 86 files, 1,546 passing + 1 pre-existing Windows-specific failure in `src/neural-fs/__tests__/neural-fs.test.ts:45` — "normalizes backslash paths", known project debt; NOT caused by this phase. Research.md's "1,547 passing" claim is corrected here.) |
+| **Estimated runtime** | ~10-13 seconds (baseline verified 2026-07-31 by two independent runs: **87 files / 1,568 tests passing / 0 failures**. Note: `neural-fs.test.ts:45` observed flaky once — drive-state-dependent backslash test, passes on re-runs; do not treat as known debt unless it fails reproducibly) |
 
 ---
 
@@ -45,7 +45,7 @@ created: 2026-07-31
 | 01-05 | 01 | 0 | D-01/D-02 | T-01-03 | sha256 fingerprint — no secrets hashed; mutation events recorded; encode/decode round-trip | unit | `npx vitest run src/__tests__/workspace-graphs-dna.test.ts` | ❌ W0 | ⬜ pending |
 | 01-06 | 01 | 1 | D-03/D-04 | T-01-01 | Organs exposed as readonly properties; bus events (git:commit/file:saved/error:occurred) produce graph mutations | integration | `npx vitest run src/__tests__/workspace-brain.test.ts` | ✅ exists — extend | ⬜ pending |
 | 01-07 | 01 | 1 | D-05 | T-01-01 | `persist`/`load` signatures; load returns count; missing file returns 0; temp-dir lifecycle | unit | per-organ files above | ❌ W0 | ⬜ pending |
-| 01-08 | 01 | 1 | D-06 | — | No regression — passing count stays ≥ 1,546 (pre-existing neural-fs backslash failure excluded) | smoke | `npm test` | ✅ | ⬜ pending |
+| 01-08 | 01 | 1 | D-06 | — | No regression — `npm test` exits 0 with ≥ 1,546 passing and no new failures (current green: 1,568) | smoke | `npm test` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

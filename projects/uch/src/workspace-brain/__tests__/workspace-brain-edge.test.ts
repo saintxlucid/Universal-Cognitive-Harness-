@@ -5,7 +5,7 @@ import { createGenome, genomeSummary } from '../genome.js';
 import { createWorkspaceIdentity } from '../identity.js';
 import { createWorldModel, addDecision, addSubsystem, worldModelSummary } from '../world-model.js';
 import { ArchitectureGraph } from '../architecture-graph.js';
-import { WorkspaceTimeline } from '../timeline.js';
+import { WorkspaceTimeline, type TimelineEventType } from '../timeline.js';
 import { WorkspaceHealth } from '../health.js';
 
 // ── Genome edge cases ──
@@ -131,7 +131,7 @@ describe('WorkspaceTimeline — edge cases', () => {
   });
 
   it('getByType returns empty for unknown type', () => {
-    expect(tl.getByType('nonexistent' as any)).toEqual([]);
+    expect(tl.getByType('nonexistent' as TimelineEventType)).toEqual([]);
   });
 
   it('getRecent returns events sorted newest first', () => {

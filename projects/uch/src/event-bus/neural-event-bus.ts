@@ -44,6 +44,7 @@ export type EventType =
   | 'session:ended'
   | 'sleep:cycle'
   | 'consolidation:completed'
+  | 'skill:distilled'
   | 'prediction:made'
   | 'prediction:failed'
   | 'memory:ingest'
@@ -73,7 +74,8 @@ export type EventType =
   | 'mcp:error'
   | 'runtime:memory_warning'
   | 'runtime:cpu_spike'
-  | 'runtime:health_check';
+  | 'runtime:health_check'
+  | 'governance:event_denied';
 
 export interface NeuralEvent {
   id: string;
@@ -89,6 +91,14 @@ export interface NeuralEvent {
     module?: string;
     protocol?: string;
     targets?: string[];
+    /** W3C traceparent of the source trace (propagated through MCP/ACP/IDE drivers). */
+    traceparent?: string;
+    /** Original trace id when this event is a replay hydration of a recorded trace. */
+    replay_of?: string;
+    /** Event provenance marker (set by governance before dispatch). */
+    provenance?: unknown;
+    /** Driver-defined metadata (forwarded as-is). */
+    [key: string]: unknown;
   };
 }
 

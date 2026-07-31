@@ -1,4 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { mkdtempSync, rmSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
 import { WorkspaceBrain } from '../workspace-brain/workspace-brain.js';
 import { createGenome, genomeSummary } from '../workspace-brain/genome.js';
@@ -278,15 +281,22 @@ describe('WorkspaceHealth', () => {
 
 describe('WorkspaceBrain (integration)', () => {
   let brain: WorkspaceBrain;
+  let dir: string;
 
   beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'uch-brain-it-'));
     const bus = new NeuralEventBus();
     brain = new WorkspaceBrain({
       workspace_id: 'ws1',
       name: 'Test WS',
-      root_path: '/workspace/test',
+      root_path: dir,
       eventBus: bus,
     });
+  });
+
+  afterEach(() => {
+    if (typeof (brain as { close?: unknown }).close === 'function') brain.close();
+    rmSync(dir, { recursive: true, force: true });
   });
 
   it('initializes with default metrics', () => {
@@ -398,5 +408,150 @@ describe('WorkspaceBrain (integration)', () => {
 
     expect(workspace.worldModel.known_failures).toEqual(['Database connection failed']);
     expect(workspace.timeline.getByType('incident').length).toBe(1);
+  });
+});
+
+describe('WorkspaceBrain graph organs', () => {
+  let dir: string;
+  let bus: NeuralEventBus;
+  let brain: WorkspaceBrain;
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'uch-brain-'));
+    bus = new NeuralEventBus();
+    brain = new WorkspaceBrain({
+      workspace_id: 'wsg1',
+      name: 'WSG',
+      root_path: dir,
+      eventBus: bus,
+    });
+  });
+
+  afterEach(() => {
+    brain.close();
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('exposes the five graph organs as attach points', () => {
+    expect(brain.knowledgeGraph).toBeTruthy();
+    expect(brain.decisionGraph).toBeTruthy();
+    expect(brain.taskGraph).toBeTruthy();
+    expect(brain.evolutionHistory).toBeTruthy();
+    expect(brain.dna).toBeTruthy();
+    expect(brain.knowledgeGraph.nodeCount()).toBe(0);
+  });
+
+  it('records artifacts from file:saved events', async () => {
+    await bus.publish({
+      type: 'file:saved',
+      source: 'test',
+      payload: { path: 'src/app.ts' },
+    });
+    const artifacts = brain.knowledgeGraph.findArtifacts();
+    expect(artifacts.length).toBe(1);
+    expect(artifacts[0]!.name).toBe('app.ts');
+  });
+
+  it('records commits with file linkage from git:commit events', async () => {
+    await bus.publish({
+      type: 'git:commit',
+      source: 'test',
+      payload: { hash: 'abc123', message: 'feat: x', files: ['src/a.ts'] },
+    });
+    const commits = brain.knowledgeGraph.findCommits();
+    expect(commits.length).toBe(1);
+    expect(commits[0]!.id).toBe('commit:abc123');
+    const artifacts = brain.knowledgeGraph.findArtifacts();
+    expect(artifacts.some((a) => a.name === 'a.ts')).toBe(true);
+  });
+
+  it('records failures from error:occurred and test:failed events', async () => {
+    await bus.publish({
+      type: 'error:occurred',
+      source: 'test',
+      payload: { message: 'boom' },
+    });
+    expect(brain.knowledgeGraph.findFailures()[0]!.properties.kind).toBe('error');
+
+    await bus.publish({
+      type: 'test:failed',
+      source: 'test',
+      payload: { message: 'suite failed' },
+    });
+    const failures = brain.knowledgeGraph.findFailures();
+    expect(failures.length).toBe(2);
+    expect(failures[1]!.properties.kind).toBe('test');
+  });
+
+  it('upserts deterministically on duplicate events', async () => {
+    await bus.publish({
+      type: 'git:commit',
+      source: 'test',
+      payload: { hash: 'abc123', message: 'feat: x' },
+    });
+    await bus.publish({
+      type: 'git:commit',
+      source: 'test',
+      payload: { hash: 'abc123', message: 'feat: x' },
+    });
+    expect(brain.knowledgeGraph.findCommits().length).toBe(1);
+  });
+
+  it('links decisions into the decision graph on addDecision', () => {
+    const d = brain.addDecision({
+      title: 'Use React',
+      context: 'c',
+      decision: 'd',
+      alternatives: [],
+      rationale: 'r',
+      consequences: [],
+      status: 'active',
+    });
+    expect(brain.decisionGraph.getDecision(d.id)!.name).toBe('Use React');
+  });
+
+  it('recomputes DNA fingerprint as decisions change', () => {
+    const f0 = brain.dna.getFingerprint();
+    expect(f0).toBeTruthy();
+    brain.addDecision({
+      title: 'Use React',
+      context: 'c',
+      decision: 'd',
+      alternatives: [],
+      rationale: 'r',
+      consequences: [],
+      status: 'active',
+    });
+    const f1 = brain.dna.getFingerprint();
+    expect(f1).not.toBe(f0);
+    expect(brain.dna.mutationCount()).toBeGreaterThanOrEqual(1);
+  });
+
+  it('persists and loads the workspace organs', async () => {
+    brain.addDecision({
+      title: 'Use React',
+      context: 'c',
+      decision: 'd',
+      alternatives: [],
+      rationale: 'r',
+      consequences: [],
+      status: 'active',
+    });
+    await brain.persistWorkspace();
+    expect(existsSync(join(dir, '.uccp', 'persist', 'knowledge-graph.json'))).toBe(true);
+    expect(existsSync(join(dir, '.uccp', 'persist', 'decision-graph.json'))).toBe(true);
+    expect(existsSync(join(dir, '.uccp', 'persist', 'task-graph.json'))).toBe(true);
+    expect(existsSync(join(dir, '.uccp', 'persist', 'evolution-history.json'))).toBe(true);
+    expect(existsSync(join(dir, '.uccp', 'persist', 'workspace-dna.json'))).toBe(true);
+
+    const brain2 = new WorkspaceBrain({
+      workspace_id: 'wsg1',
+      name: 'WSG',
+      root_path: dir,
+      eventBus: new NeuralEventBus(),
+    });
+    const restored = await brain2.loadWorkspace();
+    expect(restored).toBeGreaterThan(0);
+    brain2.close();
   });
 });

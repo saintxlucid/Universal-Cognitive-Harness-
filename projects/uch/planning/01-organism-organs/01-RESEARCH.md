@@ -12,7 +12,7 @@ Three file-verified facts dominate planning:
 
 1. **`GraphStore` is SQLite-backed, not JSON-backed.** The constructor creates `graph.sqlite` at a `basePath` via `node:sqlite` `DatabaseSync` (graph-store.ts:29-51). It is *already durable on disk*; it is **not** a `Storable` (no `persist`/`load` methods) and it has **no full-enumeration methods** (`getAllNodes`/`getAllEdges` do not exist — only `findNodesByType`, `searchNodes`, counts). This makes the D-05 `persist(filePath)`/`load(filePath)` contract a genuine design decision for the graph organs (see Open Question 1).
 2. **`WorkspaceBrain` is a constructor-wired composer** — organs are `readonly` properties assigned in the constructor, with event subscriptions via `this.eventBus.subscribeToProtocol(...)` inline in the constructor (workspace-brain.ts:37-116). The organism-level pattern is `this.config.eventBus.subscribe('file:saved', async (event) => {...})` inside an `initialize()` method (organism.ts:462-488). WorkspaceBrain currently has **no `persist`/`load` methods at all** — the new organs will be the first Storable components in workspace-brain.
-3. **The current test baseline is 1,546 tests passing / 86 files, with 1 pre-existing Windows-specific failure** (`src/neural-fs/__tests__/neural-fs.test.ts:45` — "normalizes backslash paths"; known project debt, deterministic on this machine, unrelated to this phase). Baseline re-verified 2026-07-31 by the plan-phase orchestrator (`npx vitest run`, ~12s). CONTEXT.md D-06 cites 1,251, which is stale. The "must not regress" baseline for this phase is **1,546 passing** (no new failures).
+3. **The current test baseline is 87 files / 1,568 tests passing / 0 failures** (re-verified 2026-07-31 by two independent `npx vitest run` executions — plan-phase orchestrator and plan-checker). Note: `src/neural-fs/__tests__/neural-fs.test.ts:45` ("normalizes backslash paths") was observed failing ONCE in an earlier run and passing in two subsequent runs — it is drive-state-dependent flaky (compares `fs.ls('\\')` vs `fs.ls('/')` and `\concepts` → `[]`), NOT a stable failure. Do not treat it as known debt; do not fix unless it fails reproducibly. The "must not regress" floor for this phase is **1,546 passing** (CONTEXT D-06); the current verified green count is 1,568.
 
 **Primary recommendation:** One GraphStore-backed organ per graph (Knowledge, Decision, Task, Evolution History), one JSON Storable for Workspace DNA, wired into `WorkspaceBrain` as readonly properties with constructor event subscriptions, each organ implementing `persist(filePath)`/`load(filePath)` per the Storable contract, and one vitest file per organ in `src/__tests__/`.
 
@@ -51,7 +51,7 @@ Three file-verified facts dominate planning:
 #### D-06: Tests
 - One vitest file per organ following `src/__tests__/*.test.ts` conventions
   (deterministic, no live LLM calls). Existing suite: 1,251 passing tests —
-  must not regress. *(NOTE: actual current baseline re-verified 2026-07-31: 1,546 passing tests / 86 files, + 1 pre-existing Windows-only failure in neural-fs.test.ts:45.)*
+  must not regress. *(NOTE: baseline re-verified 2026-07-31: 87 files / 1,568 tests passing / 0 failures; floor for this phase = 1,546 passing.)*
 
 #### D-07: Scope limits
 - IDE driver deepening, Ollama runtime profile, issue/sprint/doc ingestion
@@ -140,7 +140,7 @@ There is **no project-level AGENTS.md** (`projects/uch/AGENTS.md` does not exist
 **Version verification (ecosystem-appropriate commands):**
 ```bash
 node --version        # v24.15.0 — verified 2026-07-31
-npm test              # vitest run — 86 files, 1,546 passing + 1 pre-existing Windows-only failure (re-verified 2026-07-31)
+npm test              # vitest run — 87 files, 1,568 passing, 0 failures (re-verified 2026-07-31)
 npm run typecheck     # tsc --noEmit — baseline must stay clean
 npm run build         # tsc — noEmitOnError (tsconfig.json:17)
 ```
@@ -300,7 +300,7 @@ src/__tests__/
 ├── workspace-graphs-evolution.test.ts
 └── workspace-graphs-dna.test.ts
 ```
-Dependency direction (cycle-safe, verified): `workspace-graphs → kernel/storage + kernel/types + cognitive-plane/persistence + cognitive-plane/{decisions,scheduler,evolution} (type-only for source data)`; **never** `workspace-graphs → workspace-brain` (that would create a cycle once workspace-brain imports workspace-graphs — see Pitfall 3). Barrel exports should be added to `src/index.ts` following the existing `WorkspaceBrain` export (index.ts:377-378).
+Dependency direction (cycle-safe, verified): `workspace-graphs → kernel/storage + kernel/types + cognitive-plane/persistence + cognitive-plane/{decisions,scheduler,evolution} (type-only for source data)`; **never** `workspace-graphs → workspace-brain` (that would create a cycle once workspace-brain imports workspace-graphs — see Pitfall 3). Barrel exports should be added to `src/index.ts` following the existing `WorkspaceBrain` export (index.ts:393-394 — file-verified).
 
 ### Anti-Patterns to Avoid
 - **Wrapping GraphStore in a JSON snapshot for persist():** GraphStore has no `getAllNodes`/`getAllEdges` enumeration — snapshotting requires adding GraphStore methods or a parallel in-memory index. Don't build either until the persist/load semantics decision is locked (Open Question 1).
@@ -323,7 +323,7 @@ Dependency direction (cycle-safe, verified): `workspace-graphs → kernel/storag
 | DNA fingerprint hashing | Hand-rolled string hash | `node:crypto` `createHash('sha256')` | Precedent version-store.ts:71; concept-genome's `hashString` is module-private (concept-genome.ts:55-63, not exported) |
 | Event subscription plumbing | Direct coupling to drivers | `NeuralEventBus.subscribe`/`subscribeToProtocol` (neural-event-bus.ts:124-189) | Typed EventType, wildcard, filters, failure isolation, history |
 
-**Key insight:** The kernel and cognitive-plane already own the hard parts (SQLite graph persistence, traversal, contradiction handling, snapshot I/O, hash utilities). The five organs are thin adapters: domain types + id schemes + event mapping + Storable glue. Every line of custom graph algorithm is a regression risk against the 1,547-test baseline.
+**Key insight:** The kernel and cognitive-plane already own the hard parts (SQLite graph persistence, traversal, contradiction handling, snapshot I/O, hash utilities). The five organs are thin adapters: domain types + id schemes + event mapping + Storable glue. Every line of custom graph algorithm is a regression risk against the 1,568-test green baseline.
 
 ## Common Pitfalls
 
@@ -364,7 +364,7 @@ Dependency direction (cycle-safe, verified): `workspace-graphs → kernel/storag
 **Warning signs:** `Type 'undefined' is not assignable` in the new subsystem during `npm run typecheck`.
 
 ### Pitfall 7: Missing barrel/export wiring
-**What goes wrong:** New organs exist but are unreachable — `src/index.ts` is the public API surface (~200 exports; WorkspaceBrain exported at index.ts:377-378); `agent/plugin.ts` and `cli/uccp.ts` construct WorkspaceBrain (plugin.ts:93-98, uccp.ts:110-115) and would silently not compose the new organs if wiring is forgotten.
+**What goes wrong:** New organs exist but are unreachable — `src/index.ts` is the public API surface (~200 exports; WorkspaceBrain exported at index.ts:393-394 — file-verified); `agent/plugin.ts` and `cli/uccp.ts` construct WorkspaceBrain (plugin.ts:93-98, uccp.ts:110-115) and would silently not compose the new organs if wiring is forgotten.
 **Why it happens:** The phase touches composition but the entry points are two files away.
 **How to avoid:** Plan explicit tasks: (1) extend `WorkspaceBrainConfig`/constructor, (2) export organs from `src/index.ts`, (3) verify `UCHAgentPlugin` and `UCCPServer` constructors compile against the extended brain.
 **Warning signs:** No diff in `src/index.ts` or `src/agent/plugin.ts` in the plan.
@@ -459,7 +459,7 @@ describe('WorkspaceKnowledgeGraph', () => {
 |--------------|------------------|--------------|--------|
 | In-memory graphs (ArchitectureGraph: Map + adjacency, architecture-graph.ts:16-31) | SQLite-backed `GraphStore` (`node:sqlite` DatabaseSync, graph-store.ts:25-51) | GraphStore introduced before this phase | Organs get durable graphs + traversal for free; but Storable contract must be reconciled with SQLite (Open Question 1) |
 | No vitest config (defaults) | `vitest.config.ts` with v8 coverage thresholds (statements 70/branches 75/functions 78/lines 70) (vitest.config.ts:7-24) | 2026-07-31 | New organs must clear coverage thresholds in `npm run test:coverage` |
-| Suite of 1,251 tests (CONTEXT D-06) | 1,546 passing / 86 files + 1 pre-existing Windows-only failure (re-verified by run, 2026-07-31) | suite growth before this phase | Baseline for "must not regress" is 1,546 passing |
+| Suite of 1,251 tests (CONTEXT D-06) | 87 files / 1,568 passing / 0 failures (re-verified by two runs, 2026-07-31) | suite growth before this phase | Baseline floor for "must not regress" is 1,546 passing |
 
 **Deprecated/outdated:**
 - `UCH-COMPLETE-INDEX.md` §15's "1,176 test cases" and CONTEXT D-06's "1,251 passing tests" — both superseded by the verified 1,547 (the index itself notes the 78-test addition on 2026-07-31 that took the suite to 1,251; further growth since then).
@@ -476,21 +476,23 @@ describe('WorkspaceKnowledgeGraph', () => {
 | A5 | DNA fingerprint = `sha256` over a stable serialization of genome + conventions + taste + recent decisions | Standard Stack | Low — scheme is agent's discretion; `node:crypto` precedent verified; input sources may shift |
 | A6 | New organs should be exported from `src/index.ts` | Anti-Patterns | Low — consistent with every subsystem; omission only affects discoverability |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Storable semantics for SQLite-backed graph organs** (needs user confirmation)
+> All four resolved 2026-07-31 during plan phase — recommendations adopted as locked plan contracts (plan-checker verified, iteration 2).
+
+1. **Storable semantics for SQLite-backed graph organs** — RESOLVED: metadata-manifest persist/load (A2 adopted; no GraphStore enumeration APIs added)
    - What we know: `GraphStore` self-persists to `{basePath}/graph.sqlite` (graph-store.ts:29-51); has no `getAllNodes`/`getAllEdges` (full file read); D-05 mandates `persist`/`load` per organ.
    - What's unclear: should `persist()` snapshot the graph to JSON (requires new GraphStore APIs or parallel index), write a metadata manifest only (recommended, A2), or be a no-op flush?
    - Recommendation: metadata manifest + SQLite as source of truth; DNA and Evolution History counters as plain JSON.
 
-2. **Where does `WorkspaceBrain` expose persistence?**
+2. **Where does `WorkspaceBrain` expose persistence?** — RESOLVED: `persistWorkspace(rootPath)`/`loadWorkspace(rootPath)`/`close()` facade on WorkspaceBrain (locked in 01-03 interfaces)
    - What we know: WorkspaceBrain has no `persist`/`load` today (grep of `src/workspace-brain/` — zero matches); `PersistenceProvider` orchestrates Storables with `{baseDir}/persist/{name}.json` resolution (persistence-provider.ts:24-41) but has no production caller.
    - What's unclear: does the phase add a `persist()`/`load()` facade on WorkspaceBrain, register organs with PersistenceProvider, or leave orchestration to callers (agent plugin / UCCP server)?
    - Recommendation: add thin `persistWorkspace(rootPath)`/`loadWorkspace(rootPath)` methods on WorkspaceBrain delegating to organs at `{rootPath}/.uccp/persist/{organ}.json` — single attach point, D-03-compliant.
 
-3. **DNA fingerprint inputs** — which sources feed the hash (genome only, or + TasteEngine preferences + DecisionLog stats as the phase specifics suggest)? TasteEngine and DecisionLog live in cognitive-plane and are not currently owned by WorkspaceBrain (verified plugin.ts:108-110 constructs them separately). If included, WorkspaceBrain needs access — a constructor param or lazy wiring. Recommendation: genome + worldModel standards + decision count/outcomes available inside WorkspaceBrain; TasteEngine deferred unless cheaply injectable.
+3. **DNA fingerprint inputs** — RESOLVED: genome + worldModel standards + decision count/outcomes (all available inside WorkspaceBrain); TasteEngine deferred (locked in 01-02/01-03 interfaces). Which sources feed the hash (genome only, or + TasteEngine preferences + DecisionLog stats as the phase specifics suggest)? TasteEngine and DecisionLog live in cognitive-plane and are not currently owned by WorkspaceBrain (verified plugin.ts:108-110 constructs them separately). If included, WorkspaceBrain needs access — a constructor param or lazy wiring. Recommendation: genome + worldModel standards + decision count/outcomes available inside WorkspaceBrain; TasteEngine deferred unless cheaply injectable.
 
-4. **Shared store vs per-organ store** (A1) — one `graph.sqlite` per organ at `{basePath}/{organ}/` vs one shared store with type-scoped nodes. Recommendation: per-organ (isolation, independent clear/close, matches MemoryOrgan's one-store-per-component pattern, memory-organ.ts:29-35).
+4. **Shared store vs per-organ store** (A1) — RESOLVED: per-organ GraphStore at `{basePath}/{organ}/graph.sqlite` (locked in 01-01/01-02 interfaces). One `graph.sqlite` per organ at `{basePath}/{organ}/` vs one shared store with type-scoped nodes. Recommendation: per-organ (isolation, independent clear/close, matches MemoryOrgan's one-store-per-component pattern, memory-organ.ts:29-35).
 
 ## Environment Availability
 
@@ -519,7 +521,7 @@ describe('WorkspaceKnowledgeGraph', () => {
 | Framework | Vitest ^3.0.0 (installed 3.2.7) |
 | Config file | `vitest.config.ts` — include `src/**/*.test.ts`, v8 coverage thresholds (statements 70 / branches 75 / functions 78 / lines 70) |
 | Quick run command | `npx vitest run src/__tests__/workspace-graphs-<organ>.test.ts` |
-| Full suite command | `npm test` (vitest run) — baseline: **86 files, 1,546 passing + 1 pre-existing Windows-only failure** (re-verified 2026-07-31, ~12s) |
+| Full suite command | `npm test` (vitest run) — baseline: **87 files, 1,568 tests passing / 0 failures** (re-verified 2026-07-31, ~10-13s) |
 | Baseline guard | `npm run typecheck` (tsc --noEmit; tests excluded from tsconfig per `**/__tests__/**` at tsconfig.json:22, so organ SOURCE must be clean) |
 
 ### Phase Requirements → Test Map
@@ -596,7 +598,7 @@ The project's threat model (`design/THREAT-MODEL.md`, T01–T14) already covers 
 - `src/agent/plugin.ts`, `src/cli/uccp.ts` — WorkspaceBrain construction sites, `.uccp/persist` paths, sha256 precedent via version-store.ts
 - `src/workspace-brain/{genome,identity,world-model,timeline,health}.ts` — existing organ shapes; verified NO persist/load in workspace-brain
 - `tsconfig.json`, `package.json`, `vitest.config.ts` — strict flags, scripts, zero-dep constraint, coverage thresholds
-- Executable verification: `npx vitest run` → 86 files / 1,547 tests passing (2026-07-31)
+- Executable verification: `npx vitest run` → 87 files / 1,568 tests passing (2026-07-31)
 
 ### Secondary (MEDIUM confidence — project documents)
 - `UCCP-persist-load-SUMMARY.md` — the 15-store Storable pattern contract (matches code)
@@ -616,4 +618,4 @@ The project's threat model (`design/THREAT-MODEL.md`, T01–T14) already covers 
 - Design decisions (persist/load semantics, store layout, brain facade): MEDIUM — flagged in Assumptions Log (A1-A6) and Open Questions for user confirmation
 
 **Research date:** 2026-07-31
-**Valid until:** 2026-08-30 (stable in-repo APIs; 30-day validity — only the test-count baseline (1,547) and Node version (24.15.0) are volatile)
+**Valid until:** 2026-08-30 (stable in-repo APIs; 30-day validity — only the test-count baseline (1,568 passing / 87 files) and Node version (24.15.0) are volatile)

@@ -42,6 +42,17 @@ describe('UCH Agent Integration — Full Lifecycle', () => {
     expect(typeof summary.concepts).toBe('number');
   });
 
+  it('exposes a wired CodingToolkit', async () => {
+    expect(plugin.coding).toBeDefined();
+    expect(plugin.coding.workspaceRoot).toBe(tmpDir);
+    const file = path.join(tmpDir, 'sample.ts');
+    fs.writeFileSync(file, 'export const sample = () => 1;\n');
+    const result = await plugin.coding.analyzeProject(tmpDir);
+    expect(result.stats.files).toBeGreaterThanOrEqual(1);
+    const match = plugin.coding.suggestSkill('write tests for this');
+    expect(match.skill.category).toBe('testing');
+  });
+
   it('getContext returns relevant memory from empty state', async () => {
     const ctx = await plugin.getContext('Hello UCH', { currentFile: 'test.ts' });
     expect(ctx.message).toBe('Hello UCH');
@@ -112,7 +123,7 @@ describe('UCH Agent Integration — Full Lifecycle', () => {
     const tools = ['claude-code', 'codex', 'opencode', 'cursor', 'copilot', 'windsurf', 'antigravity'];
     for (const tool of tools) {
       const p = new UCHAgentPlugin({
-        toolName: tool as any,
+        toolName: tool,
         workspaceRoot: tmpDir,
         autoIngestGit: false,
       });

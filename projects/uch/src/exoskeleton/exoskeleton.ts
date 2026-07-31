@@ -1,5 +1,5 @@
-import { NeuralEventBus, type EventType } from '../event-bus/neural-event-bus.js';
-import { AetherCore, type AetherConfig, type AetherSubsystem } from '../aether/aether-core.js';
+import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
+import { AetherCore, type AetherConfig } from '../aether/aether-core.js';
 import { Consciousness } from '../aether/consciousness.js';
 import { CognitiveKernel } from '../kernel/cognitive-kernel.js';
 import { WorkspaceBrain } from '../workspace-brain/workspace-brain.js';
@@ -19,9 +19,10 @@ import { FileSystemDriver } from '../drivers/filesystem/filesystem-driver.js';
 import { GitDriver } from '../drivers/git/git-driver.js';
 import { CodeScorer } from '../suit/litmus/code-scorer.js';
 import { ReflexEngine } from '../suit/instinct/reflex-engine.js';
+import { FastPathRouter, type RoutineHandler } from '../agentic/fastpath/fast-path-router.js';
 import { ImmuneSystem } from './immune.js';
 import { EndocrineSystem } from './endocrine.js';
-import { SleepCycle } from '../sleep_cycle/cycle.js';
+import { SleepCycle, createKernelMemorySource } from '../sleep_cycle/cycle.js';
 import { ActionSelector } from '../basal_ganglia/action-selector.js';
 import { Connectome } from '../connectome/wiring.js';
 import { Hippocampus } from '../hippocampus/consolidator.js';
@@ -29,8 +30,15 @@ import { Neocortex } from '../neocortex/pattern-learner.js';
 import { CortexKernel } from '../cortex_kernel/integrator.js';
 import { NervousSystem } from '../nervous-system/nervous-system.js';
 import { createSignal } from '../nervous-system/signal.js';
-import type { Signal } from '../nervous-system/signal.js';
 import { Metabolism } from '../metabolism/metabolism.js';
+import { getTools } from '../agentic/tools/registry.js';
+import type { Tool } from '../agentic/tools/types.js';
+import { QueryEngine, type QueryEngineConfig } from '../agentic/query/engine.js';
+import { LLMClientAdapter, type ModelCaller } from '../agentic/model/caller.js';
+import { createPermissionRuleSet, type PermissionRuleSet, type PermissionMode } from '../agentic/permissions/permissions.js';
+import { HistoryManager } from '../agentic/history/history.js';
+import { LLMClient } from '../llm/provider.js';
+import { MEMORY_EXTRACTION_HOOK, DREAM_TRIGGER_HOOK, type StopHook } from '../agentic/query/stop-hooks.js';
 
 export interface ExoskeletonConfig {
   workspaceId: string;
@@ -39,6 +47,13 @@ export interface ExoskeletonConfig {
   traceFile?: string;
   apiKey?: string;
   aetherConfig?: Partial<AetherConfig>;
+  llm?: LLMClient;
+  model?: string;
+  permissionMode?: PermissionMode;
+  permissionRules?: PermissionRuleSet;
+  agenticTools?: Tool[];
+  historyFile?: string;
+  stopHooks?: StopHook[];
 }
 
 export interface ExoskeletonState {
@@ -79,6 +94,7 @@ export class CognitiveExoskeleton {
   readonly plugins: PluginLoader;
   readonly codeScorer: CodeScorer;
   readonly reflexEngine: ReflexEngine;
+  readonly fastPath: FastPathRouter;
   readonly immuneSystem: ImmuneSystem;
   readonly endocrineSystem: EndocrineSystem;
   readonly sleepCycle: SleepCycle;
@@ -89,8 +105,19 @@ export class CognitiveExoskeleton {
   readonly cortexKernel: CortexKernel;
   readonly fsDriver: FileSystemDriver;
   readonly gitDriver: GitDriver;
+  readonly agenticTools: Tool[];
+  readonly agenticModel: ModelCaller | null;
+  readonly history: HistoryManager;
+  readonly agenticStopHooks: StopHook[];
+  readonly permissionMode: PermissionMode;
+  readonly permissionRules: PermissionRuleSet;
 
-  private config: Required<ExoskeletonConfig>;
+  private config: ExoskeletonConfig & {
+    traceFile: string;
+    apiKey: string;
+    historyFile: string;
+    permissionMode: PermissionMode;
+  };
   private transports: Map<string, ExoskeletonTransport> = new Map();
 
   constructor(config: ExoskeletonConfig) {
@@ -101,8 +128,25 @@ export class CognitiveExoskeleton {
       traceFile: config.traceFile ?? '.uccp/traces.jsonl',
       apiKey: config.apiKey ?? 'dev-key',
       aetherConfig: config.aetherConfig ?? {},
+      llm: config.llm,
+      model: config.model,
+      permissionMode: config.permissionMode ?? 'default',
+      permissionRules: config.permissionRules,
+      agenticTools: config.agenticTools,
+      historyFile: config.historyFile ?? '.uccp/history.jsonl',
+      stopHooks: config.stopHooks,
     };
 
+    this.agenticTools = config.agenticTools ?? getTools('reasoning');
+    this.permissionMode = config.permissionMode ?? 'default';
+    this.permissionRules = config.permissionRules ?? createPermissionRuleSet();
+    this.history = new HistoryManager(config.historyFile ?? '.uccp/history.jsonl');
+    this.agenticStopHooks = config.stopHooks ?? [MEMORY_EXTRACTION_HOOK, DREAM_TRIGGER_HOOK];
+
+    const llm = config.llm ?? new LLMClient(config.apiKey ? { apiKey: config.apiKey } : undefined);
+    this.agenticModel = llm.isAvailable
+      ? new LLMClientAdapter(llm, { model: config.model })
+      : null;
     this.eventBus = new NeuralEventBus();
     this.nervousSystem = new NervousSystem({ trackEnergy: true });
     this.metabolism = new Metabolism();
@@ -131,7 +175,7 @@ export class CognitiveExoskeleton {
     this.secrets = new SecretsStore();
     this.policies = new PolicyEngine();
     this.budgets = new BudgetTracker();
-    this.otlp = new OTLPExporter(this.traceRecorder.ledger);
+    this.otlp = new OTLPExporter();
     this.persistence = new TracePersistence(this.config.traceFile);
     this.lifecycle = new Lifecycle();
     this.plugins = new PluginLoader();
@@ -146,7 +190,12 @@ export class CognitiveExoskeleton {
 
     this.immuneSystem = new ImmuneSystem(this.policies, this.auth, this.reflexEngine);
     this.endocrineSystem = new EndocrineSystem(this.nervousSystem, this.consciousness);
-    this.sleepCycle = new SleepCycle(this.nervousSystem, this.aether);
+    this.sleepCycle = new SleepCycle(
+      this.nervousSystem,
+      this.aether,
+      createKernelMemorySource(this.kernel),
+      null,
+    );
     this.actionSelector = new ActionSelector();
     this.connectome = new Connectome();
     this.hippocampus = new Hippocampus(this.kernel);
@@ -158,11 +207,58 @@ export class CognitiveExoskeleton {
     this.metabolism.registerComponent('endocrine');
     this.metabolism.registerComponent('immune');
     this.metabolism.registerComponent('sleep-cycle');
+    this.metabolism.registerComponent('reflex');
 
     this.registerCoreServices();
     this.setupPolicies();
     this.wireNervousSystem();
     this.wireConnectome();
+
+    this.fastPath = this.buildFastPathRouter();
+  }
+
+  private buildFastPathRouter(): FastPathRouter {
+    const router = new FastPathRouter();
+    const state = (): string => {
+      const s = this.getState();
+      return `running=${s.running} phase=${s.aetherPhase} agents=${s.connectedAgents} subsystems=${s.subsystems.length}`;
+    };
+    const routines: RoutineHandler[] = [
+      {
+        name: 'status-routine',
+        description: 'reports runtime status without invoking the LLM',
+        keywords: ['status', 'state', 'phase'],
+        execute: () => state(),
+      },
+      {
+        name: 'health-routine',
+        description: 'reports health metrics without invoking the LLM',
+        keywords: ['health', 'healthy', 'doctor'],
+        execute: () => {
+          const stats = this.getStats();
+          const sleep = stats.sleep as { phase?: string } | undefined;
+          const instinct = stats.instinct as { reflexCount?: number } | undefined;
+          return `sleep=${sleep?.phase ?? 'unknown'} connectome=${stats.connectome} reflexes=${instinct?.reflexCount ?? 0}`;
+        },
+      },
+      {
+        name: 'memory-routine',
+        description: 'reports memory size without invoking the LLM',
+        keywords: ['memory', 'episodes', 'episodic'],
+        execute: () => {
+          const k = this.kernel.getStats();
+          return `episodes=${k.episodes}`;
+        },
+      },
+    ];
+    for (const routine of routines) {
+      router.register(routine);
+    }
+    return router;
+  }
+
+  resolveFastPath(input: string) {
+    return this.fastPath.resolve(input);
   }
 
   private registerCoreServices(): void {
@@ -222,6 +318,15 @@ export class CognitiveExoskeleton {
       stop: async () => {
         this.aether.stop();
       },
+    });
+    this.lifecycle.register({
+      name: 'agentic-history',
+      version: '0.1.0',
+      dependencies: [],
+      start: async () => {
+        await this.history.open();
+      },
+      stop: async () => {},
     });
 
     this.aether.register('endocrine', {
@@ -402,6 +507,94 @@ export class CognitiveExoskeleton {
       transports: this.getTransports(),
       litmus: { threshold: this.codeScorer['config'].threshold },
       instinct: { reflexCount: this.reflexEngine.getReflexes().length },
+      reflex: {
+        ...this.fastPath.getStats(),
+        routines: this.fastPath.listRoutines(),
+      },
+      agentic: {
+        model: this.agenticModel?.modelName ?? null,
+        tools: this.agenticTools.length,
+        historyEntries: this.history.getEntries().length,
+        permissionMode: this.permissionMode,
+      },
     };
+  }
+
+  getMemoryAdapter() {
+    const kernel = this.kernel;
+    return {
+      remember: async (content: string, importance: number) =>
+        kernel.remember({
+          content: { type: 'text', text: content },
+          provenance: { source: 'agentic', reliability: Math.max(0.3, Math.min(1, importance)) },
+        }),
+      recall: async (query: string) =>
+        kernel.recallCompressed({ text: query }).text,
+    };
+  }
+  createEngine(overrides?: Partial<QueryEngineConfig>): QueryEngine | null {
+    if (!this.agenticModel) return null;
+    const sessionId = `${this.config.workspaceId}-${Date.now()}`;
+    const memory = this.getMemoryAdapter();
+    const systemPrompt =
+      overrides?.systemPrompt ??
+      `You are the cognitive agent for workspace "${this.config.workspaceName}".`;
+    return new QueryEngine({
+      cwd: this.config.workspaceRoot,
+      tools: this.agenticTools,
+      model: this.agenticModel,
+      systemPrompt,
+      permissionMode: this.permissionMode,
+      permissionRules: this.permissionRules,
+      headless: overrides?.headless ?? true,
+      abortController: overrides?.abortController,
+      toolContext: {
+        cwd: this.config.workspaceRoot,
+        abortController: overrides?.abortController ?? new AbortController(),
+        getSessionId: () => sessionId,
+        memory,
+      },
+      stopHooks: this.agenticStopHooks,
+      extractMemories: async (text: string) => {
+        const chunks = text.split('\n').filter((line) => line.trim().length > 20).slice(0, 5);
+        for (const chunk of chunks) {
+          await memory.remember(chunk, 0.6);
+        }
+        return chunks.length;
+      },
+      triggerDream: async () => {
+        await this.sleepCycle.deepSleep();
+        return true;
+      },
+      ...overrides,
+    });
+  }
+
+  async runAgentic(
+    prompt: string,
+    options?: { maxTurns?: number; onMessage?: (m: import('../agentic/types.js').Message) => void },
+  ): Promise<{ text: string; toolCalls: number; terminal: import('../agentic/types.js').Terminal }> {
+    const engine = this.createEngine({ maxTurns: options?.maxTurns });
+    if (!engine) {
+      throw new Error('No LLM configured — set OPENAI_API_KEY or ANTHROPIC_API_KEY');
+    }
+    const texts: string[] = [];
+    let toolCalls = 0;
+    for await (const event of engine.submitMessage(prompt)) {
+      if (event.type === 'message' && event.message) {
+        options?.onMessage?.(event.message);
+        for (const block of event.message.content) {
+          if (block.type === 'text') texts.push(block.text);
+          if (block.type === 'tool_use') toolCalls += 1;
+        }
+      }
+    }
+    const terminal = engine.getTerminal() ?? {
+      state: 'success' as const,
+      message: 'Completed',
+      turnCount: 0,
+      usage: engine.usage,
+    };
+    return { text: texts.join('\n').trim(), toolCalls, terminal };
   }
 }

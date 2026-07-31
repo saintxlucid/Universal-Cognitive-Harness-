@@ -1,4 +1,4 @@
-import { NeuralEventBus, type NeuralEvent, type EventType } from './neural-event-bus.js';
+import { NeuralEventBus, type EventType } from './neural-event-bus.js';
 
 export type AgentStatus = 'idle' | 'busy' | 'error' | 'offline';
 export type AgentCapability = string;
