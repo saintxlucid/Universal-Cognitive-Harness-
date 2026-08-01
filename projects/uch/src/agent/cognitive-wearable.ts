@@ -1,3 +1,5 @@
+import type { CognitiveLifecycleEvent } from './cognitive-continuity.js';
+
 export interface UniversalCognitiveState {
   runtime: string;
   objective: string;
@@ -15,6 +17,14 @@ export interface CognitiveStateSyncTarget {
     runtime: string,
     update: Partial<UniversalCognitiveState>,
   ): UniversalCognitiveState;
+  getCognitiveStateSnapshot(runtime: string): UniversalCognitiveState;
+  wear(runtime: string, objective?: string): CognitiveLifecycleEvent;
+  syncLifecycle(
+    runtime: string,
+    update: Partial<UniversalCognitiveState>,
+  ): CognitiveLifecycleEvent;
+  learnFromWearable(runtime: string, summary: string): CognitiveLifecycleEvent;
+  sleepWearable(runtime: string): CognitiveLifecycleEvent;
 }
 
 export interface HarnessAdapter {
@@ -30,6 +40,11 @@ export interface HarnessAdapter {
   };
 }
 
+export interface WearableLifecycleResult {
+  event: CognitiveLifecycleEvent;
+  state: UniversalCognitiveState;
+}
+
 export class CognitiveWearableHarnessAdapter implements HarnessAdapter {
   readonly runtime: string;
   private readonly syncTarget: CognitiveStateSyncTarget;
@@ -39,7 +54,15 @@ export class CognitiveWearableHarnessAdapter implements HarnessAdapter {
     this.syncTarget = syncTarget;
   }
 
-  sync(state: UniversalCognitiveState) {
+  sync(state: UniversalCognitiveState): {
+    event: {
+      kind: 'state-sync';
+      runtime: string;
+      timestamp: string;
+      summary: string;
+    };
+    state: UniversalCognitiveState;
+  } {
     const syncedState = this.syncTarget.syncCognitiveState(this.runtime, state);
     return {
       event: {
@@ -49,6 +72,38 @@ export class CognitiveWearableHarnessAdapter implements HarnessAdapter {
         summary: `Synced ${this.runtime} with objective: ${syncedState.objective}`,
       },
       state: syncedState,
+    };
+  }
+
+  wear(objective?: string): WearableLifecycleResult {
+    const event = this.syncTarget.wear(this.runtime, objective);
+    return {
+      event,
+      state: this.syncTarget.getCognitiveStateSnapshot(this.runtime),
+    };
+  }
+
+  syncLifecycle(update: Partial<UniversalCognitiveState>): WearableLifecycleResult {
+    const event = this.syncTarget.syncLifecycle(this.runtime, update);
+    return {
+      event,
+      state: this.syncTarget.getCognitiveStateSnapshot(this.runtime),
+    };
+  }
+
+  learn(summary: string): WearableLifecycleResult {
+    const event = this.syncTarget.learnFromWearable(this.runtime, summary);
+    return {
+      event,
+      state: this.syncTarget.getCognitiveStateSnapshot(this.runtime),
+    };
+  }
+
+  sleep(): WearableLifecycleResult {
+    const event = this.syncTarget.sleepWearable(this.runtime);
+    return {
+      event,
+      state: this.syncTarget.getCognitiveStateSnapshot(this.runtime),
     };
   }
 }

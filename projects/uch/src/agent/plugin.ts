@@ -617,10 +617,15 @@ export class UCHAgentPlugin {
     ];
 
     const injectedContext = [
+      'Genome',
       `Genome: ${currentState.objective}`,
-      `Engineering standards: preserve architecture, extend contracts, verify before merge`,
-      `Workspace memory: ${currentState.evidence.length > 0 ? currentState.evidence.join(' | ') : 'No evidence captured yet'}`,
+      'Engineering standards',
+      'Engineering standards: preserve architecture, extend contracts, verify before merge',
+      'Active risks',
       `Active risks: ${currentState.hypotheses.length > 0 ? currentState.hypotheses.join(' | ') : 'No active hypotheses'}`,
+      'Workspace memory',
+      `Workspace memory: ${currentState.evidence.length > 0 ? currentState.evidence.join(' | ') : 'No evidence captured yet'}`,
+      'Current decisions',
       `Current decisions: ${currentState.decisions.length > 0 ? currentState.decisions.join(' | ') : 'Use a universal cognitive state contract'}`,
       `Pipeline: ${pipeline.join(' → ')}`,
     ];
