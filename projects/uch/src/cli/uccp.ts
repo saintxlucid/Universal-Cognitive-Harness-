@@ -1,4 +1,5 @@
 import * as http from 'node:http';
+import { join } from 'node:path';
 import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
 import { CognitiveKernel } from '../kernel/cognitive-kernel.js';
 import { WorkspaceBrain } from '../workspace-brain/workspace-brain.js';
@@ -95,7 +96,7 @@ export class UCCPServer {
       workspaceRoot: options.workspaceRoot,
       httpPort: options.httpPort ?? 3100,
       configPath: options.configPath ?? 'uccp.config.json',
-      traceFile: options.traceFile ?? '.uccp/traces.jsonl',
+      traceFile: options.traceFile ?? join(options.workspaceRoot, '.uccp', 'traces.jsonl'),
       apiKey: options.apiKey ?? 'dev-key',
     };
 
@@ -105,7 +106,7 @@ export class UCCPServer {
       agent_id: 'uccp',
       user_id: 'system',
       project_id: this.options.workspaceId,
-      persistence_path: `.uccp/persist`,
+      persistence_path: join(this.options.workspaceRoot, '.uccp', 'persist'),
     });
     this.workspace = new WorkspaceBrain({
       workspace_id: this.options.workspaceId,
@@ -141,7 +142,7 @@ export class UCCPServer {
     this.gitDriver = new GitDriver(this.eventBus, { repoPath: this.options.workspaceRoot });
 
     this.persistentStore = new PersistentStore(
-      { basePath: `.uccp/persist` },
+      { basePath: join(this.options.workspaceRoot, '.uccp', 'persist') },
       this.kernel.getEpisodicStore(),
       this.kernel.getSemanticGraph(),
     );

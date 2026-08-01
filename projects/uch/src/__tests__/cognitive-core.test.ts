@@ -69,7 +69,14 @@ describe('CognitiveCore', () => {
       workspaceRoot: dir,
     });
     const names = core.metabolism.getAllBudgets().map((b) => b.componentId);
-    expect(names).toEqual(['exoskeleton', 'aether', 'endocrine', 'immune', 'sleep-cycle', 'reflex']);
+    expect(names).toEqual([
+      'exoskeleton',
+      'aether',
+      'endocrine',
+      'immune',
+      'sleep-cycle',
+      'reflex',
+    ]);
   });
 
   it('registers endocrine, immune, hippocampus on the aether', () => {
@@ -217,6 +224,55 @@ describe('CognitiveCore', () => {
     await core.stop();
   });
 
+  it('W-07: defaults the trace journal into the workspace root, not the CWD', async () => {
+    const core = new CognitiveCore({
+      workspaceId: 'ws-core',
+      workspaceName: 'Core Test',
+      workspaceRoot: dir,
+    });
+    await core.start();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(existsSync(join(dir, '.uccp', 'traces.jsonl'))).toBe(true);
+    await core.stop();
+  });
+
+  it('W-09: boot report records all phases healthy on a clean boot', async () => {
+    const core = new CognitiveCore({
+      workspaceId: 'ws-core',
+      workspaceName: 'Core Test',
+      workspaceRoot: dir,
+    });
+    expect(core.getBootReport()).toBeNull();
+    await core.start();
+    const report = core.getBootReport();
+    expect(report).not.toBeNull();
+    expect(report!.ok).toBe(true);
+    expect(report!.results.map((r) => r.phase)).toEqual([
+      'trace-persistence',
+      'organism-persistence',
+      'aether',
+      'metabolism',
+    ]);
+    await core.stop();
+  });
+
+  it('W-09: a failing boot phase degrades instead of aborting, and is reported', async () => {
+    const core = new CognitiveCore({
+      workspaceId: 'ws-core',
+      workspaceName: 'Core Test',
+      workspaceRoot: dir,
+      traceFile: dir, // a directory — the journal cannot be opened
+    });
+    await expect(core.start()).resolves.toBeUndefined();
+    const report = core.getBootReport();
+    expect(report).not.toBeNull();
+    expect(report!.ok).toBe(false);
+    const tracePhase = report!.results.find((r) => r.phase === 'trace-persistence');
+    expect(tracePhase).toBeDefined();
+    expect(tracePhase!.ok).toBe(false);
+    await core.stop();
+  });
+
   it('exposes replay and signals over the trace ledger', async () => {
     const core = new CognitiveCore({
       workspaceId: 'ws-core',
@@ -244,10 +300,9 @@ describe('Import firewall', () => {
           expect(line.includes(prefix), `${file} must not import ${prefix}`).toBe(false);
         }
         if (line.includes('../suit/')) {
-          expect(
-            line,
-            `${file} may only import the reflex-engine leaf from suit/`,
-          ).toContain('../suit/instinct/reflex-engine.js');
+          expect(line, `${file} may only import the reflex-engine leaf from suit/`).toContain(
+            '../suit/instinct/reflex-engine.js',
+          );
         }
       }
     }

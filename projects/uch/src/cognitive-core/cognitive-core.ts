@@ -46,6 +46,21 @@ export interface CognitiveCoreState {
   connectedAgents: number;
 }
 
+/** Result of one boot phase. A failed phase degrades the core instead of
+ * aborting boot (W-09). */
+export interface BootPhaseResult {
+  phase: string;
+  ok: boolean;
+  error?: string;
+}
+
+/** Health report of the last boot: overall verdict + per-phase results. */
+export interface BootReport {
+  ok: boolean;
+  startedAt: Date;
+  results: BootPhaseResult[];
+}
+
 export class CognitiveCore {
   readonly eventBus: NeuralEventBus;
   readonly nervousSystem: NervousSystem;
@@ -74,72 +89,44 @@ export class CognitiveCore {
   readonly auth: Auth;
 
   private config: CognitiveCoreConfig;
+  private bootReport: BootReport | null = null;
 
   constructor(config: CognitiveCoreConfig) {
     this.config = config;
 
-    this.eventBus = new NeuralEventBus();
-    this.nervousSystem = new NervousSystem({ trackEnergy: true });
-    this.metabolism = new Metabolism();
-    this.consciousness = new Consciousness();
-    this.aether = new AetherCore(this.eventBus, {
-      tickIntervalMs: 5000,
-      ...config.aetherConfig,
-    });
-    this.kernel = new CognitiveKernel({
-      agent_id: config.agentId ?? 'cognitive-core',
-      user_id: 'system',
-      project_id: config.workspaceId,
-    });
-    this.workspace = new WorkspaceBrain({
-      workspace_id: config.workspaceId,
-      name: config.workspaceName,
-      root_path: config.workspaceRoot,
-      eventBus: this.eventBus,
-    });
-    this.executive = new ExecutiveBrain({ eventBus: this.eventBus });
+    const conscious = this.buildConsciousnessPlane(config);
+    this.eventBus = conscious.eventBus;
+    this.nervousSystem = conscious.nervousSystem;
+    this.metabolism = conscious.metabolism;
+    this.consciousness = conscious.consciousness;
+    this.aether = conscious.aether;
 
-    this.traceRecorder = new TraceRecorder(this.eventBus, {
-      onTrace: (trace) => this.persistence.append(trace),
-    });
-    this.replay = new CognitiveReplay(this.traceRecorder.ledger);
-    this.signals = new SignalStore(this.traceRecorder.ledger);
-    this.persistence = new TracePersistence(config.traceFile ?? '.uccp/traces.jsonl');
+    const cognition = this.buildCognitionPlane(config);
+    this.kernel = cognition.kernel;
+    this.workspace = cognition.workspace;
+    this.executive = cognition.executive;
 
-    this.policies = config.policies ?? new PolicyEngine();
-    this.auth = config.auth ?? new Auth();
-    this.immuneSystem = new ImmuneSystem(
-      this.policies,
-      this.auth,
-      config.reflexEngine ?? new ReflexEngine(),
-    );
-    this.endocrineSystem = new EndocrineSystem(this.nervousSystem, this.consciousness);
-    this.sleepCycle = new SleepCycle(
-      this.nervousSystem,
-      this.aether,
-      createKernelMemorySource(this.kernel),
-      null,
-    );
-    this.actionSelector = new ActionSelector();
-    this.connectome = new Connectome();
-    this.hippocampus = new Hippocampus(this.kernel);
-    this.neocortex = new Neocortex();
-    this.cortexKernel = new CortexKernel(
-      this.consciousness,
-      this.kernel,
-      this.executive,
-      this.eventBus,
-    );
+    const trace = this.buildTracePlane(config);
+    this.persistence = trace.persistence;
+    this.traceRecorder = trace.recorder;
+    this.replay = trace.replay;
+    this.signals = trace.signals;
 
-    this.organismPersistence = new PersistenceProvider({
-      baseDir: this.persistenceBaseDir(),
-      files: {
-        connectome: 'connectome.json',
-        signals: 'signals.json',
-      },
-    });
-    this.organismPersistence.register('connectome', this.connectome, 'connectome.json');
-    this.organismPersistence.register('signals', this.signals, 'signals.json');
+    const defense = this.buildDefensePlane(config);
+    this.policies = defense.policies;
+    this.auth = defense.auth;
+    this.immuneSystem = defense.immuneSystem;
+    this.endocrineSystem = defense.endocrineSystem;
+    this.sleepCycle = defense.sleepCycle;
+    this.actionSelector = defense.actionSelector;
+
+    const learning = this.buildLearningPlane();
+    this.connectome = learning.connectome;
+    this.hippocampus = learning.hippocampus;
+    this.neocortex = learning.neocortex;
+    this.cortexKernel = learning.cortexKernel;
+
+    this.organismPersistence = this.buildOrganismPersistence();
 
     this.metabolism.registerComponent('exoskeleton', { cpu: 5000, tokens: 500000 });
     this.metabolism.registerComponent('aether');
@@ -151,6 +138,102 @@ export class CognitiveCore {
     this.registerAetherSubsystems();
     this.wireNervousSystem();
     this.wireConnectome();
+  }
+
+  /** Arousal plane: the bus, nervous system, metabolism, consciousness, and
+   * the aether orchestrator. No cross-organ dependencies. */
+  private buildConsciousnessPlane(config: CognitiveCoreConfig) {
+    const eventBus = new NeuralEventBus();
+    const nervousSystem = new NervousSystem({ trackEnergy: true });
+    const metabolism = new Metabolism();
+    const consciousness = new Consciousness();
+    const aether = new AetherCore(eventBus, {
+      tickIntervalMs: 5000,
+      ...config.aetherConfig,
+    });
+    return { eventBus, nervousSystem, metabolism, consciousness, aether };
+  }
+
+  /** Cognition plane: kernel (working memory), workspace brain, executive. */
+  private buildCognitionPlane(config: CognitiveCoreConfig) {
+    const kernel = new CognitiveKernel({
+      agent_id: config.agentId ?? 'cognitive-core',
+      user_id: 'system',
+      project_id: config.workspaceId,
+    });
+    const workspace = new WorkspaceBrain({
+      workspace_id: config.workspaceId,
+      name: config.workspaceName,
+      root_path: config.workspaceRoot,
+      eventBus: this.eventBus,
+    });
+    const executive = new ExecutiveBrain({ eventBus: this.eventBus });
+    return { kernel, workspace, executive };
+  }
+
+  /** Trace plane: the ADR-002 ledger, recorder, replay, signals, and the
+   * journal persistence sink. The journal defaults to the workspace root,
+   * never the process CWD (W-07). */
+  private buildTracePlane(config: CognitiveCoreConfig) {
+    const persistence = new TracePersistence(
+      config.traceFile ?? join(config.workspaceRoot, '.uccp', 'traces.jsonl'),
+    );
+    const recorder = new TraceRecorder(this.eventBus, {
+      onTrace: (trace) => persistence.append(trace),
+    });
+    const replay = new CognitiveReplay(recorder.ledger);
+    const signals = new SignalStore(recorder.ledger);
+    return { persistence, recorder, replay, signals };
+  }
+
+  /** Defense + regulation plane: policies, auth, immune, endocrine, sleep,
+   * and the basal-ganglia action selector. */
+  private buildDefensePlane(config: CognitiveCoreConfig) {
+    const policies = config.policies ?? new PolicyEngine();
+    const auth = config.auth ?? new Auth();
+    const immuneSystem = new ImmuneSystem(
+      policies,
+      auth,
+      config.reflexEngine ?? new ReflexEngine(),
+    );
+    const endocrineSystem = new EndocrineSystem(this.nervousSystem, this.consciousness);
+    const sleepCycle = new SleepCycle(
+      this.nervousSystem,
+      this.aether,
+      createKernelMemorySource(this.kernel),
+      null,
+    );
+    const actionSelector = new ActionSelector();
+    return { policies, auth, immuneSystem, endocrineSystem, sleepCycle, actionSelector };
+  }
+
+  /** Learning plane: connectome, hippocampus, neocortex, cortex kernel. */
+  private buildLearningPlane() {
+    const connectome = new Connectome();
+    const hippocampus = new Hippocampus(this.kernel);
+    const neocortex = new Neocortex();
+    const cortexKernel = new CortexKernel(
+      this.consciousness,
+      this.kernel,
+      this.executive,
+      this.eventBus,
+    );
+    return { connectome, hippocampus, neocortex, cortexKernel };
+  }
+
+  /** Organism-wide store coordinator — registers every durable Storable organ
+   * and persists them under {workspaceRoot}/.uccp/persist/organism (W-02). */
+  private buildOrganismPersistence(): PersistenceProvider {
+    const provider = new PersistenceProvider({
+      baseDir: this.persistenceBaseDir(),
+      files: {
+        connectome: 'connectome.json',
+        signals: 'signals.json',
+      },
+    });
+    provider.register('connectome', this.connectome, 'connectome.json');
+    provider.register('signals', this.signals, 'signals.json');
+    return provider;
   }
 
   /** Where the organism-wide store snapshots live, relative to the workspace
@@ -263,12 +346,44 @@ export class CognitiveCore {
   }
 
   async start(): Promise<void> {
-    this.persistence.open();
-    await this.persistence.loadInto(this.traceRecorder.ledger);
-    await this.organismPersistence.loadAll();
-    this.organismPersistence.startAutoSave();
-    this.aether.start();
-    this.metabolism.start();
+    const results: BootPhaseResult[] = [];
+
+    await this.runBootPhase(
+      'trace-persistence',
+      async () => {
+        this.persistence.open();
+        await this.persistence.loadInto(this.traceRecorder.ledger);
+      },
+      results,
+    );
+    await this.runBootPhase(
+      'organism-persistence',
+      async () => {
+        await this.organismPersistence.loadAll();
+        this.organismPersistence.startAutoSave();
+      },
+      results,
+    );
+    await this.runBootPhase(
+      'aether',
+      async () => {
+        this.aether.start();
+      },
+      results,
+    );
+    await this.runBootPhase(
+      'metabolism',
+      async () => {
+        this.metabolism.start();
+      },
+      results,
+    );
+
+    this.bootReport = {
+      ok: results.every((r) => r.ok),
+      startedAt: new Date(),
+      results,
+    };
 
     const sig = createSignal('aether:started', 'cognitive-core', {
       workspaceId: this.config.workspaceId,
@@ -277,6 +392,30 @@ export class CognitiveCore {
     await this.nervousSystem.emit(sig);
 
     this.aether.observeThought('meta', 'Cognitive Core booted', 'cognitive-core', ['startup']);
+  }
+
+  /** Boot-phase runner: a failing phase degrades the core instead of aborting
+   * boot; the failure is recorded in the boot report for health inspection. */
+  private async runBootPhase(
+    phase: string,
+    fn: () => Promise<void>,
+    results: BootPhaseResult[],
+  ): Promise<void> {
+    try {
+      await fn();
+      results.push({ phase, ok: true });
+    } catch (err) {
+      results.push({
+        phase,
+        ok: false,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
+  /** Report of the last boot — null until start() has run once. */
+  getBootReport(): BootReport | null {
+    return this.bootReport;
   }
 
   async stop(): Promise<void> {
