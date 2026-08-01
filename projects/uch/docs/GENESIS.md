@@ -287,6 +287,29 @@ organ-level interoperability contract (observe/process/checkpoint/
 restore/health/capabilities) that binds independently developed
 organs and runtimes, the organ-side twin of driver compliance.
 
+A fourth framing of the same universe is the **compatibility-layer
+intake** (2026-08-01, round 14): UCCL — "start thinking like LLVM,
+Kubernetes, or POSIX" — the AI ecosystem is fragmenting but the
+integration patterns are converging (MCP, SDKs, CLIs, skills/context
+files, agent configs, tool APIs, extension APIs, workspace context);
+the move is a Universal Cognitive Compatibility Layer every adapter
+implements, not 50 bespoke connectors. ~80% of the claim maps to the
+existing corpus (ECOSYSTEM-COMPATIBILITY "one contract, many
+adapters", UNIVERSAL-INTEGRATION hive, COMPATIBILITY-MATRIX v1.0
+evidence layer, INTEGRATION-LEVELS L0–L4, driver compliance +
+conformance, ACP driver, ADR-005 UCP, negotiation, ADR-006 microkernel
+and IDEA-0021 hypervisor); the true delta is **IDEA-0096..0101** —
+UCCL (one normative ten-method adapter contract + tier
+classification + one-source context generation), CIP (Cognitive
+Introspection Protocol — voluntary inbound cognitive state exchange
+with Green/Yellow/Red consent zones; the inbound twin of
+uch.cognitive-state.v1, and the round's headline), UCM (Universal
+Compatibility Matrix as first-class spec + five certification brands),
+the Universal Capability Scanner (UIA surface taxonomy + capability
+graph), Architectural Contracts (continuous invariant verification
+over workspace graphs), and Living Architecture (per-node alive
+projection).
+
 A second framing of the same universe is the **discipline ladder** — the
 eight formal disciplines from which every feature should be derivable:
 Mathematics (definitions, operators, proofs) → Physics (movement, signals,

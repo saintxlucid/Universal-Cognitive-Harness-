@@ -557,3 +557,75 @@ checkpoint/restore, the health registry, the capability registry, and
 driver compliance are its seeds, so a prototype (one organ certified
 against the six-method contract) is cheap. As with every prior round:
 SOP-08 stage 1, zero code, zero spec edits.
+
+## 17. The compatibility-layer intake (2026-08-01, round 14)
+
+**User decision (vision intake, "start thinking like LLVM, Kubernetes,
+or POSIX")**: the ecosystem is fragmenting but the integration patterns
+are converging (MCP, SDKs, CLIs, skills/context files, agent configs,
+tool APIs, extension APIs, workspace context). The move is not to write
+adapters one by one but to define a **Universal Cognitive Compatibility
+Layer (UCCL)** that every adapter implements - ten compatibility tiers
+(providers, coding applications, IDEs, editor protocols, version
+control, CI/CD, clouds, container platforms, memory providers, agent
+standards), a Universal Cognitive Adapter contract (discover/connect/
+authenticate/capabilities/observe/execute/synchronize/heartbeat/
+checkpoint/disconnect), a Universal Compatibility Matrix (UCM) as a
+first-class spec, five certification brands (UCH Compatible/Native/
+Enterprise/Verified/Certified), and a ten-layer vertical integration
+model (identity, shared cognitive state, intent sync, execution fabric,
+cross-model cognition, universal memory, semantic git, universal
+debugging, cognitive time travel, living architecture) - with the
+Cognitive Hypervisor as the substrate claim ("virtualizes cognition the
+way a hardware hypervisor virtualizes CPUs") and a Cognitive
+Introspection Protocol (CIP) as the disciplined leap ("MCP standardizes
+tool access; CIP standardizes cognitive state exchange; deep semantic
+integration, not unrestricted access").
+
+**Verdict after corpus mapping (2026-08-01, verified):** ~80% already
+executed - the compatibility thesis is section 2 of this document plus
+design/ECOSYSTEM-COMPATIBILITY.md ("one contract, many adapters"),
+design/UNIVERSAL-INTEGRATION.md (hive + per-runtime capture matrix),
+design/integrations/COMPATIBILITY-MATRIX.md v1.0 (23 harnesses / 9 IDEs
+/ 24 providers / 14 SDKs / 6 protocols), and design/integrations/*.md
+per-runtime specs; the levels claim is design/INTEGRATION-LEVELS.md
+(L0-L4 + T0-T4 transports, per-rail, graceful degradation) + driver
+compliance (src/drivers/compliance.ts) + conformance.ts; negotiation
+exists (workspace-manifest negotiation + capability-negotiation +
+attach + projections); the event bus and ledger exist (neural-event-bus
+and ADR-002); the hypervisor is IDEA-0021; the bus is IDEA-0010; the
+twin is IDEA-0012; observability is IDEA-0014 + IDEA-0071; networking
+is IDEA-0064 + CIC; memory is the model-independent memory manager;
+nine of the ten layers map to executed machinery (identity, live
+cognitive state, intent objects, ADR-004 fabric, cross-model consensus,
+universal memory, workspace graphs + UER + archaeology, ADR-002 replay
+and time machine); providers are already interchangeable execution
+backends (ADR-004 virtual processors); the ACP driver exists
+(src/drivers/acp/); the CIP payload shape is literally
+design/LIVE-COGNITIVE-STATE.md (uch.cognitive-state.v1) in the
+outbound direction.
+
+**The true delta is 6 ideas (IDEA-0096..0101)**:
+
+| Claim                                                                                      | Idea      | Delta vs corpus                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| UCCL: one normative adapter contract + tier classification + one-source context generation | IDEA-0096 | Adapter contracts are per-family (drivers, protocol-adapter, ACP/MCP); no single ten-method contract third-party adapters implement and get certified on; context generation for external agents (AGENTS.md/Claude Skills/Cursor Rules/Copilot/Gemini/OpenCode from one source) is unowned |
+| CIP: voluntary cognitive state exchange + Green/Yellow/Red consent zones                   | IDEA-0097 | Live Cognitive State is UCH-produced/host-consumed (outbound); hive capture is bespoke per-runtime. CIP is the named inbound contract apps implement to publish state voluntarily, with zone declarations; the Red zone formalizes L3's never-hidden-COT rule as a negotiable contract     |
+| UCM: first-class compatibility matrix + five certification brands + registry               | IDEA-0098 | compliance.ts certifies UCH's own drivers (UCH-to-host); nothing certifies third-party products (host-to-UCH) against a living matrix spec with deterministic conformance                                                                                                                  |
+| UIA surfaces taxonomy + Universal Capability Scanner + capability graph                    | IDEA-0099 | discovery.ts resolves the UCH manifest; nothing enumerates an external app's surfaces (configs, manifests, CLI, MCP lists) into a traversable capability graph feeding negotiation                                                                                                         |
+| Architectural Contracts: continuous invariant verification                                 | IDEA-0100 | EI/coupling/organic gates are advisory single-shot evaluations; no structural-invariant DSL (reachability/event-flow) continuously enforced over workspace-graphs with veto authority                                                                                                      |
+| Living Architecture: per-node alive projection                                             | IDEA-0101 | The nine lower layers are executed; the fused per-node view (health + deps + decisions + tasks + risks + confidence) has no schema/renderer - the observatory's Phase-02 prescriptive frontier, claimed in read-only form                                                                  |
+
+**Verdict on the intake's verdict:** the "think like an OS" framing is
+the ADR-006 microkernel decision already in force, and "supports
+Cursor" -> "UCH Certified" is the compliance direction the corpus
+already certifies drivers in - the genuinely new artifact is **CIP**,
+the inbound voluntary state-exchange twin of Live Cognitive State: it
+is the one proposal that extends interoperability from "what tools can
+I call" (MCP) to "what cognitive state can trusted systems
+intentionally share" without crossing the Red zone, and it gives the
+UCM/certification ladder (IDEA-0098) its enterprise-safe content.
+UCCL (0096) is the consolidation move, the scanner (0099) is its
+mechanism, architectural contracts (0100) and living architecture
+(0101) are Phase-02 view/enforcement layers over executed substrate.
+As with every prior round: SOP-08 stage 1, zero code, zero spec edits.
