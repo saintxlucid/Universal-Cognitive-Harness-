@@ -1039,3 +1039,248 @@ is a named/versioned/certifiable artifact over existing machinery,
 the same delta shape as rounds 14-15. As with every prior round:
 SOP-08 stage 1, zero code, zero spec edits; §19's files (IDEA-0109)
 untouched; appended after §19 per coexistence rules.
+
+## 22. The cognitive-runtime-standard intake (2026-08-01, round 18)
+
+**User decision (vision intake, "models are no longer the
+bottleneck - persistent execution, orchestration, governance,
+observability, identity, and runtime infrastructure are")**: the
+moat is not "better reasoning" but becoming the layer every
+reasoning engine depends on. The future stack: Model → Inference
+Runtime → Cognitive Runtime → Cognitive Operating System →
+Applications → Users - "the model becomes replaceable, the runtime
+doesn't." Fourteen claims: (1) an Internal Microkernel (scheduler,
+memory manager, signal router, capability manager, policy engine,
+security kernel, event ledger, checkpoint manager, identity
+manager, observability, clock, transaction manager - everything
+else becomes userspace, like Mach or Linux); (2) Cognitive
+Syscalls - applications never manipulate memory directly, they
+call observe()/remember()/recall()/reason()/verify()/simulate()/
+checkpoint()/rollback()/reflect()/learn()/delegate()/synchronize()/
+negotiate()/commit()/abort(); "every cognitive action is a
+syscall"; (3) a Cognitive ABI - applications compiled against UCH
+1.0 still work on UCH 8.0, the POSIX survival argument; (4) a
+Cognitive Object Format (.cog) - the ELF/WASM analog: one artifact
+containing goals, policies, knowledge, behaviors, capabilities,
+genome, memory, verification, relationships - portable, versioned,
+signed, reproducible; (5) a Cognitive Linker - don't load plugins,
+link cognitive objects (Security.cog + Architecture.cog +
+Research.cog + Memory.cog → Running Organism); (6) a Cognitive
+Loader - demand paging for intelligence (Claude opens a project →
+load only the required cognitive modules); (7) a Cognitive
+Scheduler - schedule thinking, not threads (planning priority 8,
+verification 10, learning 2, reflection 1, research 5); (8) a
+Cognitive Filesystem - not directories, knowledge: /Genome /
+Memory /Knowledge /Projects /Signals /Sessions /Thoughts /
+Policies /Events /Observability /Experiments /Users /Agents /
+Capabilities in one namespace; (9) Cognitive Networking - above
+TCP/HTTP/MCP: identity → capability negotiation → memory
+negotiation → policy negotiation → session negotiation → knowledge
+exchange → synchronization (MCP standardizes tools, but identity
+propagation, budgeting, structured errors, and observability also
+need standardized semantics); (10) a Cognitive Package Manager -
+"uch install architecture / security / rust / compiler / finance /
+oncology" - knowledge systems, not libraries; (11) a Cognitive
+Build System - projects compile to organisms: Constitution →
+Genome → Knowledge → Capabilities → Policies → Verification →
+Image → Deployment, an OS image whose output is a portable
+cognitive environment; (12) a Cognitive Runtime Observatory - not
+logs/metrics but a living execution graph: current goal, supporting
+evidence, active memories, pending decisions, confidence, risks,
+verification status, energy budget, latency budget - click any
+node and replay its history; (13) the Real Moat - market UCH as
+"The Cognitive Runtime Standard", because standards become
+infrastructure, infrastructure becomes dependencies, dependencies
+become ecosystems; (14) the headline: a Cognitive Binary Interface
+(CBI) - "a .cog package compiled against CBI v1.2 would run on any
+compliant Cognitive Virtual Machine, regardless of whether the
+execution engine underneath is GPT-5.5, Claude, Gemini, DeepSeek,
+or a future model" - compatibility shifts away from vendors toward
+a stable execution contract.
+
+**Verdict after corpus mapping (2026-08-01, verified):** ~85%
+already executed or tracked - the stack and moat claims restate
+VISION sec 2's substrate thesis + STACK.md's six layers + the
+capability hierarchy + Platform Zero; the microkernel is ADR-006's
+12 kernel primitives restated (scheduler = CognitiveScheduler +
+accelerators/scheduler.ts + IDEA-0034 priorities; memory manager =
+vmem WS-B paging; signal router = neural-event-bus + priorities;
+capability manager = capability-registry + grants; policy engine =
+constitution + integrity checklist; security kernel = permissions +
+CIC + WS-P quarantine; event ledger = OTel trace ledger; checkpoint
+manager = WS-D + sessions + IDEA-0088 savepoints + IDEA-0117
+execution-graph checkpoints - a composition, not a new primitive;
+identity manager = workspace-manifest; observability = trace
+recorder + IDEA-0071 SLOs + IDEA-0014; clock = catalog.ts cognitive
+clock; transaction manager = WS-D; "everything else is userspace" =
+ADR-006's service-topology rule + WS-C); cognitive syscalls = CP
+v1.0, which already declares itself "the syscall ABI of the
+Cognitive OS" - 9 of the 15 verbs map 1:1 (observe/remember/
+retrieve=recall/think=reason/critique+evaluate=verify/simulate/
+reflect/learn/execute=delegate) and the other 6 map to existing
+mechanisms (checkpoint/rollback/commit/abort = WS-D transactional
+verbs, synchronize = CIC transport, negotiate = attach-time
+capability negotiation); the Cognitive ABI = IDEA-0095 + CP
+major-version compatibility ("any client speaking major 1 is
+served") + conformance + spec-version gate; the scheduler = the
+accelerators scheduler + decision-law priorities (the example
+priorities are policy knobs over IDEA-0034); the filesystem =
+neural-fs + IDEA-0049 (one storage contract, one namespace) +
+IDEA-0056 COM + IDEA-0057 CQL - the user's /Genome /Memory /
+Knowledge list is exactly IDEA-0049's claim; cognitive networking
+= IDEA-0064 multi-UCH + capability negotiation + CIC transport
+adapters + IDEA-0096 UCCL + IDEA-0105 CRP + IDEA-0098 UCM - the
+MCP-adjacent standardization point is the round-14/15 corpus;
+package manager = WS-P executed ("uch package install") + IDEA-0058
+marketplace (knowledge packs = skill/policy package kinds); the
+build system = IDEA-0083 + IDEA-0104 + IDEA-0013 manufacturing +
+IDEA-0081 chain + IDEA-0045 CVM + ADR-006 cognitive image - the
+pipeline's natural output is the .cog; the observatory = IDEA-0014
+
+- IDEA-0101 living architecture + ADR-002 replay + the execution
+  graph IDEA-0117 as its substrate (click-to-replay = replay + time
+  machine).
+
+**The true delta is 2 ideas (IDEA-0125..0126)**:
+
+| Claim                                                                                                                                                                                                   | Idea      | Delta vs corpus                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cognitive Object Format (.cog) + Cognitive Binary Interface (CBI) - the ELF/WASM analog and its binary contract; a .cog built against CBI v1.2 runs on any compliant CVM regardless of inference engine | IDEA-0125 | uch.package.v1 is a distribution envelope (drivers/skills/policies + manifest + gate) with no cognitive sections, no executable semantics, no artifact-to-VM binary contract; CIC is the runtime message, CIR the program IR - nothing is a loadable signed artifact with a pinned CBI; driver compliance certifies UCH-to-host, CBI is the first artifact-to-VM compatibility contract (the "compatibility away from vendors" claim) |
+| Cognitive Linker + Loader - bind .cog objects into a running organism (contract satisfaction, CBI checks, ledger link event) and demand-page cognition (load only required modules)                     | IDEA-0126 | WS-P resolves the dependency closure for validation but has no link semantics (no contract binding per IDEA-0019, no CBI compatibility check, no link record); vmem pages memory, not modules - nothing demand-pages cognition; no artifact binds Security.cog + Architecture.cog into one organism with a recorded link event                                                                                                        |
+
+**Verdict on the intake's verdict:** the runtime-standard framing
+is the corpus's own thesis stated as a market position - "standards
+become infrastructure, dependencies become ecosystems" is Platform
+Zero + VISION sec 2, and every claim 1-3 and 7-13 lands on
+executed machinery (ADR-006, CP v1, IDEA-0095/0049/0056/0064/
+0014, WS-P/WS-D/WS-C, conformance). The genuinely new material is
+the _artifact pipeline_: .cog + CBI (0125) and linker + loader
+(0126) - the executable-object layer between distribution (WS-P)
+and execution (CVM), the layer that makes "the model becomes
+replaceable, the runtime doesn't" literally true for artifacts,
+not just drivers. Two dependencies shape sequencing: the CVM
+(IDEA-0045) is the critical path for 0125 (a format without an
+interpreter is a zip file with opinions), and the observatory
+claim 12 executes over IDEA-0117 (the execution graph - the round
+17 note) once it lands; the user's priority order therefore holds:
+CVM promotion, then the artifact pipeline, then observatory. The
+syscall list (claim 2) is CP restated with six verbs mapped to
+existing mechanisms - no new op surface proposed; the checkpoint
+manager (claim 1) is a composition of WS-D + IDEA-0117. As with
+every prior round: SOP-08 stage 1, zero code, zero spec edits.
+
+## 23. The reimplementation-objective intake (2026-08-01, round 19)
+
+**User decision (vision intake, "change the objective: not
+'impossible to replace' but 'impossible to reimplement'")**: the JVM,
+Git, and LLVM became foundational not because of bytecode, commits,
+or IR alone, but because they accumulated specifications, tooling,
+conformance tests, debugging infrastructure, compatibility
+guarantees, and ecosystem gravity. "Impossible to replace" invites a
+feature-race; "impossible to reimplement" is an ecosystem goal where
+the unit of reimplementation is not a mechanism but a corpus. The
+intake's ten claims: (1) Ω-0 Cognitive Microkernel - fourteen
+primitives (Identity, Clock, Scheduler, Transactions, Signals, Memory
+Manager, Policy Engine, Capability Manager, Security, Observability,
+Ledger, Persistence, Replication, Recovery) with everything else as
+userspace, "exactly like Linux"; (2) five specifications instead of
+one Constitution - Constitution → Physics → Instruction Set →
+Runtime/ABI → Conformance; (3) a Cognitive ISA defining only
+instructions (Observe/Recall/Learn/Verify/Reflect/Predict/Simulate/
+Delegate/Checkpoint/Rollback/Synchronize), not implementations; (4) a
+Cognitive ABI defining compatibility POSIX-style - UCH 1 and UCH 18
+sharing an ABI still run everything; (5) a Cognitive Runtime
+Specification (scheduling, memory, transactions, signals, pipelines,
+lifecycle); (6) the Conformance Suite as "probably the biggest moat" -
+3000+ tests → certification → "UCH Compatible", nobody claims
+compatibility without passing; (7) CVM evolution - LLM → Proposal →
+Verifier → Optimizer → IR → CVM → Ledger Commit: the LLM never
+creates execution, it proposes execution, the runtime owns execution;
+(8) replay as the largest moat - Observe → Plan → Execute →
+Checkpoint → Replay → Compare → Benchmark → Optimize, every
+engineering session becomes a benchmark, eventually millions of
+engineering episodes; (9) a Cognitive Profiler (VTune for thinking:
+Memory Hits, Reasoning Cost, Verification Time, Research Latency,
+Planning Cost, Context Growth, Knowledge Reuse, Decision Entropy,
+Simulation Cost, Token Efficiency); (10) a Cognitive Linker (Research
+Module + Security Module + Compiler Module + Architecture Module →
+Executable Organism, "like linking binaries") and the compiler
+framing (Constitution → Genome → Knowledge → Policies → Context →
+IR → Optimizer → Executable Cognition, "exactly like LLVM"); plus the
+discipline claim - not AI Engineering but **Runtime Cognitive
+Engineering (RCE)**: formal specifications instead of prompt
+conventions, deterministic execution instead of emergent
+orchestration, replayable cognition instead of opaque conversations,
+capability contracts instead of ad hoc integrations, conformance
+testing instead of marketing claims, performance profiling for
+cognition, versioned cognitive artifacts.
+
+**Verdict after corpus mapping (verified 2026-08-01):** ~85% already
+executed or tracked - the microkernel (1) is ADR-006's 12 primitives
+restated (verified status table: Identity/Scheduler/Transactions/
+Signals/Policy/Capability/Security/Observability/Ledger/Persistence
+implemented; Clock and Memory Manager partial) plus **two genuine
+deltas: Replication and Recovery** (replication is grep-absent across
+src/ and design/ - zero implementation, zero design docs; recovery
+is embryo-only: WS-E diagnoses, IDEA-0070 proposes restart-restore-
+replay, but no primitive restores state to a consistent point); the
+five-spec canon (2) is the existing spec/ stack restated
+(CONSTITUTION + FORMAL_FOUNDATIONS Physics via RFC-0005 + CP ISA +
+IDEA-0095 ABI draft + conformance.ts) but is not canonicalized as one
+five-document stack with one conformance layer (IDEA-0048's every-
+section-gets-a-conformance-test is the execution path); the ISA (3)
+is CP v1 with 9 of the 11 verbs mapping 1:1 (observe/retrieve=
+recall/evaluate+critique=verify/reflect/predict/simulate/execute=
+delegate) and the rest mapped to mechanisms (checkpoint/rollback =
+WS-D, synchronize = CIC) - no new op surface; the ABI (4) is IDEA-0095
+
+- CP major-version compatibility + spec-version gate; the Runtime
+  Spec (5) is ADR-006 + COGNITIVE-RUNTIME-STANDARD.md (round 18) +
+  COGNITIVE-ABI.md; the Conformance Suite (6) is the round's real
+  amplification - conformance.ts/compliance.ts/GO-CERTIFICATION.md +
+  the RFC-0004 71-case corpus precedent exist, but the suite is not yet
+  a certification gate over spec sections (2963 tests today, none
+  branded; the 3000+ suite-as-moat is a program, not a feature); the
+  CVM proposer/verifier evolution (7) is WS-D propose→verify→commit +
+  CIR delegated-ops + ledger commit = ADR-002 restated - "the LLM
+  proposes, the runtime executes" is the CIR design, already landed;
+  replay as the largest moat (8) is ADR-002 + time machine + UER +
+  EI benchmark runner restated, with the genuine delta being the
+  session-capture corpus (synthetic 17+16 corpus today; nothing
+  captures real sessions as benchmark episodes); the Profiler (9) is a
+  real instrument delta - quantities (0035), SLOs (0071), silicon
+  benchmarks (0018), and runtime telemetry (0122) exist but nothing
+  attributes cost to reasoning stages per session; the Linker (10) is
+  IDEA-0126 (round 18) restated - no new note, and the compiler framing
+  is RFC-0004's CIR + 17-pass optimizer + intent frontend restated
+  ("think compiler" is what CIR is); RCE is IDEA-0024 + the discipline
+  ladder (sec 9) + IDEA-0081 + conformance restated as a name with
+  seven already-anchored pillars.
+
+**The true delta is 4 ideas (IDEA-0127..0130)**:
+
+| Claim                                                                                                                                                                     | Idea      | Delta vs corpus                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Objective shift: "impossible to reimplement" - conformance suite as the moat (3000+ tests → certification → UCH Compatible brand), five-spec canon, RCE discipline naming | IDEA-0127 | VISION §1's purpose clause states the end (cognitive capital), not the moat test; no document binds "compatibility claims are only valid through the suite" as the objective; the certification machinery exists (conformance.ts, brands per IDEA-0098, GO-CERTIFICATION evidence model) but no objective states the suite is the moat |
+| Cognitive Profiler (VTune for cognition: 10 named metrics with per-session attribution)                                                                                   | IDEA-0128 | 0035 names quantities, 0071 SLOs, 0018 benchmarks processors, 0122 runtime telemetry - nothing attributes cost to reasoning stages per session over the ADR-002 ledger; the Observatory's instrument taxonomy (0043) lacks the profiler                                                                                                |
+| Replay moat corpus: every engineering session becomes a benchmark episode (millions of episodes, replay→compare→benchmark→optimize)                                       | IDEA-0129 | EI corpus is 17+16 synthetic labeled cases; UER P1 is in-memory, P2 (real ledger + git ingestion) planned; no pipeline captures a real session as a replayable, comparable episode; checkpoints (WS-D) are not harvested into a corpus                                                                                                 |
+| Ω-0 kernel deltas: Replication + formal Recovery as kernel primitives (14th and 15th)                                                                                     | IDEA-0130 | Replication is grep-absent (zero impl, zero design); Recovery is embryo-only (WS-E diagnosis + IDEA-0070 proposal, no restore-to-consistent-point primitive); ADR-006's 12-primitive list gains two                                                                                                                                    |
+
+**Verdict on the intake's verdict:** the objective change is the
+round's real decision and it is the right one - "impossible to
+reimplement" is compatible with the purpose clause (a reimplementable
+standard does not preserve cognitive capital durably) and reframes
+the roadmap from feature delivery (Epoch III items) to ecosystem
+gravity (conformance program, certification brands, session corpus).
+Claims 1-5, 7, and 10 are re-confirmations of executed or tracked
+machinery (ADR-006, spec/ stack, CP v1, IDEA-0095, WS-D + CIR,
+IDEA-0126, RFC-0004); claim 6's amplification (suite-as-moat) and
+claims 8-9 (session corpus, profiler) are the genuine new material,
+plus the two kernel primitives. The user's priority list (0
+Microkernel → 1 Constitution → 2 Spec Repository → 3 ISA → 4 ABI → 5
+.cog → 6 Linker → 7 CVM → 8 Replay & Observatory → 9 Harnesses → 10
+Ecosystem) is 10/10 executed-or-tracked and matches the roadmap's
+CVM-next standing decision (round 16/17 re-confirmed; CVM promotion
+in flight at intake time). As with every prior round: SOP-08 stage 1,
+zero code, zero spec edits; the objective amendment to §1/§2 is
+proposed here and awaits ratification with the next commit wave.

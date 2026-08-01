@@ -410,6 +410,103 @@ merge/replay/optimize as first-class execution semantics, the
 program the CVM interprets. The ten-item roadmap is 10/10
 executed-or-tracked and confirms CVM as the next promotion.
 
+An eighth framing of the same universe is the **cognitive-runtime-
+standard intake** (2026-08-01, round 18): "models are no longer the
+bottleneck — persistent execution, orchestration, governance,
+observability, identity, and runtime infrastructure are; the model
+becomes replaceable, the runtime doesn't." The future stack Model →
+Inference Runtime → Cognitive Runtime → Cognitive Operating System
+→ Applications → Users, plus fourteen claims: the internal
+microkernel (scheduler, memory manager, signal router, capability
+manager, policy engine, security kernel, event ledger, checkpoint
+manager, identity manager, observability, clock, transaction
+manager — "everything else becomes userspace, like Mach or Linux"),
+cognitive syscalls ("every cognitive action is a syscall":
+observe/remember/recall/reason/verify/simulate/checkpoint/rollback/
+reflect/learn/delegate/synchronize/negotiate/commit/abort), the
+Cognitive ABI ("applications compiled against UCH 1.0 still work on
+UCH 8.0 — why POSIX survived"), the Cognitive Object Format (.cog —
+the ELF/WASM analog: one portable, versioned, signed, reproducible
+artifact with goals/policies/knowledge/behaviors/capabilities/
+genome/memory/verification/relationships sections), the Cognitive
+Linker ("don't load plugins, link cognitive objects: Security.cog +
+Architecture.cog → Running Organism"), the Cognitive Loader
+("demand paging for intelligence"), the Cognitive Scheduler
+(schedule thinking, not threads), the Cognitive Filesystem (one
+namespace: /Genome /Memory /Knowledge /Projects /Signals /Sessions
+/Thoughts /Policies /Events /Observability /Experiments /Users
+/Agents /Capabilities), Cognitive Networking (identity → capability
+→ memory → policy → session negotiation → knowledge exchange →
+synchronization, above MCP), the Cognitive Package Manager ("uch
+install architecture — knowledge systems, not libraries"), the
+Cognitive Build System (Constitution → Genome → Knowledge →
+Capabilities → Policies → Verification → Image → Deployment — an OS
+image whose output is a portable cognitive environment), the
+Cognitive Runtime Observatory (a living execution graph: click any
+node, replay its history), the Real Moat (market UCH as "The
+Cognitive Runtime Standard" — standards become infrastructure,
+dependencies become ecosystems), and the headline: the Cognitive
+Binary Interface — "a .cog compiled against CBI v1.2 runs on any
+compliant CVM regardless of the execution engine underneath".
+~85% maps to the existing corpus (ADR-006's 12 kernel primitives;
+CP v1.0 as "the syscall ABI of the Cognitive OS" — 9 of the 15
+verbs map 1:1, the other 6 to WS-D/CIC/negotiation; IDEA-0095 +
+CP major-version compatibility = the ABI; accelerators scheduler +
+IDEA-0034 = the thinking scheduler; neural-fs + IDEA-0049 = the
+filesystem; IDEA-0064/0096/0105 = networking; WS-P + IDEA-0058 =
+the package manager; IDEA-0083/0013/0081 + ADR-006 = the build
+system; IDEA-0014/0101 + ADR-002 + IDEA-0117 = the observatory;
+Platform Zero = the moat); the true delta is **IDEA-0125..0126** —
+the Cognitive Object Format + Cognitive Binary Interface (.cog, the
+first artifact-to-VM compatibility contract: "compatibility away
+from vendors") and the Cognitive Linker + Loader (binding objects
+into a running organism with contract satisfaction and a ledger
+link event; demand-paged cognition per vmem tiers). The CVM
+(IDEA-0045) is the critical path: a format without an interpreter
+is a zip file with opinions.
+
+A ninth framing of the same universe is the **reimplementation-
+objective intake** (2026-08-01, round 19): "don't optimize for
+'impossible to replace', optimize for 'impossible to reimplement' —
+the JVM, Git, and LLVM became foundational not because of
+bytecode, commits, or IR alone but because they accumulated
+specifications, tooling, conformance tests, debugging
+infrastructure, compatibility guarantees, and ecosystem gravity."
+The intake restates the Ω-0 microkernel (fourteen primitives incl.
+Replication and Recovery — "everything else becomes userspace,
+exactly like Linux"), the five-spec canon (Constitution → Physics →
+Instruction Set → Runtime/ABI → Conformance), the Conformance Suite
+as "probably the biggest moat" (3000+ tests → certification → "UCH
+Compatible" — nobody claims compatibility without passing), the
+CVM evolution (LLM → Proposal → Verifier → Optimizer → IR → CVM →
+Ledger Commit: the LLM proposes execution, the runtime owns it),
+replay as the largest moat (every engineering session becomes a
+benchmark episode), the Cognitive Profiler (VTune for thinking: ten
+named metrics with per-session attribution), the Cognitive Linker
+(Research + Security + Compiler + Architecture modules → Executable
+Organism — "like linking binaries", = IDEA-0126), the compiler
+framing ("think compiler, not runtime": Constitution → Genome →
+Knowledge → Policies → Context → IR → Optimizer → Executable
+Cognition — = RFC-0004 CIR), and the discipline claim: Runtime
+Cognitive Engineering (RCE) — formal specifications, deterministic
+execution, replayable cognition, capability contracts, conformance
+testing, performance profiling, versioned cognitive artifacts.
+~85% maps to the corpus (ADR-006 12 primitives verified; spec/
+five-document stack; CP v1 with 9 of 11 verbs 1:1; WS-D +
+CIR + ADR-002 = the proposer/verifier pipeline; ADR-002 + time
+machine + UER = replay; IDEA-0035/0071/0018/0122 = profiler
+quantities; IDEA-0024/0081 + conformance = RCE pillars); the true
+delta is **IDEA-0127..0130** — the objective amendment (moat test
+
+- suite-as-moat + five-spec canon + RCE naming), the Cognitive
+  Profiler (per-session stage attribution — no instrument exists
+  today), the session-benchmark corpus (real sessions as replayable
+  benchmark episodes — the synthetic 17+16 corpus is the seed), and
+  the two kernel deltas (Replication is grep-absent; Recovery is
+  embryo-only). The objective change reframes the roadmap from
+  feature delivery to ecosystem gravity — the conformance program
+  is the moat, the session corpus is the compounding asset.
+
 A second framing of the same universe is the **discipline ladder** — the
 eight formal disciplines from which every feature should be derivable:
 Mathematics (definitions, operators, proofs) → Physics (movement, signals,
