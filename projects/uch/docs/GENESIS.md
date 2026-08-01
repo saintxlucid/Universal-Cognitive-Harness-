@@ -522,6 +522,40 @@ component set: each rung maps to existing corpus work or an idea note
 Biology → IDEA-0007; Ecology → IDEA-0007; Economics → IDEA-0016; Sociology →
 IDEA-0027; Civilization → ADR-005 + IDEA-0024).
 
+A tenth framing of the same universe is the **inflection intake**
+(2026-08-01, round 20): "stop expanding horizontally — every new
+feature must strengthen the foundation." Eight frontiers are named:
+Formalize the Science (a machine-readable /specs repository —
+Laws, Ontology, Signals, Memory, Knowledge, Session Protocol,
+Organ Interface, Genome, ABI, IR, ISA, Error Codes, Metrics, State
+Machines, Transactions, Runtime Contracts — nothing implemented
+until specified), the Cognitive Microkernel (nine primitives:
+Identity, Scheduler, Signal Fabric, Memory Transactions,
+Governance, Security, Resource Allocation, Runtime Registry,
+Lifecycle — everything else a dynamically loaded organ), the
+Cognitive VM (Intent → CIR → Optimizer → Execution Graph → CVM →
+Driver → LLM — "the JVM for cognitive execution"), the Universal
+Driver Architecture (every external system as hardware behind one
+internal protocol — no subsystem knows what VS Code is, it knows
+`IDE.Driver`), Engineering Intelligence (judgment, not code),
+the Cognitive Observatory ("Task Manager for cognition"),
+the Ecosystem (genome/organ/constitution/verification packs), and
+the Development Platform (Organ/Genome/Driver/Signal/Memory/
+Protocol/Simulation/Verification SDKs). ~85-90% maps to the corpus
+(spec/ stack + RFC-0000 + spec-version gate + IDEA-0048/0083;
+ADR-006 kernel with all nine named primitives verified; RFC-0004
+CIR + IDEA-0045 CVM + IDEA-0117 execution graph landed; UCCL +
+drivers/ + compliance L0-L4 + COMPATIBILITY-MATRIX; ADR-003 Phases
+A-E with engineering vetoes; ADR-002 + time machine + SLOs +
+telemetry + profiler; WS-P + IDEA-0058 + IDEA-0098; IDEA-0083/
+0104/0019/0067 SDK path); the true delta is **IDEA-0131 — CADR**:
+immutable, queryable cognitive decision records (11 fields) the
+runtime consults instead of inferred history — the record substrate
+IDEA-0040 jurisprudence and IDEA-0042 archaeology presuppose, and
+the evidence → outcome loop the decision law (IDEA-0034) needs.
+The freeze itself is ratified governance (Platform Zero + the
+round-19 objective amendment), not new machinery.
+
 ---
 
 ## Chapter 4 — Market Analysis

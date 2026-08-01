@@ -1284,3 +1284,134 @@ CVM-next standing decision (round 16/17 re-confirmed; CVM promotion
 in flight at intake time). As with every prior round: SOP-08 stage 1,
 zero code, zero spec edits; the objective amendment to §1/§2 is
 proposed here and awaits ratification with the next commit wave.
+
+## 24. The inflection intake (2026-08-01, round 20)
+
+**User decision (vision intake, "the project is at an inflection
+point — stop expanding horizontally")**: from this point onward every
+new feature must strengthen the foundation, not widen the surface
+area. Eight major frontiers are named: (1) **Formalize the Science** —
+a `/specs` repository as the machine-readable source of truth
+covering Laws of Cognitive Physics, Cognitive Ontology, Signal
+Specification, Memory Specification, Knowledge Specification,
+Session Protocol, Organ Interface, Genome Format, ABI, IR, ISA,
+Error Codes, Metrics, State Machines, Transactions, Runtime
+Contracts; nothing gets implemented until it exists as a
+specification; (2) **Cognitive Microkernel** — shrink the trusted
+core to Identity, Scheduler, Signal Fabric, Memory Transactions,
+Governance, Security, Resource Allocation, Runtime Registry,
+Lifecycle; everything else becomes a dynamically loaded organ — "the
+architectural leap from a framework to a platform"; (3) **Cognitive
+VM** — the pipeline Intent → Cognitive IR → Optimizer → Execution
+Graph → Cognitive VM → Driver → LLM, making reasoning debuggable,
+replayable, optimizable, deterministic, and portable — "the JVM or
+WebAssembly, but for cognitive execution"; (4) **Universal Driver
+Architecture** — treat every external system as hardware: IDEs
+(VS Code, Cursor, Windsurf, Claude Code, Codex, OpenCode,
+Continue.dev, Zed), source control (Git/GitHub/GitLab), build
+systems (npm/pnpm/Cargo/Maven/Gradle/CMake), CI/CD (GitHub
+Actions/GitLab CI/Jenkins/Azure Pipelines), containers (Docker/
+Kubernetes/Podman), cloud (AWS/Azure/GCP); each driver exposes
+capabilities through one internal protocol — no subsystem knows what
+VS Code is, it only knows `IDE.Driver`; (5) **Engineering
+Intelligence** — an Engineering Cortex that reasons about
+architecture, distributed systems, database design, compilers,
+networking, OSes, concurrency, performance, API evolution,
+maintainability, technical debt; the output is not code, it is
+engineering judgment; (6) **Cognitive Observatory** — true
+observability: Brain Activity, Signal Traffic, Attention Heatmap,
+Memory Flow, Knowledge Graph, Reasoning Graph, Energy Budget,
+Latency, Risk, Confidence, Genome Expression, Homeostasis, Learning
+Rate, Architecture Health — "the Task Manager for cognition";
+(7) **The Ecosystem** — Cognitive Package Manager, Genome
+Marketplace, Organ Marketplace, Constitution Packs, Engineering
+Packs, Memory Policies, Verification Packs, Research Packs —
+organizations publish cognitive capabilities instead of just
+plugins; (8) **The Development Platform** — Organ SDK, Genome SDK,
+Driver SDK, Signal SDK, Memory SDK, Protocol SDK, Simulation SDK,
+Verification SDK — third parties build _inside_ UCH rather than
+merely integrating with it. Plus the biggest missing discipline:
+**Cognitive Architecture Decision Records (CADRs)** — every major
+cognitive decision becomes an immutable, queryable record (Problem,
+Context, Alternatives considered, Evidence, Decision, Trade-offs,
+Expected outcomes, Runtime metrics, Validation status, Superseded
+by, Related decisions) that the runtime consults instead of relying
+on inferred history. The proposed v2.0 sequence: 1 Specification
+Repository → 2 Cognitive Microkernel → 3 CVM + IR + ABI + ISA → 4
+Universal Driver Framework → 5 Engineering Cortex → 6 Observability
+& Replay → 7 SDK & Marketplace → 8 Reference Implementations
+(TypeScript first, Rust as the high-performance runtime).
+
+**Verdict after corpus mapping (verified 2026-08-01):** ~85-90%
+already executed or tracked — frontier by frontier: (1) the spec
+repository is the existing spec/ stack (CP.md ISA, CONSTITUTION,
+LAWS_OF_COGNITIVE_PHYSICS, COGNITIVE_ONTOLOGY, FORMAL_FOUNDATIONS,
+CIR.md, GENOME, EXPRESSION, COGNITIVE_BIOLOGY, VERSION.md) under
+RFC-0000 governance + the spec-version gate, with IDEA-0048
+(consolidated normative spec, every section gets a conformance
+test) and IDEA-0083 (machine-readable spec repository) as its
+formalization path; the "nothing gets implemented until it exists
+as a specification" gate ratifies Platform Zero + IDEA-0127's
+objective amendment (the freeze is a governance decision, not new
+machinery); (2) the microkernel is ADR-006's 12-primitive kernel
+(10 implemented + WS-A..F shipping wave, Identity = manifest,
+Scheduler = accelerators, Signal Fabric = neural-event-bus + IDEA-
+0010, Memory Transactions = WS-D, Governance = constitution,
+Security = permissions + CIC, Resource Allocation = control-plane
+budgets, Runtime Registry = capability-registry + runtime, Lifecycle
+= WS-A process table + IDEA-0072 lifecycle engine — all nine named
+primitives verified present), with IDEA-0130's Replication +
+Recovery as the remaining deltas; (3) the CVM pipeline is exactly
+the landed RFC-0004 CIR reference implementation (17-pass optimizer + executor)
+and IDEA-0045 CVM prototype + IDEA-0117 execution graph
+(4157188/fb965c1) — Intent → CIR → Optimizer → Execution Graph →
+CVM → Driver → LLM is the executed architecture, at prototype
+level; (4) the universal driver architecture is UCCL (IDEA-0096,
+ten-method adapter contract — "one internal protocol, no subsystem
+knows what VS Code is" is literally the CIC/UCCL design) +
+`src/drivers/` (git/session/sensors/effectors/acp) + compliance.ts
+L0-L4 certification + the COMPATIBILITY-MATRIX evidence layer
+(23 harnesses, 9 IDEs, 24 providers, 14 SDKs, 6 protocols) —
+per-IDE adapters are the IDEA-0054 roadmap item, the contract
+exists; (5) Engineering Intelligence is ADR-003 Phases A-E complete
+(150 concepts / 10 tiers, benchmark corpus, decision law, learning
+loop, dream scan, organic-score veto hookup) — and it already
+outputs judgment, not code: engineering vetoes and advisory
+findings gate changes; (6) the Observatory's instrument layer
+exists (ADR-002 trace engine + cognitive time machine + UER +
+IDEA-0071 SLOs + IDEA-0122 telemetry + IDEA-0128 profiler +
+IDEA-0043 instruments); the "Task Manager for cognition" dashboard
+is the Phase-02 frontier (IDEA-0014's prescriptive layer), the
+data is flowing; (7) the ecosystem machinery is designed (WS-P
+packages + quarantine, IDEA-0058 marketplace, IDEA-0098 UCM +
+five certification brands, genome/organ/constitution packs map to
+IDEA-0008/0067/0094 + WS-C); marketplaces are unbuilt but
+specified; (8) the development platform maps to IDEA-0083/0104
+(SDK generation + adapter compiler), IDEA-0019 operating contracts,
+IDEA-0067 organ design system, IDEA-0052 skill compiler, VISION §3
+five-product split; the SDKs are a program over the existing
+organ/driver contracts.
+
+**The true delta is 1 idea (IDEA-0131)**:
+
+| Claim                                                                                                        | Idea      | Delta vs corpus                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CADR: immutable, queryable decision records (11 fields) consulted by the runtime instead of inferred history | IDEA-0131 | The FrameworkDecisionJournal records engine → verdict → quality but is mutable, framework-scoped, and lacks alternatives/trade-offs/expected-outcomes/runtime-metrics/validation-status/superseded-by/related; UCH's own ADRs (001-006) are markdown, human-consulted; no record type is both immutable and consulted at decision time |
+
+**Verdict on the intake's verdict:** the freeze is the round's real
+decision and it is the right one — it ratifies the round-19
+objective change (ecosystem gravity over feature delivery) into an
+operating rule: "every new feature strengthens the foundation." The
+eight frontiers are 8/8 executed-or-tracked (the v2.0 sequence
+matches the standing roadmap: specs → kernel → CVM/IR/ABI/ISA →
+drivers → EI → observability → SDK/marketplace → reference
+implementations; the Rust runtime is an open governance decision
+per STACK.md, TS-first is the current state). CADR is the single
+genuinely new primitive — and it is foundation-strengthening, not
+surface-widening: it gives the runtime decision precedent, closes
+the evidence → outcome loop the decision law (IDEA-0034) needs for
+reweighting, and is the record substrate IDEA-0040/0042 presuppose.
+The spec-first gate, the microkernel boundary, and the driver
+contract need no new machinery — they are ratified governance. As
+with every prior round: SOP-08 stage 1, zero code, zero spec edits;
+the freeze + CADR await ratification with the next commit wave.
