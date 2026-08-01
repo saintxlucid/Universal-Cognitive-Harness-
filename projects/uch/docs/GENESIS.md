@@ -3,7 +3,7 @@
 ## Universal Cognitive Harness — Product Requirement Document
 
 > **Book I of the Five-Book Canon.** This book answers one question:
-> *Why should this exist?* It is the philosophical, business, technical, and
+> _Why should this exist?_ It is the philosophical, business, technical, and
 > market vision of UCH. It is not a features list — it is the purpose.
 >
 > **Status:** Draft v0.1 (chapters 1–3 written; remaining chapters stubbed for
@@ -69,13 +69,13 @@ judgment remains. When a vendor dies, the knowledge remains.
 Every layer of computing emerged because a new resource became the
 bottleneck:
 
-| Era | Bottleneck | Layer created | Platform |
-| --- | --- | --- | --- |
-| 1970s | Hardware | Operating system | Unix, Windows |
-| 1990s | Networking | Internet stack | TCP/IP, Web |
-| 2000s | Compute virtualization | Container/VM layer | Docker, K8s |
-| 2010s | Developer productivity | Language/compiler layer | LLVM, Rust |
-| 2020s | **Machine inference** | **Agent/assistant layer** | Claude Code, Cursor, Copilot |
+| Era   | Bottleneck             | Layer created             | Platform                     |
+| ----- | ---------------------- | ------------------------- | ---------------------------- |
+| 1970s | Hardware               | Operating system          | Unix, Windows                |
+| 1990s | Networking             | Internet stack            | TCP/IP, Web                  |
+| 2000s | Compute virtualization | Container/VM layer        | Docker, K8s                  |
+| 2010s | Developer productivity | Language/compiler layer   | LLVM, Rust                   |
+| 2020s | **Machine inference**  | **Agent/assistant layer** | Claude Code, Cursor, Copilot |
 
 Each new layer succeeded when it (1) owned a resource the layer above
 couldn't, and (2) made the layer below replaceable. The agent layer is doing
@@ -165,13 +165,13 @@ below it; anything that cannot be derived is either a new law or a bug.
 A compact summary of the same idea as five engines, each already present in
 embryo:
 
-| Engine | Function | Current embryo |
-| --- | --- | --- |
-| Physics | runs the laws | constitution + trace ledger |
-| Evolution | changes the organism under governance | sleep cycle + self-evolution DBs |
-| Meaning | maintains semantic coherence | connectome + context compressor |
-| Civilization | coordinates multiple organisms | CIC, attach, cognitive merge |
-| Reality | synchronizes with the external world | drivers, sensors, effectors |
+| Engine       | Function                              | Current embryo                   |
+| ------------ | ------------------------------------- | -------------------------------- |
+| Physics      | runs the laws                         | constitution + trace ledger      |
+| Evolution    | changes the organism under governance | sleep cycle + self-evolution DBs |
+| Meaning      | maintains semantic coherence          | connectome + context compressor  |
+| Civilization | coordinates multiple organisms        | CIC, attach, cognitive merge     |
+| Reality      | synchronizes with the external world  | drivers, sensors, effectors      |
 
 The layer model and the five engines are conceptual framings, not new
 components; they are recorded here so future features state which layer they
@@ -250,7 +250,29 @@ execution → validation → evidence → replay), engineering taste
 (elegance and simplicity made measurable), and the Specification
 Repository (machine-readable specs for every primitive, with
 implementations generated from them — the shift from software project
-to specification-first cognitive platform).
+to specification-first cognitive platform);
+and the 2026-08-01 cognitive-microarchitecture + physics intake
+(IDEA-0084…0094): the signal lifecycle engine (TTL, freshness, and a
+noise gate where attention is earned, not assumed), signal flow
+control (backpressure and rate limiting on the fabric), the belief
+propagation engine (confidence, trust, and contradiction flow through
+support edges — the semantic layer over the UER causal graph), concept
+locality (related cognition placed physically together, traversed in
+few pages), cognitive locking + extended transactions (semantic locks,
+nested transactions, savepoints, optimistic concurrency, causal
+ordering — cognition as a distributed database), capability leasing
+(grants expire unless renewed), the expression system (genes express
+proteins that produce behavior, plus epigenetics: same genome,
+different expression per environment — production conservative,
+development experimental), morphogenesis (organs grown from primitive
+building blocks through a staged developmental program, not
+installed), the psychology discipline (curiosity, habituation, bias
+and dissonance detection — compensation, not imitation), attention
+algebra (attention as a conserved resource that focuses, splits,
+merges, diffuses, attenuates, amplifies), and the Cognitive
+Constitution of Computing (one canonical foundational document — the
+POSIX/LLVM-IR role — that every implementation, TypeScript or Rust,
+every IDE driver, implements).
 
 A second framing of the same universe is the **discipline ladder** — the
 eight formal disciplines from which every feature should be derivable:
@@ -271,103 +293,103 @@ IDEA-0027; Civilization → ADR-005 + IDEA-0024).
 
 ## Chapter 4 — Market Analysis
 
-*Stub. To be written under RFC governance. Scope: the current AI stack
+_Stub. To be written under RFC governance. Scope: the current AI stack
 (OpenAI, Anthropic, Cursor, Codex, Claude Code, VS Code, Copilot, MCP, A2A,
 UMP, OCP, ARP), who owns what layer, where the gaps are. Reference:
-arXiv 2410.06107 (AI-Native Software Engineering roadmap).*
+arXiv 2410.06107 (AI-Native Software Engineering roadmap)._
 
 ## Chapter 5 — Competitive Analysis
 
-*Stub. Scope: Mem0, Zep, Letta, Cognee, Graphiti, Claude Code, Cursor,
+_Stub. Scope: Mem0, Zep, Letta, Cognee, Graphiti, Claude Code, Cursor,
 Codex, Copilot, CodeQL-class tools, cognitive-runtime.com — reverse-engineer
 strengths, document limitations, and map each to the layer it occupies
-(and cannot escape).*
+(and cannot escape)._
 
 ## Chapter 6 — Unique Innovation
 
-*Stub. Why UCH cannot be replaced by better prompting or better models:
+_Stub. Why UCH cannot be replaced by better prompting or better models:
 governance, ownership, persistence, and the law layer — properties no model
-or prompt can supply.*
+or prompt can supply._
 
 ## Chapter 7 — Core Principles
 
-*Stub. Philosophy, not architecture: Identity · Continuity · Evidence ·
+_Stub. Philosophy, not architecture: Identity · Continuity · Evidence ·
 Persistence · Governance · Homeostasis · Energy · Truth · Evolution. Each
-principle maps to Laws 1–32.*
+principle maps to Laws 1–32._
 
 ## Chapter 8 — Product Definition
 
-*Stub. The official definition: the Universal Cognitive Substrate, its
+_Stub. The official definition: the Universal Cognitive Substrate, its
 drivers, the CIC contract, what is in scope and — explicitly — what is not
-(not an IDE, not an agent, not a memory library, not an MCP server).*
+(not an IDE, not an agent, not a memory library, not an MCP server)._
 
 ## Chapter 9 — Target Users
 
-*Stub. Segments: Individual, Professional, Studio, Enterprise, Government,
+_Stub. Segments: Individual, Professional, Studio, Enterprise, Government,
 Research, Education, Military, Healthcare. Per-segment: jobs-to-be-done,
-adoption path, certification path.*
+adoption path, certification path._
 
 ## Chapter 10 — Use Cases
 
-*Stub. Software Engineering, Research, Science, Medicine, Law, Architecture,
+_Stub. Software Engineering, Research, Science, Medicine, Law, Architecture,
 Creative, Autonomous Robotics, Knowledge Work. Per-case: the cognition that
-must persist, and the current failure without a substrate.*
+must persist, and the current failure without a substrate._
 
 ## Chapter 11 — Success Metrics
 
-*Stub. Not revenue: Engineering continuity, Knowledge retention,
+_Stub. Not revenue: Engineering continuity, Knowledge retention,
 Architecture quality, Defect reduction, Context reuse, Memory accuracy,
 Recovery time, Reasoning consistency, Developer productivity. Each metric
-needs a measurement instrument in the benchmark suite.*
+needs a measurement instrument in the benchmark suite._
 
 ## Chapter 12 — Commercial Strategy
 
-*Stub. Open core · Enterprise · Marketplace · Certification · Cloud ·
+_Stub. Open core · Enterprise · Marketplace · Certification · Cloud ·
 Self-hosted · On-prem · OEM · White-label · Managed runtime. The runtime is
-MIT; the certification and marketplace are the commercial surface.*
+MIT; the certification and marketplace are the commercial surface._
 
 ## Chapter 13 — Business Model
 
-*Stub. Revenue flows: certification, marketplace fees, enterprise support,
-managed runtime, OEM licensing. Unit economics per segment.*
+_Stub. Revenue flows: certification, marketplace fees, enterprise support,
+managed runtime, OEM licensing. Unit economics per segment._
 
 ## Chapter 14 — Licensing
 
-*Stub. MIT for the reference runtime; the specification corpus licensing;
+_Stub. MIT for the reference runtime; the specification corpus licensing;
 trademark/certification policy ("UCH Certified" as a trust mark, like
-"Open Source Initiative" or "Kubernetes Certified").*
+"Open Source Initiative" or "Kubernetes Certified")._
 
 ## Chapter 15 — Risk Analysis
 
-*Stub. Technical, market, legal, adoption, and single-point-of-failure risks
+_Stub. Technical, market, legal, adoption, and single-point-of-failure risks
 with mitigations. Includes the risk of the ecosystem building a competing
-substrate (and why interoperability beats protection).*
+substrate (and why interoperability beats protection)._
 
 ## Chapter 16 — Future Vision
 
-*Stub. The 10-year horizon: cognitive continuity as a standard expectation;
-"which cognitive runtime are you running?" replacing "which model?"*
+_Stub. The 10-year horizon: cognitive continuity as a standard expectation;
+"which cognitive runtime are you running?" replacing "which model?"_
 
 ## Chapter 17 — User Stories
 
-*Stub. The journey of an individual developer, a team, an enterprise, and a
-government agency adopting UCH.*
+_Stub. The journey of an individual developer, a team, an enterprise, and a
+government agency adopting UCH._
 
 ## Chapter 18 — Roadmap Alignment
 
-*Stub. Maps the Epochs (Foundation → Kernel → Runtime → Ecosystem →
-Platform) to the market and adoption strategy.*
+_Stub. Maps the Epochs (Foundation → Kernel → Runtime → Ecosystem →
+Platform) to the market and adoption strategy._
 
 ## Chapter 19 — Open Questions
 
-*Stub. The questions the product must answer before 1.0: naming (UCH vs
-substrate vs COS), three-repo split, Rust daemon, rollback productization.*
+_Stub. The questions the product must answer before 1.0: naming (UCH vs
+substrate vs COS), three-repo split, Rust daemon, rollback productization._
 
 ## Chapter 20 — The Ask
 
-*Stub. What the project needs to become a platform: contributors to the
+_Stub. What the project needs to become a platform: contributors to the
 specification, certification bodies, driver implementers, university
-adoption, and a governance body independent of the reference runtime.*
+adoption, and a governance body independent of the reference runtime._
 
 ---
 

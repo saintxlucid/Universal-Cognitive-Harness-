@@ -29,14 +29,14 @@ fail the purpose; the purpose is the acceptance test.
 TCP/IP, POSIX, LLVM, Docker, Kubernetes — none of them won by having more features.
 They won by becoming **the compatibility layer everyone else built on**.
 
-- Nobody *installs* TCP/IP. Everyone *implements* it.
+- Nobody _installs_ TCP/IP. Everyone _implements_ it.
 - Docker isn't the standard; **OCI** is.
 - LLVM isn't Clang; it's the **IR**.
 - POSIX isn't Linux; it's the **specification**.
 
 The same move is available for AI coding tools — and the window is open precisely
 because every vendor (VS Code Agent Host, Codex App Server, MCP, ACP) is currently
-building *host-specific* cognition rails, none of which persists across hosts.
+building _host-specific_ cognition rails, none of which persists across hosts.
 
 **UCH is not competing to be the best AI coding tool. It is the cognitive
 infrastructure that every AI coding tool can adopt.**
@@ -76,20 +76,20 @@ UCH Marketplace          governed distribution of skills, brains, knowledge,
 
 The five-product split is not aspirational; four of the five layers exist:
 
-| Product layer | Current state |
-|---|---|
-| **Specification** | `spec/` — Laws, Constitution, Genome, ontology, CP. `design/` — ADR-001…005, CIC v0.1 (transport-neutral contract), INTEGRATION-LEVELS, LIVE-COGNITIVE-STATE. Versioning boundary: pending (GAP-CLOSURE-PLAN Phase 3) |
-| **Reference runtime** | `src/` — kernel, brains, organs, Mnemosyne, trace ledger, projection engine, sleep cycle, connectome, engineering intelligence, 2,200+ tests |
-| **SDKs** | MCP surface (25 tools), CLI (`uch`), CIC transports (MCP/A2A/CloudEvents planned) |
-| **Drivers** | `src/drivers/` — acp, agent, filesystem, git, ide, mcp, runtime + sensor/effector composition layer; per-host integration docs (`design/integrations/`) |
-| **Marketplace** | Not built — requires Cognitive Packages first (GAP-CLOSURE-PLAN Phase 4) |
+| Product layer         | Current state                                                                                                                                                                                                         |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Specification**     | `spec/` — Laws, Constitution, Genome, ontology, CP. `design/` — ADR-001…005, CIC v0.1 (transport-neutral contract), INTEGRATION-LEVELS, LIVE-COGNITIVE-STATE. Versioning boundary: pending (GAP-CLOSURE-PLAN Phase 3) |
+| **Reference runtime** | `src/` — kernel, brains, organs, Mnemosyne, trace ledger, projection engine, sleep cycle, connectome, engineering intelligence, 2,200+ tests                                                                          |
+| **SDKs**              | MCP surface (47 tools), CLI (`uch`), CIC transports (MCP/A2A/CloudEvents planned)                                                                                                                                     |
+| **Drivers**           | `src/drivers/` — acp, agent, filesystem, git, ide, mcp, runtime + sensor/effector composition layer; per-host integration docs (`design/integrations/`)                                                               |
+| **Marketplace**       | Not built — requires Cognitive Packages first (GAP-CLOSURE-PLAN Phase 4)                                                                                                                                              |
 
 ## 5. The compatibility-layer argument, concretely
 
 VS Code's Agent Host already ships dedicated host, immutable session updates,
 snapshots, reducers, JSON-RPC, multiple clients, reconnect, synchronization. UCH does
 not replace that — **it plugs underneath it**: the Agent Host (and Codex App Server,
-and MCP, and every future host) becomes a *driver* attached to the same persistent
+and MCP, and every future host) becomes a _driver_ attached to the same persistent
 organism. One workspace, one organism, any tool.
 
 The universal protocol (ADR-005) makes this concrete: every host's session concept
@@ -105,7 +105,7 @@ history); every host participates at the integration level it actually exposes
 - **Cognitive Replay** — an engineering session replayed like a debugger, as the
   acceptance test of Law 12 (Reversibility).
 - **Cognitive Merge** (research track) — the flagship: two engineers, two tools, six
-  hours each, then merge *cognition* — knowledge, lessons, beliefs, conflicts. The
+  hours each, then merge _cognition_ — knowledge, lessons, beliefs, conflicts. The
   trivial slice (non-overlapping union) is buildable now; conflict resolution is an
   open research problem.
 
@@ -143,7 +143,7 @@ The next step past primitives is a discipline: **Cognitive Systems
 Engineering** — deriving everything from Laws → Mathematics → Specifications →
 Protocols → Compilers → Reference Implementations → SDKs → Applications, the
 way TCP/IP, LLVM, POSIX, USB, OpenGL, Vulkan, and OCI are ecosystems rather
-than software. Two consequences are recorded as *proposals*, not decisions:
+than software. Two consequences are recorded as _proposals_, not decisions:
 
 - **Ambient endgame** — the runtime disappears; developers experience
   Workspace Intelligence through any viewport (the CDE — Cognitive
@@ -233,16 +233,16 @@ holds: the missing material is infrastructure, not AI features.
 
 The true delta is 8 proposals, tracked as idea notes IDEA-0048…0055:
 
-| Foundation | Idea | Delta |
-|---|---|---|
-| F0 Formal Specification | IDEA-0048 | One normative doc set; timing/determinism/persistence specs missing |
-| F3 Storage Engine | IDEA-0049 | Unified storage contract over pluggable backends |
+| Foundation                | Idea      | Delta                                                                     |
+| ------------------------- | --------- | ------------------------------------------------------------------------- |
+| F0 Formal Specification   | IDEA-0048 | One normative doc set; timing/determinism/persistence specs missing       |
+| F3 Storage Engine         | IDEA-0049 | Unified storage contract over pluggable backends                          |
 | F4 + F14 Knowledge Fabric | IDEA-0050 | Cross-domain artifact graph; per-domain graphs exist, the fabric does not |
-| F9 Engineering Database | IDEA-0051 | Tradeoffs, meetings, successes, experiments as first-class records |
-| F11 Skill Compiler | IDEA-0052 | Skill DSL → IR → optimizer → runtime; skills are prose today |
-| F12 Constitution Engine | IDEA-0053 | Execute-time enforcement; checks exist at evaluation points only |
-| F2 + F19 Driver Ecosystem | IDEA-0054 | Per-IDE adapters + automated cross-host/OS certification matrix |
-| CEL | IDEA-0055 | Mission → CIR → CVM; makes UCH programmable, not configurable |
+| F9 Engineering Database   | IDEA-0051 | Tradeoffs, meetings, successes, experiments as first-class records        |
+| F11 Skill Compiler        | IDEA-0052 | Skill DSL → IR → optimizer → runtime; skills are prose today              |
+| F12 Constitution Engine   | IDEA-0053 | Execute-time enforcement; checks exist at evaluation points only          |
+| F2 + F19 Driver Ecosystem | IDEA-0054 | Per-IDE adapters + automated cross-host/OS certification matrix           |
+| CEL                       | IDEA-0055 | Mission → CIR → CVM; makes UCH programmable, not configurable             |
 
 The CEL claim is the round's headline: with CEL compiling through CIR
 to the CVM, models become execution backends of user-written programs,
@@ -276,11 +276,11 @@ observe pipeline.
 
 The true delta is 3 proposals, tracked as idea notes IDEA-0056…0058:
 
-| Phase Ω item | Idea | Delta |
-| --- | --- | --- |
-| Cognitive Object Model | IDEA-0056 | One identity + lifecycle for every cognitive object class |
-| Cognitive Query Language | IDEA-0057 | Declarative language with confidence/importance/causal predicates |
-| Cognitive Marketplace | IDEA-0058 | Governance-gated distribution of organs, genomes, constitutional packs |
+| Phase Ω item             | Idea      | Delta                                                                  |
+| ------------------------ | --------- | ---------------------------------------------------------------------- |
+| Cognitive Object Model   | IDEA-0056 | One identity + lifecycle for every cognitive object class              |
+| Cognitive Query Language | IDEA-0057 | Declarative language with confidence/importance/causal predicates      |
+| Cognitive Marketplace    | IDEA-0058 | Governance-gated distribution of organs, genomes, constitutional packs |
 
 The round's headline is the ecosystem trio: an object model everything
 obeys, a query language everything answers, and a marketplace everything
@@ -299,12 +299,12 @@ compilers, distributed systems, CPUs, and biology have) against the
 repo: **~85% already has ancestors executed or tracked**. The claims
 land in four classes:
 
-| Class | Count | Items (terse; evidence in prose below) |
-| --- | --- | --- |
-| Executed | 11 | ABI, ISA, transactions, replay, cache, fs metadata, packages, drivers, DNA, ontology, scheduler |
-| Draft-only | 3 | compiler, IR, optimizer — one stack: CIR (RFC-0004), design-only |
-| Partial | 9 | scheduler policies, hypervisor, GC, allocator, security, networking, consensus, profiler, design |
-| Absent | 2 | kernel debugger, formal verification |
+| Class      | Count | Items (terse; evidence in prose below)                                                           |
+| ---------- | ----- | ------------------------------------------------------------------------------------------------ |
+| Executed   | 11    | ABI, ISA, transactions, replay, cache, fs metadata, packages, drivers, DNA, ontology, scheduler  |
+| Draft-only | 3     | compiler, IR, optimizer — one stack: CIR (RFC-0004), design-only                                 |
+| Partial    | 9     | scheduler policies, hypervisor, GC, allocator, security, networking, consensus, profiler, design |
+| Absent     | 2     | kernel debugger, formal verification                                                             |
 
 Executed evidence: CP v1.0.0 is literally the syscall ABI of the
 Cognitive OS (spec/CP.md, conformance-gated) with CIC v0.1 grants on
@@ -314,22 +314,22 @@ WS-D transactional cognition is exactly "memory + knowledge + genome +
 signals + beliefs commit together, rollback on failed verification";
 replay spans the ledger, cognitive-replay, the time machine, and UER.
 The user's closing stack (SDK → Runtime → Compiler → IR → VM → Kernel →
-Microkernel → fabrics) has every rung present *in some form* — which
+Microkernel → fabrics) has every rung present _in some form_ — which
 makes the missing rungs more visible, not less.
 
 The true delta is 9 proposals, tracked as idea notes IDEA-0059…0067:
 
-| Proposal | Idea | Gap it closes |
-| --- | --- | --- |
-| Cognitive Kernel Debugger | IDEA-0059 | Pause/step/inspect/mutate/resume live cognition |
-| Cognitive Garbage Collector | IDEA-0060 | Unified reclamation across all object classes |
-| Cognitive Formal Verification | IDEA-0061 | Model-check reasoning graphs against the Laws |
-| Cognitive Security Architecture | IDEA-0062 | One boundary for poisoning/injection/hijacking |
-| Cognitive Resource Allocator | IDEA-0063 | Grants for attention/tokens/depth/confidence |
-| Multi-UCH Networking | IDEA-0064 | Op-replication + conflict resolution between UCHs |
-| Cognitive Consensus Layer | IDEA-0065 | Calibrated voting, fusion, evidence weighting |
-| Cognitive Reasoning Profiler | IDEA-0066 | Per-run token/depth/hit-rate/energy profiles |
-| Organ Design System | IDEA-0067 | Organ lifecycle, signal archetypes, patterns |
+| Proposal                        | Idea      | Gap it closes                                     |
+| ------------------------------- | --------- | ------------------------------------------------- |
+| Cognitive Kernel Debugger       | IDEA-0059 | Pause/step/inspect/mutate/resume live cognition   |
+| Cognitive Garbage Collector     | IDEA-0060 | Unified reclamation across all object classes     |
+| Cognitive Formal Verification   | IDEA-0061 | Model-check reasoning graphs against the Laws     |
+| Cognitive Security Architecture | IDEA-0062 | One boundary for poisoning/injection/hijacking    |
+| Cognitive Resource Allocator    | IDEA-0063 | Grants for attention/tokens/depth/confidence      |
+| Multi-UCH Networking            | IDEA-0064 | Op-replication + conflict resolution between UCHs |
+| Cognitive Consensus Layer       | IDEA-0065 | Calibrated voting, fusion, evidence weighting     |
+| Cognitive Reasoning Profiler    | IDEA-0066 | Per-run token/depth/hit-rate/energy profiles      |
+| Organ Design System             | IDEA-0067 | Organ lifecycle, signal archetypes, patterns      |
 
 The round's headline: the intake's own framing — "these are missing
 sciences" — is half right and half a promotion. The truly missing
@@ -384,30 +384,30 @@ substrates; taste is already scored — the Organic Score rubric covers
 six of the seven qualities; and the spec-first direction is a settled
 platform decision (Platform Zero, conformance, spec-version gate,
 IDEA-0048). Grep-proven absents: feature flags (0 matches), SLO/
-service-level semantics (0), safe mode (0), deprecation *engine* (only
+service-level semantics (0), safe mode (0), deprecation _engine_ (only
 a state and warnings), organ-level watchdogs, and machine-readable
 specs.
 
 The true delta is 16 proposals, tracked as idea notes IDEA-0068…0083:
 
-| Category | Idea | Delta |
-| --- | --- | --- |
-| Capability Negotiation & Discovery | IDEA-0068 | Workspace-level negotiate exists; no cognitive-level handshake, no discovery queries |
+| Category                                          | Idea      | Delta                                                                                                                 |
+| ------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------- |
+| Capability Negotiation & Discovery                | IDEA-0068 | Workspace-level negotiate exists; no cognitive-level handshake, no discovery queries                                  |
 | Feature Flags + Versioned Cognition + Deprecation | IDEA-0069 | Zero flag semantics; versions cover specs/genomes/laws, not beliefs/strategies; deprecation is a state, not an engine |
-| Organ Health, Watchdogs & Safe Mode | IDEA-0070 | Diagnostics bands exist; no per-organ health machine, no liveness watchdogs, no safe-mode boot |
-| Cognitive SLOs | IDEA-0071 | Metrics scattered; no named-quantity catalog with targets, error budgets, escalation |
-| Universal Lifecycle Engine | IDEA-0072 | SOP-08/0056/0067/WS-C are disjoint machines; no Extinct terminal state, no lifecycle registry |
-| Contracts Registry | IDEA-0073 | MANIFESTO §6 + conformance are prose/verdicts; no nine-field structured contract records |
-| Failure Taxonomy | IDEA-0074 | RFC-0005 classes physics failures; no ten-faculty runtime classes with per-class response |
-| Intent Objects | IDEA-0075 | CIR/CEL are the IR half; no intent envelope (goal/success/risk/evidence) compiling into them |
-| Knowledge Lineage Service | IDEA-0076 | Ledger/UER/journal fragmentation; no uniform five-question answer surface |
-| Human Factors Model | IDEA-0077 | Anthropology models teams; no per-user workflow-optimization profile |
-| Cognitive UX Charter | IDEA-0078 | Six felt properties unnamed, unmeasured, uncontracted; no interrupt protocol |
-| Memory Hygiene Engine | IDEA-0079 | Sleep/vmem/compressor exist per-organ; no orchestrated hygiene pipeline, no conflict policy |
-| Plugin Trust Scoring | IDEA-0080 | WS-P is binary, marketplace certifies listings; no six-axis scorecard for the organism to decide |
-| Deterministic Engineering Chain | IDEA-0081 | Discipline is process (organic-code/DOE/GSD); no chain contract with mandatory evidence artifacts |
-| Engineering Taste | IDEA-0082 | Organic Score already scores six of seven; rubric is code not spec; no taste accumulation |
-| Specification Repository | IDEA-0083 | Platform Zero direction + prose spec/ + version gate; no machine-readable specs, no generated implementations |
+| Organ Health, Watchdogs & Safe Mode               | IDEA-0070 | Diagnostics bands exist; no per-organ health machine, no liveness watchdogs, no safe-mode boot                        |
+| Cognitive SLOs                                    | IDEA-0071 | Metrics scattered; no named-quantity catalog with targets, error budgets, escalation                                  |
+| Universal Lifecycle Engine                        | IDEA-0072 | SOP-08/0056/0067/WS-C are disjoint machines; no Extinct terminal state, no lifecycle registry                         |
+| Contracts Registry                                | IDEA-0073 | MANIFESTO §6 + conformance are prose/verdicts; no nine-field structured contract records                              |
+| Failure Taxonomy                                  | IDEA-0074 | RFC-0005 classes physics failures; no ten-faculty runtime classes with per-class response                             |
+| Intent Objects                                    | IDEA-0075 | CIR/CEL are the IR half; no intent envelope (goal/success/risk/evidence) compiling into them                          |
+| Knowledge Lineage Service                         | IDEA-0076 | Ledger/UER/journal fragmentation; no uniform five-question answer surface                                             |
+| Human Factors Model                               | IDEA-0077 | Anthropology models teams; no per-user workflow-optimization profile                                                  |
+| Cognitive UX Charter                              | IDEA-0078 | Six felt properties unnamed, unmeasured, uncontracted; no interrupt protocol                                          |
+| Memory Hygiene Engine                             | IDEA-0079 | Sleep/vmem/compressor exist per-organ; no orchestrated hygiene pipeline, no conflict policy                           |
+| Plugin Trust Scoring                              | IDEA-0080 | WS-P is binary, marketplace certifies listings; no six-axis scorecard for the organism to decide                      |
+| Deterministic Engineering Chain                   | IDEA-0081 | Discipline is process (organic-code/DOE/GSD); no chain contract with mandatory evidence artifacts                     |
+| Engineering Taste                                 | IDEA-0082 | Organic Score already scores six of seven; rubric is code not spec; no taste accumulation                             |
+| Specification Repository                          | IDEA-0083 | Platform Zero direction + prose spec/ + version gate; no machine-readable specs, no generated implementations         |
 
 The round's headline is the intake's last claim: the **Specification
 Repository**. The corpus chose spec-first (Platform Zero — "the
@@ -418,8 +418,78 @@ keystone — contracts (0073), SLOs (0071), the failure taxonomy (0074),
 lifecycles (0072), and the taste rubric (0082) all become data in the
 repository — and it is also the natural continuation of round-10's
 headline: promoting RFC-0004 (CIR) to Specification becomes the
-repository's proof case, with the compiler *generated from the spec*
+repository's proof case, with the compiler _generated from the spec_
 rather than handwritten. Verdict on the intake's own verdict: roughly
 half is already in flight; the missing half is dominated by the
 repository and the reliability layer (flags, health, SLOs, safe mode),
 not by new organs.
+
+## 15. The microarchitecture + physics intake (2026-08-01, round 12)
+
+This intake makes two claims. **First, the microarchitecture claim**:
+compare UCH to a CPU — the ISA (laws, organs, signals, governance) and
+the operating system (kernel, runtime, memory, drivers) exist; what
+remains is the _microarchitecture_: clocks, pulses, signal QoS/TTL,
+locality, speculation, interrupts, backpressure, causal propagation,
+lifecycle mechanics. "Everyone is still designing runtimes; very few
+are designing the physics that govern those runtimes." **Second, the
+science claim**: twelve disciplines — Cognitive Mathematics, Physics,
+Chemistry, Biology, Ecology, Economics, Evolution, Genetics,
+Embryology, Psychology, Sociology, Civilization — as universal
+primitives from which future modules emerge. Closing framing: **The
+Cognitive Constitution of Computing**, one foundational document
+(POSIX/LLVM-IR role) that every implementation — TypeScript, Rust,
+every IDE driver — implements.
+
+**Verdict after corpus mapping (2026-08-01, verified):** the
+microarchitecture is far more executed than the framing suggests —
+the clock (catalog.ts `nextCognitiveTick`, tick-based scheduling in
+15+ organs), pulse (health registry heartbeats + WS-E SMART metrics),
+signal QoS (SignalPriority 0-4 + Law 16 preemption + ux-charter
+interrupts), compression/dedup (sleep cycle + context compressor),
+replay (ADR-002 + time machine + UER), forgetting (memory hygiene +
+vmem archive + Law 5), residency/paging (vmem Hot→Warm→Cold→Archive +
+retrieval ladder), snapshots/checkpoints (sessions + WS-D
+transactions), pipelines (CIR 17-pass + accelerators + engineering
+chain), speculation/branch prediction (IDEA-0030 + fast-path router),
+circuit breakers (CIC + immune), provenance trees (lineage service +
+UER ancestry), causal graph (UER) — all exist. The twelve disciplines
+are ~90% anchored (Mathematics IDEA-0026/0005/0035; Physics RFC-0005,
+the 32 laws, IDEA-0044; Chemistry IDEA-0002; Biology
+COGNITIVE_BIOLOGY + IDEA-0007; Ecology IDEA-0007; Economics
+IDEA-0016/0034; Evolution IDEA-0008; Genetics GENOME + IDEA-0008;
+Embryology IDEA-0039, Sociology IDEA-0027/0064, Civilization
+IDEA-0027 + attach/merge). The Constitution claim is anchored in
+Platform Zero + CONSTITUTION + RFC-0000 + IDEA-0048/0083.
+
+**The true delta is 11 ideas (IDEA-0084…0094)**, dominated by signal
+lifecycle mechanics, belief semantics, the expression system, and the
+constitution framing:
+
+| Claim                                          | Idea      | Delta vs corpus                                                                                                |
+| ---------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------- |
+| Signal TTL / expiry / GC                       | IDEA-0084 | TTL is point-case only (availability, cache, hygiene); no signal-envelope freshness, no expiry→GC on the bus   |
+| Signal noise filter / amplification            | IDEA-0084 | Cortex/retrieval gates exist; no signal-layer admission (attention earned), no repetition-amplification policy |
+| Backpressure / rate limiting                   | IDEA-0085 | Persistence-write backpressure only; no producer-facing admission, no per-source limiters                      |
+| Confidence / trust / contradiction propagation | IDEA-0086 | Activation propagates, belief does not; no support/attack graph, no ripple, no trust flow                      |
+| Memory / knowledge locality                    | IDEA-0087 | Temporal paging exists; no concept-neighborhood placement or re-packing                                        |
+| Semantic locks / extended transactions         | IDEA-0088 | WS-D is linear; no locks, savepoints, nesting, optimistic concurrency, version vectors                         |
+| Capability leasing                             | IDEA-0089 | Grants static until revoked; lifecycle states not time-bounded; no renewal                                     |
+| DNA expression / proteins / epigenetics        | IDEA-0090 | Genome is config read at boot; no expression step, no runtime proteins, no environment profiles                |
+| Morphogenesis                                  | IDEA-0091 | Organs installed wholesale; embryology is workspace-level, not organ-level; no developmental program           |
+| Cognitive Psychology                           | IDEA-0092 | Laws + AttentionCortex + fences exist; no mechanism catalog with compensation loops                            |
+| Attention algebra                              | IDEA-0093 | Bottleneck + SLO + budgets unbound; no conserved-quantity axiom, no operator set                               |
+| The Constitution of Computing                  | IDEA-0094 | All ingredients exist as a corpus; no single canonical document with the POSIX/LLVM-IR role                    |
+
+**Verdict on the intake's verdict:** the framing (ISA vs OS vs
+microarchitecture; physics of runtimes) is right and useful — the
+intake's strongest claims are the ones that map onto existing organs
+(the clock, QoS, replay, speculation, breakers are already built). The
+genuinely new primitives are the **expression system** (genes →
+proteins → behavior + epigenetics — genome becomes developmental, not
+config) and **belief propagation** (confidence/trust/contradiction
+flow — the semantic layer over UER's causal graph). The Constitution
+is a real artifact gap, but its first deliverable is a boundary
+decision against IDEA-0048 (doc set) and IDEA-0083 (repository), not
+new prose. As with every prior round: SOP-08 stage 1, zero code, zero
+spec edits.
