@@ -13,7 +13,7 @@ first reference implementation.
 | --- | --- | --- |
 | **I — Genesis** | [GENESIS.md](GENESIS.md) | Product: why UCH exists — problem, vision, thesis, market, strategy (20 chapters) |
 | **II — Constitution** | `../spec/CONSTITUTION.md` + `../spec/LAWS_OF_COGNITIVE_PHYSICS.md` | Immutable law: 32 laws in 5 families, cognitive rights/responsibilities, the kernel ABI |
-| **III — Blueprint** | `../design/ARCHITECTURE.md` + `../design/STACK.md` + `../design/CIR.md` | Engineering: kernel, memory, scheduler, signals, drivers, protocols, CIR |
+| **III — Blueprint** | `../design/ARCHITECTURE.md` + `../design/STACK.md` + `../spec/CIR.md` | Engineering: kernel, memory, scheduler, signals, drivers, protocols, CIR |
 | **IV — Standards** | `../rfc/` | The RFC series — the source of truth for contracts (RFC-0000 governs the system) |
 | **V — Ascension** | *to be authored* | Scale: performance, quality, DX, commercialization, community, enterprise, platform evolution |
 

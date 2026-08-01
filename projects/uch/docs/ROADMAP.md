@@ -19,7 +19,7 @@
 | Specification Governance System | ✅ | rfc/RFC-0000, design/DIRECTIONS.md SOP-08/09 |
 | Genesis PRD (20 chapters) | 🔶 | docs/GENESIS.md — ch. 1–3 written, rest under RFC governance |
 | RFC-0001 Identity / 0002 Signals / 0003 Memory | ✅ | rfc/ (accepted) |
-| RFC-0004 CIR (Cognitive Intermediate Representation) | 🔶 | design/CIR.md draft → RFC |
+| RFC-0004 CIR (Cognitive Intermediate Representation) | ✅ | spec/CIR.md normative, RFC-0004 Accepted, corpus certified (benchmark runner) |
 
 ## Epoch II — Kernel
 
@@ -54,7 +54,7 @@
 | Conformance suite | ✅ | protocol/conformance.ts |
 | Driver certification | ✅ | drivers/compliance.ts |
 | Cognitive time machine + replay | ✅ | cognitive-plane/replay |
-| **CIR compiler + optimizer passes** | 🔶 | design/CIR.md — design done, prototype open |
+| **CIR compiler + optimizer passes** | ✅ | spec/CIR.md normative; src/cognitive-compiler (RFC-0004 Accepted, benchmark 71 cases green) |
 | **Driver SDK** (official extension APIs, MCP, LSP — never undocumented internals) | ⬜ | RFC pending |
 | **Observatory** (live physiology: memory, signals, latency, health, energy) | 🔶 | health-monitor/telemetry exist; observatory UI open (Phase 02) |
 | **Digital Twin** (what-if simulation) | ⬜ | planning/02 — Phase 02 frontier |

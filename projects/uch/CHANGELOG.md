@@ -8,6 +8,15 @@ All notable changes to UCH are documented here. Format follows
 
 ### Added
 
+- **Cognitive Compiler / CIR (RFC-0004, Accepted)** —
+  `src/cognitive-compiler/`: CIR core (types, JSON encoding,
+  validation, versioning — `cir.ts`), Intent→CIR frontend
+  (`frontend.ts`), 17-pass deterministic optimizer (`passes.ts`),
+  executor with verification gates + trace contract
+  (`executor.ts`), and the §14 benchmark corpus + runner (71 cases,
+  six contract booleans all green). Exported from `src/index.ts`;
+  CLI surface `uch cir <compile|optimize|execute|benchmark>`; spec
+  promoted to `spec/CIR.md` (normative, corpus 0.4.0).
 - **Workspace attachment governance (ADR-001 criteria 1–4)** —
   `src/workspace-manifest/` (discover/negotiate/attach/detach, `uch.manifest.v1`),
   `GrantEngine` (`src/cognitive-runtime/grants.ts`), `EventGovernance` gate

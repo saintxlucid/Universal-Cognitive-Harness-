@@ -842,3 +842,10 @@ export type { EpistemicStatus as MnemosyneEpistemicStatus } from './mnemosyne/in
 // reasoning primitives, deterministic EngineeringEvaluator. ADR-003.
 // ---------------------------------------------------------------------------
 export * from './engineering-intelligence/index.js';
+
+// ---------------------------------------------------------------------------
+// COGNITIVE COMPILER - CIR: the Cognitive Intermediate Representation
+// (RFC-0004). Intent→CIR frontend, 17-pass optimizer, executor with
+// verification gates, deterministic benchmark corpus + runner.
+// ---------------------------------------------------------------------------
+export * from './cognitive-compiler/index.js';

@@ -1,6 +1,8 @@
 # Cognitive Intermediate Representation (CIR)
 
-- **Status:** Draft (design) — no code yet; RFC-0004 proposed
+- **Status:** Superseded (2026-08-01) — promoted to `spec/CIR.md`
+  (normative) at RFC-0004 Acceptance; kept as the historical design
+  record (Law 12)
 - **Related:** spec/CP.md (the ABI), src/protocol/catalog.ts (instruction metadata), design/COGNITIVE-TRACE.md, design/STACK.md
 - **Date:** 2026-08-01
 

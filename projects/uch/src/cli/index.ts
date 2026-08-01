@@ -38,6 +38,7 @@ import { computeCalibrationProfile } from '../cognitive-plane/calibration/calibr
 import { ProductivityKernel } from '../productivity-kernel/productivity-kernel.js';
 import { SignalFusionEngine } from '../cortex_kernel/signal-fusion-engine.js';
 import { CodeGovernanceGate } from '../kernel/constitution/code-governance-gate.js';
+import { CIR_VERSION, compileIntent, executePipeline, runCIRBenchmark, runPasses } from '../cognitive-compiler/index.js';
 
 function printHelp(): void {
   console.log(`UCH — Universal Cognitive Harness v0.2.0
@@ -89,6 +90,10 @@ USAGE:
   uch package revoke <name>    Revoke an installed package (stops new execution, drains sessions)
   uch package list             List installed cognitive packages
   uch package audit            Show the package audit ledger (install/update/revoke, in order)
+  uch cir compile "<goal>"     Compile an Intent into a CIR stream (RFC-0004); [--context "..."] [--scope ws:x] [--by <driver>]
+  uch cir optimize "<goal>"    Compile + run the 17-pass optimizer (reports, energy/token deltas)
+  uch cir execute "<goal>"     Compile + optimize + execute (replay substitution, deterministic subset)
+  uch cir benchmark            Run the RFC-0004 §14 deterministic benchmark corpus (six contracts)
   uch help                     Show this help
 
 ENVIRONMENT:
@@ -957,6 +962,75 @@ async function main(): Promise<void> {
       }
 
       console.error('Usage: uch package <install|update|revoke|list|audit>');
+      process.exit(1);
+      break;
+    }
+
+    case 'cir': {
+      const sub = args[1] ?? '';
+      if (sub === 'benchmark') {
+        const report = await runCIRBenchmark();
+        console.log(JSON.stringify({
+          corpus: report.corpusVersion,
+          totalCases: report.totalCases,
+          passedCases: report.passedCases,
+          contracts: report.contracts,
+          passCoverage: report.passCoverage.map((c) => ({
+            pass: c.pass, changing: c.changing, nonChanging: c.nonChanging, covered: c.covered,
+          })),
+          latencyMs: { avg: report.avgLatencyMs, p95: report.p95LatencyMs, max: report.maxLatencyMs },
+          failures: report.cases.filter((c) => !c.passed).map((c) => ({ id: c.id, failures: c.failures })),
+        }, null, 2));
+        process.exit(0);
+        break;
+      }
+      if (sub === 'compile' || sub === 'optimize' || sub === 'execute') {
+        const flag = (name: string): string | undefined => {
+          const i = args.indexOf(name);
+          return i >= 0 ? args[i + 1] : undefined;
+        };
+        const goal = args.slice(2).filter((a) => !a.startsWith('--')).join(' ');
+        if (!goal) {
+          console.error('Usage: uch cir <compile|optimize|execute> "<goal>" [--context "..."] [--scope ws:x] [--by <driver>]');
+          process.exit(1);
+        }
+        const scope = flag('--scope') ?? 'ws:default';
+        const compiledBy = flag('--by') ?? 'uch-cli';
+        const context = flag('--context');
+        const { stream, report } = compileIntent(goal, context, { scope, compiledBy, tick: 1 });
+        if (sub === 'compile') {
+          console.log(JSON.stringify({ cir: CIR_VERSION, stream, report }, null, 2));
+          process.exit(0);
+          break;
+        }
+        const optimizer = runPasses(stream);
+        if (sub === 'optimize') {
+          console.log(JSON.stringify({
+            cir: CIR_VERSION,
+            reports: optimizer.reports,
+            energy: { before: optimizer.energyBefore, after: optimizer.energyAfter },
+            tokens: { before: optimizer.tokenBefore, after: optimizer.tokenAfter },
+          }, null, 2));
+          process.exit(0);
+          break;
+        }
+        // Deterministic subset: the delegated evaluate is replayed from the
+        // recorded payload (ADR-002) instead of a live model call.
+        const result = await executePipeline(stream, {}, {
+          replayPayloads: new Map([['v1', { payload: { verdict: 'approved' }, confidence: 0.9, latencyMs: 0 }]]),
+        });
+        console.log(JSON.stringify({
+          cir: CIR_VERSION,
+          accepted: result.verdict.accepted,
+          ...(result.verdict.accepted
+            ? { record: result.verdict.record }
+            : { rejection: result.verdict.rejection }),
+          passReports: result.optimizer?.reports,
+        }, null, 2));
+        process.exit(0);
+        break;
+      }
+      console.error('Usage: uch cir <compile|optimize|execute|benchmark>');
       process.exit(1);
       break;
     }
