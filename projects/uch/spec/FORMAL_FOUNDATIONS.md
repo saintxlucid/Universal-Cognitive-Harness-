@@ -550,12 +550,12 @@ Identity is not atomic. It is a stack of three genomes:
 
 ---
 
-## Part VIII: Cognitive Physics (DRAFT — proposed by RFC-0005, not yet normative)
+## Part VIII: Cognitive Physics (RFC-0005 — normative)
 
-> **Status:** Draft. This part is proposed text, not normative. It does not
-> bind any implementation until RFC-0005 passes Acceptance. Content mirrors
-> rfc/ideas/IDEA-0001/0003/0004/0005. Until acceptance, the numbers below are
-> candidates, not constants.
+> **Status:** Normative since corpus 0.3.0 (RFC-0005 Acceptance, 2026-08-01).
+> Definitions mirror rfc/ideas/IDEA-0001/0003/0004/0005 and are validated
+> by the failure-physics prototype (instability veto, held-out-validated
+> threshold θ = 0.5) per RFC-0005's Acceptance record.
 
 ### §8.1 Measured Quantities and Units
 

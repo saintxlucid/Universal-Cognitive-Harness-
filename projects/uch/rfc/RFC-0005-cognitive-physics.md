@@ -101,5 +101,62 @@ error, tracked file, owned by no wave) — added.
       generalizes — held-out veto recall 6/6, negatives 5/5 clean,
       separability (0.25, 0.6], θ_heldout cross-applies to train;
       heldout-calibration.ts + 10 tests)
-- [ ] Architecture review → security review → constitution check
-- [ ] Acceptance → promotion to `spec/` + VERSION.md bump
+- [x] Architecture review → security review → constitution check — done
+      (see "Reviews" below; 2026-08-01)
+- [x] Acceptance → promotion to `spec/` + VERSION.md bump — done
+      (FORMAL_FOUNDATIONS.md Part VIII now normative; corpus 0.2.0 → 0.3.0)
+
+## Reviews (2026-08-01)
+
+### Architecture review — PASS
+
+- Additive: `failure-physics/` is a new module; `calibrateThreshold`
+  widened to the structural `{group, target}` shape only (behavior-
+  preserving — parity tests untouched).
+- Deterministic and dependency-free: pure string matching + arithmetic;
+  no I/O, no exec, no new runtime dependencies.
+- The instability veto is a special case of the unified decision law
+  (IDEA-0034 prototype): risk term = maxInstability; gate regions derive
+  from the objective, and parity holds on the same corpus (veto 5/5
+  reject). Prototype discipline kept both unwired (SOP-08).
+- Open item "organic-score vetoes re-derived from I(b)": satisfied by
+  the EI Wave C hookup — EngineeringEvaluator findings (incl. the same
+  failure families) feed OrganicScoreEngine with a hard-veto gate, and
+  the corpus parity (rule 1.0 = instability 1.0) holds on 17 cases +
+  16 held-out.
+
+### Security review — PASS (no findings)
+
+- The module never executes target text: substring matching against
+  constant marker lists only; no command construction, no path handling,
+  no external calls. Targets are already an accepted evaluator input
+  surface (diffs/prose).
+- Thresholds, weights, and marker lists are compile-time constants;
+  there is no configuration-injection surface.
+- Negation stripping ("no standby" ≠ defense) is the only transformation
+  and operates on a local lowercase copy.
+
+### Constitution check — PASS
+
+- **Law 7 (no security smells in shipped code):** the module *detects*
+  failure claims; it ships no security smell itself. Veto threshold
+  rejects rather than silently accepting unstable beliefs.
+- **Law 8 (no error-masking):** signed instability preserves the
+  stability margin; a negative I(b) is visible evidence, not an
+  averaged-away failure.
+- **Integrity laws (Objectivity / Qualified Source / No Prejudice /
+  Whole Truth):** beliefs are evidence-mass-accounted with negation
+  awareness; calibration is corpus- and held-out-validated, not tuned
+  by hand.
+- **Covenant laws (SOC / DRY / KISS / DYC / YAGNI):** one threshold θ
+  shared with the decision law; reuses the existing evaluator and
+  corpus; no duplicated gate logic; no speculative terms (novelty/
+  reversibility are recorded but unused).
+
+### Acceptance — APPROVED (2026-08-01)
+
+Part VIII of `spec/FORMAL_FOUNDATIONS.md` is promoted from DRAFT to
+normative per SOP-08 stage 10 (Specification). The corpus version bump
+0.2.0 → 0.3.0 is declared in `spec/VERSION.md` with changelog entry.
+Reference implementation remains the prototype module; the
+constitution-engine hookup (IDEA-0053) is tracked separately.

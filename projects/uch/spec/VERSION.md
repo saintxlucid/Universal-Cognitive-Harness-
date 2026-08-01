@@ -3,7 +3,7 @@
 **Specification:** `spec/` — LAWS_OF_COGNITIVE_PHYSICS, GENOME,
 FORMAL_FOUNDATIONS, CP, CONSTITUTION, COGNITIVE_ONTOLOGY,
 COGNITIVE_BIOLOGY, VERSION
-**Version:** 0.2.0
+**Version:** 0.3.0
 **Status:** Draft (0.x — no compatibility promise yet)
 **Last updated:** 2026-08-01
 
@@ -13,6 +13,7 @@ COGNITIVE_BIOLOGY, VERSION
 
 | Date | Version | Change | RFC |
 | --- | --- | --- | --- |
+| 2026-08-01 | 0.2.0 → 0.3.0 | FORMAL_FOUNDATIONS Part VIII promoted from draft to normative (Cognitive Physics: quantities/units, conservation, failure physics I(b) = confidence − evidenceMass with held-out-validated θ = 0.5, cognitive calculus) | RFC-0005 |
 | 2026-08-01 | 0.1.0 → 0.2.0 | 13 new laws (Laws 20–32) added in five families; Constitution extended with Articles IX–XI (Cognitive Rights, Cognitive Responsibilities, Immutability of the Core); specification governance declared (RFC-0000) | RFC-0000 |
 
 ---
