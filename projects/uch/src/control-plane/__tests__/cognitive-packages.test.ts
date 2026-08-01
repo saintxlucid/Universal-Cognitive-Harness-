@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { createHash } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -8,8 +7,6 @@ import { validatePackageManifest, type CognitivePackageManifest } from '../packa
 import { PackageGate } from '../packages/package-gate.js';
 import { PackageStore } from '../packages/package-store.js';
 import { NeuralEventBus } from '../../event-bus/neural-event-bus.js';
-
-const sha256 = (bytes: Uint8Array): string => createHash('sha256').update(Buffer.from(bytes)).digest('hex');
 
 function basePackage(overrides?: Partial<CognitivePackageManifest>): CognitivePackageManifest {
   return {
