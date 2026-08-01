@@ -1,6 +1,8 @@
 # IDEA-0084 — Signal Lifecycle Engine
 
-- **Status:** Idea (SOP-08 stage 1; no code)
+- **Status:** Prototype (2026-08-01) - G1 register + design doc +
+  reference module with tests; NOT wired into any gate (SOP-08
+  Prototype discipline).
 - **Origin:** 2026-08-01 cognitive-microarchitecture intake (round 12) —
   "Signal TTL: Signals expire. Exactly like packets. Fresh → Useful →
   Weak → Expired → Garbage Collection. Signal Noise Filter: Ignore
@@ -82,5 +84,5 @@ signal-level policy (repeated weak signals mattering more).
 
 ## Next stage
 
-- Prototype TTL on three signal types (file:saved, test:failed,
-  connectome:link); measure cortex load reduction + ledger integrity.
+- Wire the engine into the bus admission path; measure cortex load
+  reduction and ledger integrity on real signal streams.

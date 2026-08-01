@@ -581,6 +581,33 @@ export type {
   InterruptLevel,
   EntropyReductionResult,
 } from './nervous-system/signal.js';
+export {
+  SignalLifecycleEngine,
+  freshnessStage,
+  ttlForPriority,
+  lifecycleReport,
+} from './nervous-system/signal-lifecycle.js';
+export type {
+  FreshnessStage,
+  AdmissionDecision,
+  SignalLifecycleState,
+  AdmissionRecord,
+  SignalLifecycleConfig,
+  SignalLifecycleInput,
+  SignalLifecycleReport,
+} from './nervous-system/signal-lifecycle.js';
+export { SignalFlowController, flowControlReport } from './nervous-system/flow-control.js';
+export type {
+  RefusalReason,
+  TokenColor,
+  BudgetHealth,
+  RefusalRecord,
+  ConsumedSignal,
+  TokenBucketState,
+  FlowControlConfig,
+  FlowControlSource,
+  FlowControlReport,
+} from './nervous-system/flow-control.js';
 
 // ── Metabolism (Energy Budgeting & Allocation) ─────────────
 export { Metabolism } from './metabolism/metabolism.js';
@@ -745,6 +772,15 @@ export { CortexKernel, ConsciousnessGate } from './cortex_kernel/integrator.js';
 export type { IntegrationInsight, ConsciousnessGateConfig } from './cortex_kernel/integrator.js';
 export { SleepCycle } from './sleep_cycle/cycle.js';
 export type { SleepPhase, SleepReport } from './sleep_cycle/cycle.js';
+export { AttentionAlgebra, attentionWindow } from './cortex_kernel/attention-algebra.js';
+export type {
+  AttentionOperator,
+  AttentionAllocation,
+  AllocationRecord,
+  AttentionAlgebraConfig,
+  AttentionAllocationSummary,
+  AttentionWindowState,
+} from './cortex_kernel/attention-algebra.js';
 
 // ── Neural Event Bus (capture layer, feeds Trace Recorder) ──
 export { NeuralEventBus } from './event-bus/neural-event-bus.js';
@@ -898,6 +934,27 @@ export type {
   ReasoningStep,
   TraceStepType,
 } from './neural-fs/reasoning-trace-store.js';
+
+// ── Belief Propagation Engine (IDEA-0086) ──────────────────
+export {
+  BeliefEngine,
+  evidenceAnchorOf,
+  instabilityOf,
+  isUnstable,
+  beliefReport,
+} from './cognitive-plane/belief/index.js';
+export type {
+  BeliefEdgeKind,
+  BeliefChangeCause,
+  BeliefNodeInput,
+  BeliefNode,
+  BeliefEdge,
+  BeliefChange,
+  BeliefEngineConfig,
+  RippleResult,
+  BeliefNodeState,
+  BeliefReport,
+} from './cognitive-plane/belief/index.js';
 
 // ── WebSocket Transport ─────────────────────────────────────
 export { WebSocketServer } from './control-plane/transport/websocket-transport.js';

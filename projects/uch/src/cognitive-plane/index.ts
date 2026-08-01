@@ -76,6 +76,27 @@ export type {
   ResumeContext,
 } from './replay/index.js';
 
+// -- Belief Propagation (IDEA-0086) --------------------
+export {
+  BeliefEngine,
+  evidenceAnchorOf,
+  instabilityOf,
+  isUnstable,
+  beliefReport,
+} from './belief/index.js';
+export type {
+  BeliefEdgeKind,
+  BeliefChangeCause,
+  BeliefNodeInput,
+  BeliefNode,
+  BeliefEdge,
+  BeliefChange,
+  BeliefEngineConfig,
+  RippleResult,
+  BeliefNodeState,
+  BeliefReport,
+} from './belief/index.js';
+
   // -- Takes / Calibration --------------------
 export {
   TakeFence,

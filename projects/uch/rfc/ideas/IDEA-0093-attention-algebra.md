@@ -1,6 +1,8 @@
 # IDEA-0093 — Attention Algebra
 
-- **Status:** Idea (SOP-08 stage 1; no code)
+- **Status:** Prototype (2026-08-01) - G1 register + design doc +
+  reference module with tests; NOT wired into any gate (SOP-08
+  Prototype discipline).
 - **Origin:** 2026-08-01 computational-cognitive-science intake
   (round 12) — "Attention + Attention ≠ Double Attention. Attention
   becomes a conserved resource. It can split, merge, diffuse, focus,
@@ -83,6 +85,5 @@ not this calculus.
 
 ## Next stage
 
-- Formalize the algebra over the existing bottleneck; assert the
-  conservation invariant in tests across focus/merge/attenuate
-  scenarios.
+- Bind the AttentionCortex bottleneck and the attention.saturation
+  SLO to the algebra; assert the conservation invariant under load.

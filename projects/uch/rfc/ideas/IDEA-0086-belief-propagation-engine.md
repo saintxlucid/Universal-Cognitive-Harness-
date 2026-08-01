@@ -1,6 +1,8 @@
 # IDEA-0086 — Belief Propagation Engine
 
-- **Status:** Idea (SOP-08 stage 1; no code)
+- **Status:** Prototype (2026-08-01) - G1 register + design doc +
+  reference module with tests; NOT wired into any gate (SOP-08
+  Prototype discipline).
 - **Origin:** 2026-08-01 cognitive-microarchitecture intake (round 12) —
   "Confidence Propagation: If Evidence A supports B, then B confidence
   updates automatically. Trust Propagation: Trust flows through
@@ -82,5 +84,5 @@ math but are invoked at evaluation points, not maintained as state.
 
 ## Next stage
 
-- Prototype: 3-node support chain with one contradiction; assert
-  confidence ripples and direct evidence outranks inference.
+- Seed the belief graph from connectome/UER edges; wire
+  belief:changed events onto the bus.

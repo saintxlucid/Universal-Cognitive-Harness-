@@ -1,6 +1,8 @@
 # IDEA-0085 — Signal Flow Control (Backpressure + Rate Limiting)
 
-- **Status:** Idea (SOP-08 stage 1; no code)
+- **Status:** Prototype (2026-08-01) - G1 register + design doc +
+  reference module with tests; NOT wired into any gate (SOP-08
+  Prototype discipline).
 - **Origin:** 2026-08-01 cognitive-microarchitecture intake (round 12) —
   "Cognitive Backpressure: If verification is overloaded, don't let
   reasoning flood the system. Cognitive Rate Limiting: Protect
@@ -75,6 +77,6 @@ the flood.
 
 ## Next stage
 
-- Prototype admission control on the bus with an artificially
-  overloaded verifier consumer; assert reasoning stalls (not drops)
-  and emergencies still preempt.
+- Wire flow control into the bus with an artificially overloaded
+  verifier consumer; assert reasoning stalls (not drops) and
+  emergencies still preempt (Law 16).
