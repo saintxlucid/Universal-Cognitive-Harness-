@@ -13,6 +13,16 @@ export class TraceLedger {
   private spanToTrace: Map<string, string> = new Map();
   private traceRoot: Map<string, string> = new Map();
   private childSpans: Map<string, string[]> = new Map();
+  private readonly onAppend: ((trace: CognitiveTrace) => void) | null;
+
+  /**
+   * @param onAppend Optional sink fired after every append (e.g. the
+   *   persistence layer). Receives the stored copy. The sink must be
+   *   synchronous and must not re-enter the ledger.
+   */
+  constructor(onAppend: ((trace: CognitiveTrace) => void) | null = null) {
+    this.onAppend = onAppend;
+  }
 
   /**
    * Append a span. Spans are keyed by span_id; multiple spans may share one
@@ -20,7 +30,8 @@ export class TraceLedger {
    * root.
    */
   append(trace: CognitiveTrace): string {
-    this.traces.set(trace.span_id, { ...trace });
+    const stored = { ...trace };
+    this.traces.set(trace.span_id, stored);
     this.spanToTrace.set(trace.span_id, trace.trace_id);
 
     if (!this.traceRoot.has(trace.trace_id)) {
@@ -32,6 +43,8 @@ export class TraceLedger {
       siblings.push(trace.span_id);
       this.childSpans.set(trace.parent_span_id, siblings);
     }
+
+    this.onAppend?.(stored);
 
     return trace.trace_id;
   }
@@ -104,7 +117,9 @@ export class TraceLedger {
   }
 
   getRecent(limit = 50): CognitiveTrace[] {
-    const sorted = [...this.traces.values()].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    const sorted = [...this.traces.values()].sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
+    );
     return sorted.slice(0, limit);
   }
 
@@ -139,7 +154,9 @@ export class TraceLedger {
   }
 
   async *stream(from?: Date): AsyncIterable<CognitiveTrace> {
-    const sorted = [...this.traces.values()].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const sorted = [...this.traces.values()].sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+    );
     for (const trace of sorted) {
       if (from && trace.timestamp < from) continue;
       yield trace;

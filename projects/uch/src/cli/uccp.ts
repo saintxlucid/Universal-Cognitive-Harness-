@@ -121,7 +121,9 @@ export class UCCPServer {
       workspace_root: this.options.workspaceRoot,
     });
 
-    this.traceRecorder = new TraceRecorder(this.eventBus);
+    this.traceRecorder = new TraceRecorder(this.eventBus, {
+      onTrace: (trace) => this.persistence.append(trace),
+    });
     this.replay = new CognitiveReplay(this.traceRecorder.ledger);
     this.signals = new SignalStore(this.traceRecorder.ledger);
     this.auth = new Auth();

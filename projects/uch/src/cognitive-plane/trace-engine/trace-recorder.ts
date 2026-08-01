@@ -16,6 +16,8 @@ import type { OtelBridge } from './otel-bridge.js';
 export interface TraceRecorderOptions {
   /** Optional OTel bridge — mirrors ledger traces into OpenTelemetry when a provider is registered. */
   emitter?: OtelBridge;
+  /** Optional persistence sink — fired with the stored copy of every appended trace. */
+  onTrace?: (trace: CognitiveTrace) => void;
 }
 
 const EVENT_TO_SPAN: Record<string, { name: string; kind: SpanKind }> = {
@@ -89,7 +91,7 @@ export class TraceRecorder {
   private sessionSpanId: string | null = null;
 
   constructor(eventBus: NeuralEventBus, options: TraceRecorderOptions = {}) {
-    this.ledger = new TraceLedger();
+    this.ledger = new TraceLedger(options.onTrace ?? null);
     this.eventBus = eventBus;
     this.emitter = options.emitter;
     this.wireEventBus();

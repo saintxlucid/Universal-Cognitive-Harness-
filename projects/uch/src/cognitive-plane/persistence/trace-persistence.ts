@@ -8,6 +8,7 @@ export class TracePersistence {
   private filePath: string;
   private writeStream: fs.WriteStream | null = null;
   private loaded = false;
+  private loading = false;
   private lastWriteError: Error | null = null;
   private pendingBytes = 0;
 
@@ -36,24 +37,32 @@ export class TracePersistence {
     const lines = content.split('\n').filter((l) => l.trim().length > 0);
     let count = 0;
 
-    for (const line of lines) {
-      try {
-        const trace = JSON.parse(line) as CognitiveTrace;
-        // Normalize legacy ids (pre-ADR-002 32-hex UUIDs) to W3C shape so
-        // parent/child linkage survives across versions.
-        trace.trace_id = normalizeTraceId(trace.trace_id);
-        trace.span_id = normalizeSpanId(trace.span_id);
-        if (trace.parent_span_id) trace.parent_span_id = normalizeSpanId(trace.parent_span_id);
-        trace.timestamp = new Date(trace.timestamp);
-        if (trace.end_timestamp) trace.end_timestamp = new Date(trace.end_timestamp);
-        for (const evt of trace.events) {
-          evt.timestamp = new Date(evt.timestamp);
+    // Re-entrancy guard: the ledger may carry a persistence sink (W-01), so
+    // appends during load must NOT be echoed back to the file — otherwise
+    // every boot duplicates the whole journal.
+    this.loading = true;
+    try {
+      for (const line of lines) {
+        try {
+          const trace = JSON.parse(line) as CognitiveTrace;
+          // Normalize legacy ids (pre-ADR-002 32-hex UUIDs) to W3C shape so
+          // parent/child linkage survives across versions.
+          trace.trace_id = normalizeTraceId(trace.trace_id);
+          trace.span_id = normalizeSpanId(trace.span_id);
+          if (trace.parent_span_id) trace.parent_span_id = normalizeSpanId(trace.parent_span_id);
+          trace.timestamp = new Date(trace.timestamp);
+          if (trace.end_timestamp) trace.end_timestamp = new Date(trace.end_timestamp);
+          for (const evt of trace.events) {
+            evt.timestamp = new Date(evt.timestamp);
+          }
+          ledger.append(trace);
+          count++;
+        } catch {
+          continue;
         }
-        ledger.append(trace);
-        count++;
-      } catch {
-        continue;
       }
+    } finally {
+      this.loading = false;
     }
 
     return count;
@@ -80,7 +89,8 @@ export class TracePersistence {
   }
 
   append(trace: CognitiveTrace): void {
-    if (!this.writeStream) return;
+    // No-op while loading (W-01 re-entrancy guard) or after a stream error.
+    if (this.loading || !this.writeStream) return;
     const line = JSON.stringify(trace) + '\n';
     if (this.writeStream.write(line) === false) {
       this.pendingBytes += Buffer.byteLength(line);
