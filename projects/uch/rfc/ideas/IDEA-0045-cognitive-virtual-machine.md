@@ -1,6 +1,7 @@
 # IDEA-0045 — Cognitive Virtual Machine (CVM)
 
-- **Status:** Idea (SOP-08 stage 1; no code)
+- **Status:** Research + Prototype (SOP-08 stages 2/4; P1 implemented
+  `src/cognitive-plane/cvm/` 2026-08-01)
 - **Origin:** Vision intake 2026-08-01 — "the biggest invention isn't
   UCH itself but something underneath it: a CVM like the JVM/CLR that
   executes cognitive bytecode. Every model becomes one execution
@@ -20,8 +21,8 @@ them as an execution machine — a CVM that interprets CIR programs
 (compiled to CP ops) with the kernel as its runtime facilities
 (scheduling via the process table, memory via vmem, transactions via
 WS-D, verification via gates, rollback via reversibility Law 12), so
-OpenAI/Anthropic/Gemini/local models are interchangeable *cognitive
-processors* behind one instruction surface.
+OpenAI/Anthropic/Gemini/local models are interchangeable _cognitive
+processors_ behind one instruction surface.
 
 ## The corpus cannot cover it because
 
@@ -48,14 +49,20 @@ binding exists.
 
 ## Where it lands
 
-- Extends RFC-0004; design doc `design/CVM.md`.
+- Extends RFC-0004; design doc `design/COGNITIVE-VIRTUAL-MACHINE.md`.
 
 ## Code impact
 
-- None until the bytecode envelope is specified over CP ops.
+- Prototype landed: `src/cognitive-plane/cvm/` — bytecode envelope
+  (`bytecode.ts`, decode-time verification), device interface
+  (`device.ts`, certification), machine (`machine.ts`: deterministic
+  eval, delegated dispatch, WS-D propose→verify→commit/rollback,
+  tick-ordered trace, replay determinism, checkpoint/resume,
+  branch/merge). 24 tests green 2026-08-01.
 
 ## Next stage
 
-Define the bytecode envelope for a pure subset of CP ops; prototype
-executing a CIR program with the transactional substrate as the
-execution context.
+Wire the CIR frontend (P2: compile CIR programs to CVM bytecode), then
+device registry + provider routing (P3, ADR-004) and the P4 conformance
+suite (golden bytecode programs, replay determinism checks, rollback
+drills).

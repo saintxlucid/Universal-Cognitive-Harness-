@@ -1,6 +1,7 @@
 # IDEA-0117 — Cognitive Execution Graph
 
-- **Status:** Idea (SOP-08 stage 1; no code)
+- **Status:** Research + Prototype (SOP-08 stages 2/4; P1 implemented
+  inside the CVM prototype `src/cognitive-plane/cvm/` 2026-08-01)
 - **Origin:** 2026-08-01 platform-effects intake (round 17) — "the
   next improvements are no longer adding capabilities; the
   differentiator is platform effects, determinism, and engineering
@@ -82,11 +83,14 @@ branches, and replay the result as operations on one artifact.
 
 ## Code impact
 
-- None until the CVM promotion (IDEA-0045); the CIR executor is the
-  first graph target.
+- Prototype landed with the CVM wave: `CognitiveExecutionGraph`
+  (dependency order, snapshot/restore) + `CvmMachine` checkpoint/resume
+  (`fromSnapshot`/`onCheckpoint`), `branch()`/`merge()` with
+  certification conflict detection, `replay()` determinism reports.
+  24 tests green 2026-08-01.
 
 ## Next stage
 
-- Model the CIR executor's run as a graph; prototype
-  pause/checkpoint/resume on WS-D semantics with the deterministic
-  subset.
+Model the CIR executor's run as a graph (P2: optimize passes over the
+execution graph); persist execution artifacts for resume-across-crash
+and UER ancestry ingestion (P3).
