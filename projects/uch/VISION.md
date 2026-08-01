@@ -220,29 +220,29 @@ knowledge — the acceptance test of Law 12 applied across tools.
 
 Verdict after repo-wide mapping: the "40% designed / 60% missing" split
 is optimistic about the delta — roughly 70% of the 21 foundations
-already have ancestors executed or tracked (F0 spec stack; F1 CVM →
+already have ancestors executed or tracked: F0 spec stack; F1 CVM →
 IDEA-0045; F2 driver architecture → `src/drivers/` + CIC + compliance;
 F5 reality → IDEA-0017/0031 + sensors; F6/F16 simulation + twin →
 IDEA-0012/0013; F7 benchmark → IDEA-0018 + EI benchmark runner; F8
 observatory → IDEA-0014; F10 packages → WS-P + IDEA-0019; F13 research
-→ IDEA-0033 Layer 9 + research registers; F15 manufacturing → IDEA-0013
-+ organic-code gates; F17 economy → IDEA-0016 + budgets; F18 evolution
-→ IDEA-0008 + DNA; F20 civilization → CIC + attach + merge + IDEA-0007;
-F14 graph → IDEA-0050). The user's deeper claim holds: the missing
-material is infrastructure, not AI features.
+→ IDEA-0033 Layer 9 + research registers; F15 manufacturing →
+IDEA-0013 + organic-code gates; F17 economy → IDEA-0016 + budgets;
+F18 evolution → IDEA-0008 + DNA; F20 civilization → CIC + attach +
+merge + IDEA-0007; F14 graph → IDEA-0050). The user's deeper claim
+holds: the missing material is infrastructure, not AI features.
 
 The true delta is 8 proposals, tracked as idea notes IDEA-0048…0055:
 
-| Foundation | Delta |
-|---|---|
-| F0 Formal Specification | IDEA-0048 — one consolidated normative document set (POSIX-style) + normative timing/determinism/persistence sections; spec/ + STACK.md exist, consolidation does not |
-| F3 Storage Engine | IDEA-0049 — unified storage contract over pluggable backends (file/sqlite/postgres/neo4j/vector/object/git); today stores are directly addressed |
-| F4 + F14 Knowledge Fabric | IDEA-0050 — typed artifact nodes + cross-domain edges (conversation→decision→benchmark); per-domain graphs exist, the shared fabric does not |
-| F9 Engineering Database | IDEA-0051 — typed artifact store (tradeoffs, meetings, successes, experiments as first-class records) |
-| F11 Skill Compiler | IDEA-0052 — Skill DSL → Skill IR → optimizer → runtime; skills are prose today |
-| F12 Constitution Engine | IDEA-0053 — central execute-time enforcement so no subsystem can violate the Laws (checks exist at evaluation points only) |
-| F2 + F19 Driver Ecosystem + Interop Lab | IDEA-0054 — per-IDE adapter catalog + automated cross-host/OS certification matrix as a release gate |
-| CEL | IDEA-0055 — a cognitive engineering language: mission → CIR → CVM; makes UCH programmable, not just configurable |
+| Foundation | Idea | Delta |
+|---|---|---|
+| F0 Formal Specification | IDEA-0048 | One normative doc set; timing/determinism/persistence specs missing |
+| F3 Storage Engine | IDEA-0049 | Unified storage contract over pluggable backends |
+| F4 + F14 Knowledge Fabric | IDEA-0050 | Cross-domain artifact graph; per-domain graphs exist, the fabric does not |
+| F9 Engineering Database | IDEA-0051 | Tradeoffs, meetings, successes, experiments as first-class records |
+| F11 Skill Compiler | IDEA-0052 | Skill DSL → IR → optimizer → runtime; skills are prose today |
+| F12 Constitution Engine | IDEA-0053 | Execute-time enforcement; checks exist at evaluation points only |
+| F2 + F19 Driver Ecosystem | IDEA-0054 | Per-IDE adapters + automated cross-host/OS certification matrix |
+| CEL | IDEA-0055 | Mission → CIR → CVM; makes UCH programmable, not configurable |
 
 The CEL claim is the round's headline: with CEL compiling through CIR
 to the CVM, models become execution backends of user-written programs,

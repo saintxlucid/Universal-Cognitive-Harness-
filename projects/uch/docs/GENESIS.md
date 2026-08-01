@@ -194,7 +194,14 @@ Intelligence), cognitive information theory, topology, thermodynamics,
 immunology, embryology, jurisprudence, anthropology, archaeology,
 astronomy + instruments, candidate law expansion (32 → 50–100 laws), the
 Cognitive Virtual Machine, the accelerator catalog, and Universal
-Engineering Replay (one causal engineering graph across every host).
+Engineering Replay (one causal engineering graph across every host);
+and the 2026-08-01 foundations intake (IDEA-0048…0055): the
+consolidated normative specification, the cognitive storage engine,
+the knowledge fabric + engineering intelligence graph, the
+engineering database, the skill compiler, the constitution engine,
+the driver ecosystem + interoperability certification, and the
+Cognitive Engineering Language (CEL — missions compiled through CIR
+to the CVM, making UCH programmable rather than configurable).
 
 A second framing of the same universe is the **discipline ladder** — the
 eight formal disciplines from which every feature should be derivable:
