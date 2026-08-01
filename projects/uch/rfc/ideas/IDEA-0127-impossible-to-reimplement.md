@@ -96,5 +96,13 @@ versioned artifacts = WS-C/IDEA-0125).
 
 ## Next stage
 
-Ratify the objective amendment; inventory spec sections vs
-conformance coverage (the 2963-test → 3000+ certification gap).
+**In progress (2026-08-01):** the objective amendment is recorded as
+the Irreplaceability Program (`design/IRREPLACEABILITY.md` + a
+`docs/ROADMAP.md` section, WS-1..8); the spec-section vs conformance
+inventory is landed (`design/CONFORMANCE-CORPUS.md` +
+`src/protocol/certification-corpus.ts`, gate green on 10 documents:
+6 covered / 4 partial / 0 gap). VISION §1/§2 text amendment awaits
+ratification by the vision-intake wave. Next: WS-3 — close the four
+partial-coverage gaps (per-law suites, math foundations Parts I-VII,
+ontology entity taxonomy, biology sections) toward a 3000+ gated
+certification corpus.
