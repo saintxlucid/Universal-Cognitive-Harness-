@@ -13,6 +13,9 @@
  *  - Tier VIII Failure Engineering
  *  - Tier X   Unknown-Unknown Discovery
  * (Tier IX Taste reuses src/cognitive-plane/taste per ADR-003.)
+ *
+ * Round-11 additions (IDEA-0071/0081/0082): Cognitive SLOs, the
+ * Deterministic Engineering Chain, and the Engineering Taste rubric.
  */
 
 export * from './types.js';
@@ -99,6 +102,35 @@ export {
   targetFromEvent,
   type EngineeringEnrichmentConfig,
 } from './enrichment/engineering-enrichment.js';
+export {
+  CHAIN_STAGES,
+  checkChain,
+  isReplayable,
+  isOrdered,
+  type ChainArtifact,
+  type ChainCompleteness,
+  type ChainStage,
+} from './chain/engineering-chain.js';
+export {
+  COGNITIVE_SLO_CATALOG,
+  SloMonitor,
+  type SloBand,
+  type SloDefinition,
+  type SloKind,
+  type SloObservation,
+  type SloStatus,
+} from './slo/cognitive-slos.js';
+export {
+  TASTE_GATE,
+  TASTE_RUBRIC,
+  TasteRegistry,
+  assessTaste,
+  type AuthorTasteRecord,
+  type TasteAssessment,
+  type TasteMetric,
+  type TasteQuality,
+  type TasteVerdict,
+} from './taste/taste.js';
 
 import { DomainRegistry, createDomainRegistry } from './domains/index.js';
 import { LawRegistry, createLawRegistry } from './laws/engineering-laws.js';

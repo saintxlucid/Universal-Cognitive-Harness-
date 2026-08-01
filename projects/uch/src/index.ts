@@ -849,3 +849,177 @@ export * from './engineering-intelligence/index.js';
 // verification gates, deterministic benchmark corpus + runner.
 // ---------------------------------------------------------------------------
 export * from './cognitive-compiler/index.js';
+
+// ---------------------------------------------------------------------------
+// MICROSCOPIC INFRASTRUCTURE (round 11 — IDEA-0068..0083)
+// Capability negotiation & discovery, feature flags + versioned cognition +
+// deprecation, organ health/watchdogs/safe mode, contracts registry, failure
+// taxonomy, intent objects, universal lifecycle, knowledge lineage, human
+// factors, UX charter, memory hygiene, plugin trust scoring, cognitive SLOs,
+// deterministic engineering chain, engineering taste, spec repository.
+// ---------------------------------------------------------------------------
+export {
+  negotiateDialects,
+  findProviders,
+  pickLatest,
+  dialectKey,
+  parseSemver,
+  compareSemver,
+} from './cognitive-plane/protocol/capability-negotiation.js';
+export type {
+  Semver,
+  CapabilityDescriptor,
+  DialectStatus,
+  NegotiatedDialect,
+  NegotiationOutcome,
+  NegotiationOptions,
+  DiscoveryQuery,
+} from './cognitive-plane/protocol/capability-negotiation.js';
+export {
+  FeatureFlagRegistry,
+  stickyBucket,
+  classifyBump,
+  DEPRECATION_ORDER,
+  transitionDeprecation,
+} from './cognitive-plane/protocol/feature-flags.js';
+export type {
+  DeprecationInfo,
+  FlagRule,
+  FlagEvaluation,
+  VersionedCapability,
+  VersionBump,
+} from './cognitive-plane/protocol/feature-flags.js';
+export {
+  HealthRegistry,
+  bootPlan,
+  DEFAULT_WATCHDOG_CONFIG,
+  SAFE_MODE_ORGANS,
+} from './cognitive-plane/health/health-registry.js';
+export type {
+  HealthState,
+  OrganHealthRecord,
+  WatchdogConfig,
+  HealthEvent,
+  BootMode,
+  BootPlan,
+} from './cognitive-plane/health/health-registry.js';
+export {
+  ContractRegistry,
+  parseTimingEnvelope,
+  parseResourceEnvelope,
+  probeContract,
+} from './cognitive-plane/contracts/contracts-registry.js';
+export type {
+  ContractRecord,
+  ObservedBehavior,
+  ProbeVerdict,
+  ProbeResult,
+  TimingEnvelope,
+  ResourceEnvelope,
+} from './cognitive-plane/contracts/contracts-registry.js';
+export {
+  FAILURE_CLASSES,
+  DEFAULT_FACULTY,
+  classifyFailure,
+  failureDefinition,
+  responseFor,
+  neverRetries,
+  recordFailure,
+  failureRateByClass,
+} from './cognitive-plane/failure/failure-taxonomy.js';
+export type {
+  FacultyClass,
+  CanonicalResponse,
+  FailureClassDefinition,
+  FailureRecord,
+} from './cognitive-plane/failure/failure-taxonomy.js';
+export {
+  DEFAULT_INTENT,
+  normalizeIntent,
+  compileIntent,
+  isSuccess,
+} from './cognitive-plane/intent/intent-objects.js';
+export type {
+  Priority,
+  RiskAppetite,
+  IntentEnvelope,
+  CompiledIntent,
+} from './cognitive-plane/intent/intent-objects.js';
+export {
+  LIFECYCLE_STAGES,
+  STAGE_GATES,
+  ALLOWED_TRANSITIONS,
+  LifecycleRegistry,
+} from './cognitive-plane/lifecycle/lifecycle-engine.js';
+export type {
+  LifecycleStage,
+  EvidenceKind,
+  TransitionRule,
+  LifecycleEntry,
+  TransitionJournalEntry,
+} from './cognitive-plane/lifecycle/lifecycle-engine.js';
+export { LineageService } from './cognitive-plane/lineage/lineage-service.js';
+export type {
+  LineageOrigin,
+  LineageChange,
+  VerificationVerdict,
+  LineageRecord,
+  LineageAnswer,
+} from './cognitive-plane/lineage/lineage-service.js';
+export {
+  HumanFactorsRegistry,
+  DEFAULT_PROFILE as DEFAULT_HUMAN_FACTORS_PROFILE,
+} from './cognitive-plane/human-factors/human-factors.js';
+export type {
+  HumanFactorField,
+  HumanFactorValue,
+  HumanFactorsProfile,
+} from './cognitive-plane/human-factors/human-factors.js';
+export {
+  UX_CHARTER,
+  charterStatus,
+  shouldPreempt,
+  isExplainable,
+  isCalm,
+} from './cognitive-plane/ux/ux-charter.js';
+export type {
+  UxQuality,
+  UxQualityDefinition,
+  UxObservation,
+  UxQualityStatus,
+  InterruptPriority,
+} from './cognitive-plane/ux/ux-charter.js';
+export { MemoryHygieneEngine } from './kernel/memory/hygiene/memory-hygiene.js';
+export type {
+  HygieneClass,
+  MemoryItem,
+  HygieneFinding,
+  HygieneProposal,
+  HygieneJournalEntry,
+} from './kernel/memory/hygiene/memory-hygiene.js';
+export {
+  overallScore,
+  decide,
+  DEFAULT_TRUST_POLICY,
+  TrustRegistry,
+} from './kernel/packages/trust/plugin-trust.js';
+export type {
+  TrustAxis,
+  AxisScore,
+  PluginScorecard,
+  PluginDecision,
+  TrustPolicy,
+  ScoreHistoryEntry,
+} from './kernel/packages/trust/plugin-trust.js';
+export {
+  validateEntry,
+  SpecRepository,
+  generateTsTypes,
+  FAMILY_SCHEMAS,
+} from './protocol/spec-repository/spec-repository.js';
+export type {
+  SpecFamily,
+  SpecEntry,
+  FamilySchema,
+  GeneratedTypes,
+} from './protocol/spec-repository/spec-repository.js';
