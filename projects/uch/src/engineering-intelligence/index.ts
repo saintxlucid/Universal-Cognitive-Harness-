@@ -33,11 +33,7 @@ export {
   TIER_08_FAILURE_CONCEPTS,
   TIER_10_UNKNOWN_CONCEPTS,
 } from './domains/index.js';
-export {
-  ENGINEERING_LAWS,
-  LawRegistry,
-  createLawRegistry,
-} from './laws/engineering-laws.js';
+export { ENGINEERING_LAWS, LawRegistry, createLawRegistry } from './laws/engineering-laws.js';
 export { EngineeringEvaluator } from './evaluator.js';
 export type { EvaluatorConfig } from './evaluator.js';
 export {
@@ -71,11 +67,7 @@ export {
   runHeldOutCalibration,
   type HeldOutCalibrationResult,
 } from './failure-physics/heldout-calibration.js';
-export {
-  autoTarget,
-  coerceFindings,
-  engineeringFindingsFor,
-} from './organic-hookup.js';
+export { autoTarget, coerceFindings, engineeringFindingsFor } from './organic-hookup.js';
 export {
   DEFAULT_DECISION_LAW_CONFIG,
   decideGate,
@@ -131,6 +123,23 @@ export {
   type TasteQuality,
   type TasteVerdict,
 } from './taste/taste.js';
+export {
+  EngineeringLearningLoop,
+  MIN_SLEEP_ACTIVATIONS,
+  TASTE_REINFORCE_SCORE,
+  TASTE_PENALTY,
+  type ConceptActivation,
+  type LearningLoopStats,
+  type LearningLoopConfig,
+} from './learning/learning-loop.js';
+export {
+  DreamScan,
+  DREAM_KEYWORDS,
+  type DreamScanClass,
+  type DreamSuggestion,
+  type DreamScanReport,
+  type DreamScanInput,
+} from './learning/dream-scan.js';
 
 import { DomainRegistry, createDomainRegistry } from './domains/index.js';
 import { LawRegistry, createLawRegistry } from './laws/engineering-laws.js';

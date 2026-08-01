@@ -93,6 +93,55 @@ All notable changes to UCH are documented here. Format follows
   GETTING-STARTED, ROADMAP (five Epochs), SECURITY policy, contributing
   RFC governance.
 
+### Added
+
+- **Engineering Intelligence Wave E (ADR-003 Phase E)** — learning loop:
+  `EngineeringLearningLoop` (taste reinforcement/penalty via
+  `TasteEngine.learn`, concept activation accounting, `connectome:link`
+  register-or-strengthen events, `getDominantPerProblemType` feeding the
+  sleep cycle) + `DreamScan` (Tier X offline scan over genome mutations +
+  trace ledger; 6 unknown-unknown families; `suggestion` events only,
+  never self-applies). Exoskeleton metabolism components
+  `engineering-learning` + `dream-scan`; new `suggestion` EventType.
+  `src/engineering-intelligence/learning/`. 11 new tests (171 in layer).
+- **Vision intake corpus (rounds 1–11, 2026-08-01)** — 83 idea notes
+  (IDEA-0001..0083) under `rfc/ideas/`; VISION.md sections 8–14
+  (primitive-first, discipline claim, firmware-compute, foundations,
+  platform infrastructure, missing-infrastructure, microscopic
+  infrastructure); GENESIS.md ch. 3 layer model + idea-note pointers.
+- **Cognitive Physics (RFC-0005)** — draft in FORMAL_FOUNDATIONS Part VIII;
+  failure-physics prototype (`I(b) = confidence − evidenceMass`, calibrated
+  θ = 0.5); independent held-out corpus (θ generalizes); Architecture /
+  Security / Constitution reviews passed; Part VIII promoted to normative
+  (corpus 0.3.0). `src/engineering-intelligence/failure-physics/`.
+- **Theory of Intelligence (IDEA-0034)** — unified decision law
+  (λu·EU + λi·IG − λe·E − λr·R − λl·L) with derived policies
+  (governance gate, scheduler priority, shouldVerify, memory store/evict);
+  parity on the 17-case corpus. `src/engineering-intelligence/decision-law/`.
+- **Universal Engineering Replay (IDEA-0047)** — deterministic causal graph
+  (`uer-graph.ts`): 6 node kinds / 5 edge kinds, traceparent-driven
+  ingestion, gap-heuristic change points, influence-path/ancestry/change-point
+  queries. `src/cognitive-plane/replay/`.
+- **Cognitive Virtual Machine (IDEA-0045)** — design only
+  (`design/COGNITIVE-VIRTUAL-MACHINE.md`); blocked on RFC-0004 CIR
+  reaching Specification.
+- **Cognitive wearable lifecycle (ADR-005)** — `src/agent/cognitive-wearable.ts`
+  state-sync target (snapshot/wear/syncLifecycle/learn/sleep), middleware
+  stage markers ('Genome', 'Engineering standards', 'Active risks').
+- **TracePersistence hardening** — write-stream error handling, backpressure
+  tracking, async close; regression tests.
+- **Missing-infrastructure intake (round 10)** — IDEA-0059..0067 (kernel
+  debugger, garbage collector, formal verification, security architecture,
+  resource allocator, multi-UCH networking, consensus layer, reasoning
+  profiler, organ design system).
+- **Microscopic infrastructure organs (round 11, IDEA-0068..0083)** — 14
+  organs: capability negotiation, feature flags + versioned cognition,
+  organ health/watchdogs/safe mode, cognitive SLOs, universal lifecycle
+  engine, contracts registry, failure taxonomy, intent objects, knowledge
+  lineage, human factors, UX charter, memory hygiene, plugin trust scoring,
+  spec repository (+ EI chain/slo/taste). 17 research G1 registers
+  (`research/foundations/09..17`).
+
 ## [0.2.0] — 2026-07-31
 
 ### Added

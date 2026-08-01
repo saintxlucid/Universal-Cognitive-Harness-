@@ -89,7 +89,8 @@ export type EventType =
   | 'process:joined'
   | 'process:detached'
   | 'process:signaled'
-  | 'process:killed';
+  | 'process:killed'
+  | 'suggestion';
 
 export interface NeuralEvent {
   id: string;

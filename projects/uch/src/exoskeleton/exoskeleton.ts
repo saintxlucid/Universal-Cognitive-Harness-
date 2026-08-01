@@ -24,8 +24,15 @@ import type { EndocrineSystem } from '../cognitive-core/endocrine.js';
 import type { SleepCycle } from '../sleep_cycle/cycle.js';
 import type { ActionSelector } from '../basal_ganglia/action-selector.js';
 import type { Connectome } from '../connectome/wiring.js';
-import { EngineeringEnrichment } from '../engineering-intelligence/index.js';
-import { FrameworkTraceRecorder, frameworkProblemTypeOf } from '../cognitive-plane/frameworks/tracing/trace-recorder.js';
+import {
+  EngineeringEnrichment,
+  EngineeringLearningLoop,
+  DreamScan,
+} from '../engineering-intelligence/index.js';
+import {
+  FrameworkTraceRecorder,
+  frameworkProblemTypeOf,
+} from '../cognitive-plane/frameworks/tracing/trace-recorder.js';
 import { createFrameworkRegistry } from '../cognitive-plane/frameworks/registry.js';
 import { prosCons } from '../cognitive-plane/frameworks/decisions/decision-models.js';
 import { rcaAnalyze } from '../cognitive-plane/frameworks/rca/rca.js';
@@ -45,10 +52,18 @@ import { getTools } from '../agentic/tools/registry.js';
 import type { Tool } from '../agentic/tools/types.js';
 import { QueryEngine, type QueryEngineConfig } from '../agentic/query/engine.js';
 import { LLMClientAdapter, type ModelCaller } from '../agentic/model/caller.js';
-import { createPermissionRuleSet, type PermissionRuleSet, type PermissionMode } from '../agentic/permissions/permissions.js';
+import {
+  createPermissionRuleSet,
+  type PermissionRuleSet,
+  type PermissionMode,
+} from '../agentic/permissions/permissions.js';
 import { HistoryManager } from '../agentic/history/history.js';
 import { LLMClient } from '../llm/provider.js';
-import { MEMORY_EXTRACTION_HOOK, DREAM_TRIGGER_HOOK, type StopHook } from '../agentic/query/stop-hooks.js';
+import {
+  MEMORY_EXTRACTION_HOOK,
+  DREAM_TRIGGER_HOOK,
+  type StopHook,
+} from '../agentic/query/stop-hooks.js';
 
 export interface ExoskeletonConfig {
   workspaceId: string;
@@ -112,6 +127,8 @@ export class CognitiveExoskeleton {
   readonly actionSelector: ActionSelector;
   readonly connectome: Connectome;
   readonly engineeringEnrichment: EngineeringEnrichment;
+  readonly engineeringLearningLoop: EngineeringLearningLoop;
+  readonly dreamScan: DreamScan;
   readonly frameworkTracer: FrameworkTraceRecorder;
   readonly hippocampus: Hippocampus;
   readonly neocortex: Neocortex;
@@ -157,9 +174,7 @@ export class CognitiveExoskeleton {
     this.agenticStopHooks = config.stopHooks ?? [MEMORY_EXTRACTION_HOOK, DREAM_TRIGGER_HOOK];
 
     const llm = config.llm ?? new LLMClient(config.apiKey ? { apiKey: config.apiKey } : undefined);
-    this.agenticModel = llm.isAvailable
-      ? new LLMClientAdapter(llm, { model: config.model })
-      : null;
+    this.agenticModel = llm.isAvailable ? new LLMClientAdapter(llm, { model: config.model }) : null;
 
     // Control plane first — governance instances are injected INTO the core.
     this.auth = new Auth();
@@ -213,6 +228,11 @@ export class CognitiveExoskeleton {
     this.frameworkTracer = new FrameworkTraceRecorder(this.eventBus);
     this.engineeringEnrichment = new EngineeringEnrichment(this.eventBus);
     this.metabolism.registerComponent('engineering');
+    this.engineeringLearningLoop = new EngineeringLearningLoop(this.eventBus);
+    this.engineeringLearningLoop.attach();
+    this.metabolism.registerComponent('engineering-learning');
+    this.dreamScan = new DreamScan(this.eventBus);
+    this.metabolism.registerComponent('dream-scan');
 
     // Embodiment — drivers attach to the core's event bus.
     this.fsDriver = new FileSystemDriver(this.eventBus, {
@@ -267,7 +287,8 @@ export class CognitiveExoskeleton {
       // traversal. Law 13 applied to thinking itself.
       {
         name: 'framework-decide',
-        description: 'runs a deterministic decision engine (pros & cons or model selection) without the LLM',
+        description:
+          'runs a deterministic decision engine (pros & cons or model selection) without the LLM',
         keywords: ['fw', 'framework', 'decide', 'decision', 'pros-cons', 'pros and cons'],
         execute: (input) => {
           const pros = parseList(input, 'pros');
@@ -275,8 +296,12 @@ export class CognitiveExoskeleton {
           if (pros.length > 0 || cons.length > 0) {
             const result = prosCons({ pros, cons });
             this.frameworkTracer.recordCompletion({
-              engine: 'pros-cons', family: 'decisions', problem: input,
-              profile: {}, result: result as unknown as Record<string, unknown>, verdict: result.verdict,
+              engine: 'pros-cons',
+              family: 'decisions',
+              problem: input,
+              profile: {},
+              result: result as unknown as Record<string, unknown>,
+              verdict: result.verdict,
             });
             return JSON.stringify(result);
           }
@@ -300,8 +325,11 @@ export class CognitiveExoskeleton {
             evidence: parseList(input, 'fact').map((fact) => ({ fact, source: 'fast-path' })),
           });
           this.frameworkTracer.recordCompletion({
-            engine: 'rca-focus', family: 'rca', problem: input,
-            profile: { rootCauseNeeded: true }, result: result as unknown as Record<string, unknown>,
+            engine: 'rca-focus',
+            family: 'rca',
+            problem: input,
+            profile: { rootCauseNeeded: true },
+            result: result as unknown as Record<string, unknown>,
           });
           return JSON.stringify(result);
         },
@@ -314,12 +342,16 @@ export class CognitiveExoskeleton {
           const names = parseList(input, 'task');
           const tasks = names.length > 0 ? names.map((name) => ({ name })) : [{ name: input }];
           const result = planTasks({ tasks });
-          const mit = result.mostImportantTasks.length > 0
-            ? result.mostImportantTasks
-            : tasks.slice(0, 3).map((t) => t.name);
+          const mit =
+            result.mostImportantTasks.length > 0
+              ? result.mostImportantTasks
+              : tasks.slice(0, 3).map((t) => t.name);
           this.frameworkTracer.recordCompletion({
-            engine: 'productivity-os', family: 'productivity', problem: input,
-            profile: {}, result: result as unknown as Record<string, unknown>,
+            engine: 'productivity-os',
+            family: 'productivity',
+            problem: input,
+            profile: {},
+            result: result as unknown as Record<string, unknown>,
           });
           return JSON.stringify({ mit, frog: result.frog, quickTasks: result.quickTasks });
         },
@@ -331,11 +363,17 @@ export class CognitiveExoskeleton {
         execute: (input) => {
           const result = detectGaps({
             topic: input,
-            notes: parseList(input, 'note').map((finding, i) => ({ title: `note ${i + 1}`, finding })),
+            notes: parseList(input, 'note').map((finding, i) => ({
+              title: `note ${i + 1}`,
+              finding,
+            })),
           });
           this.frameworkTracer.recordCompletion({
-            engine: 'research-gap', family: 'research', problem: input,
-            profile: {}, result: result as unknown as Record<string, unknown>,
+            engine: 'research-gap',
+            family: 'research',
+            problem: input,
+            profile: {},
+            result: result as unknown as Record<string, unknown>,
           });
           return JSON.stringify(result.ranked);
         },
@@ -346,11 +384,17 @@ export class CognitiveExoskeleton {
         keywords: ['dikw', 'transform', 'sense-making', 'sense making'],
         execute: (input) => {
           const result = dikwTransform({
-            dataPoints: parseList(input, 'datum').map((value, i) => ({ value, attribute: `datum ${i + 1}` })),
+            dataPoints: parseList(input, 'datum').map((value, i) => ({
+              value,
+              attribute: `datum ${i + 1}`,
+            })),
           });
           this.frameworkTracer.recordCompletion({
-            engine: 'dikw', family: 'knowledge', problem: input,
-            profile: {}, result: result as unknown as Record<string, unknown>,
+            engine: 'dikw',
+            family: 'knowledge',
+            problem: input,
+            profile: {},
+            result: result as unknown as Record<string, unknown>,
           });
           return JSON.stringify(result.wisdom);
         },
@@ -440,7 +484,13 @@ export class CognitiveExoskeleton {
 
     this.auth.registerAgent('exoskeleton', 'system', 'Cognitive Exoskeleton', ['*']);
     this.auth.registerAgent('connected-agent', 'agent', 'Connected Agent', [
-      'observe', 'remember', 'retrieve', 'plan', 'reflect', 'learn', 'critique',
+      'observe',
+      'remember',
+      'retrieve',
+      'plan',
+      'reflect',
+      'learn',
+      'critique',
     ]);
   }
 
@@ -580,8 +630,7 @@ export class CognitiveExoskeleton {
           content: { type: 'text', text: content },
           provenance: { source: 'agentic', reliability: Math.max(0.3, Math.min(1, importance)) },
         }),
-      recall: async (query: string) =>
-        kernel.recallCompressed({ text: query }).text,
+      recall: async (query: string) => kernel.recallCompressed({ text: query }).text,
     };
   }
   createEngine(overrides?: Partial<QueryEngineConfig>): QueryEngine | null {
@@ -609,7 +658,10 @@ export class CognitiveExoskeleton {
       },
       stopHooks: this.agenticStopHooks,
       extractMemories: async (text: string) => {
-        const chunks = text.split('\n').filter((line) => line.trim().length > 20).slice(0, 5);
+        const chunks = text
+          .split('\n')
+          .filter((line) => line.trim().length > 20)
+          .slice(0, 5);
         for (const chunk of chunks) {
           await memory.remember(chunk, 0.6);
         }
@@ -626,7 +678,11 @@ export class CognitiveExoskeleton {
   async runAgentic(
     prompt: string,
     options?: { maxTurns?: number; onMessage?: (m: import('../agentic/types.js').Message) => void },
-  ): Promise<{ text: string; toolCalls: number; terminal: import('../agentic/types.js').Terminal }> {
+  ): Promise<{
+    text: string;
+    toolCalls: number;
+    terminal: import('../agentic/types.js').Terminal;
+  }> {
     const engine = this.createEngine({ maxTurns: options?.maxTurns });
     if (!engine) {
       throw new Error('No LLM configured — set OPENAI_API_KEY or ANTHROPIC_API_KEY');
@@ -684,7 +740,15 @@ function parseProfile(input: string): Record<string, number | boolean> {
   }
   for (const flag of ['root-cause', 'human-centered', 'continuous-improvement', 'speed']) {
     if (new RegExp(`\\b${flag}\\b`, 'i').test(input)) {
-      out[flag === 'root-cause' ? 'rootCauseNeeded' : flag === 'human-centered' ? 'humanCentered' : flag === 'continuous-improvement' ? 'continuousImprovement' : 'speedAdaptability'] = true;
+      out[
+        flag === 'root-cause'
+          ? 'rootCauseNeeded'
+          : flag === 'human-centered'
+            ? 'humanCentered'
+            : flag === 'continuous-improvement'
+              ? 'continuousImprovement'
+              : 'speedAdaptability'
+      ] = true;
     }
   }
   return out;
