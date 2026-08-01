@@ -176,7 +176,7 @@ export class UCCPServer {
         await this.persistence.loadInto(this.traceRecorder.ledger);
       },
       stop: async () => {
-        this.persistence.close();
+        await this.persistence.close();
       },
     });
     this.lifecycle.register({

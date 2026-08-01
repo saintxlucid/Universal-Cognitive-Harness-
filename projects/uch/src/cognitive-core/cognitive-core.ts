@@ -209,7 +209,7 @@ export class CognitiveCore {
   async stop(): Promise<void> {
     this.metabolism.stop();
     this.aether.stop();
-    this.persistence.close();
+    await this.persistence.close();
   }
 
   getState(): CognitiveCoreState {

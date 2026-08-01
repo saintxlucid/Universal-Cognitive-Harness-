@@ -8,9 +8,22 @@ export class TracePersistence {
   private filePath: string;
   private writeStream: fs.WriteStream | null = null;
   private loaded = false;
+  private lastWriteError: Error | null = null;
+  private pendingBytes = 0;
 
   constructor(filePath: string) {
     this.filePath = filePath;
+  }
+
+  /** Last write-stream failure, if any. The persistence layer degrades to
+   * in-memory operation after a write error — it never crashes the process. */
+  get writeError(): Error | null {
+    return this.lastWriteError;
+  }
+
+  /** Bytes queued in the write-stream buffer since the last drain. */
+  get bufferedBytes(): number {
+    return this.pendingBytes;
   }
 
   async loadInto(ledger: TraceLedger): Promise<number> {
@@ -51,20 +64,39 @@ export class TracePersistence {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    this.writeStream = fs.createWriteStream(this.filePath, { flags: 'a' });
+    const stream = fs.createWriteStream(this.filePath, { flags: 'a' });
+    stream.on('error', (err) => {
+      // Record and degrade: subsequent appends become no-ops instead of
+      // throwing (Node's default would crash the process on EACCES/EISDIR).
+      this.lastWriteError = err;
+      if (this.writeStream === stream) {
+        this.writeStream = null;
+      }
+    });
+    stream.on('drain', () => {
+      this.pendingBytes = 0;
+    });
+    this.writeStream = stream;
   }
 
   append(trace: CognitiveTrace): void {
     if (!this.writeStream) return;
     const line = JSON.stringify(trace) + '\n';
-    this.writeStream.write(line);
+    if (this.writeStream.write(line) === false) {
+      this.pendingBytes += Buffer.byteLength(line);
+    }
   }
 
-  close(): void {
-    if (this.writeStream) {
-      this.writeStream.end();
-      this.writeStream = null;
-    }
+  /** Flush and close the append stream. Resolves on error too — shutdown
+   * must never hang or throw because of a failing trace sink. */
+  async close(): Promise<void> {
+    const stream = this.writeStream;
+    this.writeStream = null;
+    if (!stream) return;
+    await new Promise<void>((resolve) => {
+      stream.on('error', () => resolve());
+      stream.end(() => resolve());
+    });
   }
 
   get size(): number {
