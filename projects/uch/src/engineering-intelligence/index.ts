@@ -60,10 +60,39 @@ export {
   type InstabilityVerdict,
 } from './failure-physics/instability.js';
 export {
+  FAILURE_PHYSICS_HELDOUT_CORPUS,
+  type HeldOutCase,
+  type HeldOutGroup,
+} from './failure-physics/held-out.js';
+export {
+  runHeldOutCalibration,
+  type HeldOutCalibrationResult,
+} from './failure-physics/heldout-calibration.js';
+export {
   autoTarget,
   coerceFindings,
   engineeringFindingsFor,
 } from './organic-hookup.js';
+export {
+  DEFAULT_DECISION_LAW_CONFIG,
+  decideGate,
+  decideGateOnTarget,
+  evictScore,
+  gateCrossing,
+  rankActions,
+  runDecisionLawBenchmark,
+  schedule,
+  schedulerPriority,
+  scoreAction,
+  shouldStore,
+  shouldVerify,
+  type DecisionLawConfig,
+  type DecisionLawReport,
+  type GateAction,
+  type DecisionLawVerdict,
+  type Schedulable,
+  type ScoredAction,
+} from './decision-law/decision-law.js';
 export {
   EngineeringEnrichment,
   ENGINEERING_WATCH_EVENTS,

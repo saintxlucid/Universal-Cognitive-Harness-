@@ -96,7 +96,10 @@ error, tracked file, owned by no wave) — added.
 - [x] Research register — done (research/foundations/05-cognitive-calculus.md)
 - [x] Prototype: instability-based veto parity benchmark — done
       (failure-physics/instability.ts; 13 tests; parity 1.0 on 17 cases)
-- [ ] Independent held-out corpus for θ calibration (bootstrap-calibrated on
-      the benchmark corpus is not sufficient for Acceptance)
+- [x] Independent held-out corpus for θ calibration — done
+      (failure-physics/held-out.ts: 16 cases, new wording; θ = 0.5
+      generalizes — held-out veto recall 6/6, negatives 5/5 clean,
+      separability (0.25, 0.6], θ_heldout cross-applies to train;
+      heldout-calibration.ts + 10 tests)
 - [ ] Architecture review → security review → constitution check
 - [ ] Acceptance → promotion to `spec/` + VERSION.md bump

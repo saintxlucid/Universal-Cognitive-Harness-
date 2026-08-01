@@ -219,7 +219,7 @@ export interface InstabilityParityReport {
 
 /** θ range that achieves exact parity; null when not separable. */
 export function calibrateThreshold(
-  corpus: BenchmarkCase[] = ENGINEERING_BENCHMARK_CORPUS,
+  corpus: Array<{ group: 'veto' | 'advisory' | 'negative'; target: EvaluationTarget }> = ENGINEERING_BENCHMARK_CORPUS,
 ): { thresholdRange: [number, number] | null; recommended: number } {
   let minVeto = Infinity;
   let maxNonVeto = -Infinity;
