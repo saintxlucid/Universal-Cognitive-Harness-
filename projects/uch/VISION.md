@@ -493,3 +493,67 @@ is a real artifact gap, but its first deliverable is a boundary
 decision against IDEA-0048 (doc set) and IDEA-0083 (repository), not
 new prose. As with every prior round: SOP-08 stage 1, zero code, zero
 spec edits.
+
+## 16. The specification-layers intake (2026-08-01, round 13)
+
+This intake makes two claims. **First, the layers claim**: UCH should
+split into four specification layers — Constitution (ontology, RFC 0
+role), Cognitive Physics (invariant laws), Cognitive ISA (instruction
+set), and the Reference Runtime — instead of one monolithic
+architecture, in the LLVM/POSIX pattern: "specification becomes the
+stable foundation, while runtimes, IDE integrations, language
+bindings, and future cognitive engines remain replaceable
+implementations." The ISA list is named (OBSERVE, ATTEND, ENCODE,
+ASSOCIATE, PLAN, SIMULATE, VERIFY, EXECUTE, REFLECT, CONSOLIDATE,
+SLEEP, FORGET, SNAPSHOT, RESTORE, CHECKPOINT, FORK, MERGE, ROLLBACK).
+**Second, the ABI claim**: an ISA is not enough; a platform needs a
+Cognitive ABI — the contract that lets independently developed organs
+and runtimes interoperate — with every organ exposing a six-method
+interface (observe, process, checkpoint, restore, health,
+capabilities), "analogous to POSIX for operating systems or LLVM IR
+for compilers." The closing move: freeze a versioned specification set
+(Constitution v1.0, Physics v1.0, Mathematics v1.0, ISA v1.0, ABI
+v1.0, Microarchitecture v1.0) plus a Reference Microkernel as the
+smallest executable implementation.
+
+**Verdict after corpus mapping (2026-08-01, verified):** the layers
+claim is ~90% already executed — the Constitution layer is
+spec/CONSTITUTION.md (Articles I–XI, Immutability of the Core) +
+COGNITIVE_ONTOLOGY.md + RFC-0000 (governance); the Physics layer is
+the 32 laws + RFC-0005 (normative) + IDEA-0044 (candidate-law
+register 32→50–100); the Mathematics layer is IDEA-0026 + the
+operator sets (attention algebra IDEA-0093, belief algebra IDEA-0086,
+closed forms IDEA-0005); the ISA layer is spec/CP.md v1.0.0 (17 ops —
+observe/remember/retrieve/learn/think/simulate/reflect/critique/
+consolidate/…, most of the named list already present) + the CIR
+instruction model (RFC-0004) + src/protocol/catalog.ts metadata; the
+layering itself is design/STACK.md (six independently versioned
+layers, the Internet model) + IDEA-0048 (consolidated normative spec)
+
+- IDEA-0083 (spec repository). The discipline claim (Computational
+  Cognitive Science as a layer between Distributed Systems and Cognitive
+  Operating Systems) is IDEA-0024. The freeze-and-order recommendation
+  is the Platform Zero decision already in force (spec-first, spec-
+  version gate, conformance-as-certification).
+
+**The true delta is 1 idea (IDEA-0095)** — the Cognitive ABI, the one
+artifact the corpus does not have:
+
+| Claim                                      | Idea      | Delta vs corpus                                                                                                                                                                                                                                       |
+| ------------------------------------------ | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cognitive ABI (six-method organ contract)  | IDEA-0095 | CP is kernel-facing (ops), CIC is transport-facing (envelope), compliance certifies drivers; no versioned, certifiable organ surface that binds observe/process/checkpoint/restore/health/capabilities into one contract third-party organs implement |
+| ISA instruction list                       | —         | ~all named ops already in CP v1.0 (OBSERVE→observe, SIMULATE→simulate, VERIFY→critique, REFLECT→reflect, CONSOLIDATE→consolidate, SNAPSHOT/RESTORE/CHECKPOINT/ROLLBACK→WS-D semantics, FORK/MERGE→IDEA-0088)                                          |
+| Layer 2 operator semantics                 | —         | Attention algebra IDEA-0093, belief algebra IDEA-0086, closed forms IDEA-0005 already define operators with semantics; pre/postcondition contracts fold into IDEA-0095's method contracts                                                             |
+| Six microarchitecture engines              | —         | Temporal/Signal/Memory/Execution/Knowledge/Adaptation = a cataloging taxonomy over IDEA-0084…0094 (round 12), not new primitives                                                                                                                      |
+| Biological stack + developmental computing | —         | IDEA-0090 (genes→proteins→behavior, epigenetics) + IDEA-0091 (morphogenesis program) already cover it                                                                                                                                                 |
+| Versioned spec freeze                      | —         | Platform Zero + spec/VERSION.md gate + IDEA-0048/0083; the freeze is a governance action already in flight                                                                                                                                            |
+
+**Verdict on the intake's verdict:** the layers framing is a
+restatement of the STACK.md Internet model with cleaner names, and
+the ISA is already v1.0 — the genuinely new artifact is the **Cognitive
+ABI**: the kernel-to-organ boundary contract, the organ-side twin of
+driver compliance. It is a natural Phase-02 candidate: WS-D
+checkpoint/restore, the health registry, the capability registry, and
+driver compliance are its seeds, so a prototype (one organ certified
+against the six-method contract) is cheap. As with every prior round:
+SOP-08 stage 1, zero code, zero spec edits.

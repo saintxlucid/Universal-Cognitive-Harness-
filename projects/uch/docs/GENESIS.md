@@ -274,6 +274,19 @@ Constitution of Computing (one canonical foundational document — the
 POSIX/LLVM-IR role — that every implementation, TypeScript or Rust,
 every IDE driver, implements).
 
+A third framing of the same universe is the **specification-layers
+intake** (2026-08-01, round 13): four specification layers —
+Constitution (ontology, RFC-0 role), Cognitive Physics (invariant
+laws), Cognitive ISA (instruction set), and the Reference Runtime —
+in the LLVM/POSIX pattern, where the specification is the stable
+artifact and implementations evolve. ~90% of the claim maps to the
+existing corpus (CONSTITUTION + COGNITIVE_ONTOLOGY, the 32 laws +
+RFC-0005 + IDEA-0044, CP v1.0 + CIR + catalog, STACK.md, IDEA-0048/
+0083); the true delta is **IDEA-0095 — the Cognitive ABI**, the
+organ-level interoperability contract (observe/process/checkpoint/
+restore/health/capabilities) that binds independently developed
+organs and runtimes, the organ-side twin of driver compliance.
+
 A second framing of the same universe is the **discipline ladder** — the
 eight formal disciplines from which every feature should be derivable:
 Mathematics (definitions, operators, proofs) → Physics (movement, signals,
