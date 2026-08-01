@@ -310,6 +310,106 @@ graph), Architectural Contracts (continuous invariant verification
 over workspace graphs), and Living Architecture (per-node alive
 projection).
 
+A fifth framing of the same universe is the **abstraction-layer
+intake** (2026-08-01, round 15): "the opportunity is to invent what
+operating systems invented for hardware — a Hardware Abstraction
+Layer (HAL) for cognition" — a Cognitive Abstraction Layer (CAL)
+behind which every AI tool (Claude Code, Cursor, Copilot, Gemini
+CLI, Codex, OpenCode, Continue, Aider, Cline, Windsurf) connects:
+one abstraction, infinite clients. The claim: the newest coding
+agents are miniature operating systems exposing behavior surfaces
+(hooks, skills, subagents, rules, MCP, checkpoints, background
+agents, IDE bridges) — integrate with their microkernels, not their
+applications. ~65% of the claim maps to the existing corpus (UCCL
+IDEA-0096 = the CAL, ADR-006 microkernel, INTEGRATION-LEVELS
+per-platform behavior map, scanner IDEA-0099, ADR-002 observable
+session recording, Live Cognitive State + attach for session
+synchronization, UCM IDEA-0098 for scores); the true delta is
+**IDEA-0102..0108** — the Runtime Fingerprint (CPUID for cognitive
+runtimes: enumerate the host's behavior surface into a versioned
+document), the Cognitive BIOS (ten-stage boot sequence: Identify →
+Authenticate → Enumerate → Capability Discovery → Topology Scan →
+Permission Negotiation → Security Scan → Memory Discovery → Tool
+Discovery → Ready, "exactly like USB enumeration"), the Universal
+Adapter Compiler (generate conformant adapters from fingerprint +
+capability graph, never write them), **CRP — the Cognitive Runtime
+Protocol** (the round's headline: "MCP asks what tools do you have;
+CRP asks what cognitive capabilities do you expose" — a ten-block
+descriptor {identity, capabilities, context, session, workspace,
+events, checkpoints, knowledge, observability, permissions} that
+describes an intelligence, not a tool), the Context IR (the
+repository-artifact intermediate representation — AGENTS.md/
+CLAUDE.md/rules/skills/llms.txt as compiler dialects around one IR,
+the LLVM move applied to repository context; name resolved against
+RFC-0004's instruction CIR), the Ecosystem Twin (a living map of
+the AI ecosystem: apps × providers × IDEs × protocols × platforms
+with versions, capabilities, and certification edges), and the
+Knowledge Genome (per-application knowledge extraction: concepts,
+architecture, patterns, rules, goals, commands with per-fact
+provenance).
+
+A sixth framing of the same universe is the **cognitive-architecture
+intake** (2026-08-01, round 16, second half): "everyone is
+standardizing communication; nobody is standardizing cognition" —
+UCH as a new layer of computer architecture: the Universal Cognitive
+Capability Descriptor (a "PCI config space for cognition": a
+normative 19-field runtime self-description every harness publishes,
+with the Application Genome's explicit capabilities/limitations DNA),
+the Universal Runtime Scanner ("you don't connect, you fingerprint" —
+the full runtime stack executable → runtime → SDK → CLI → IPC →
+WebSocket → MCP → AHP → extensions → settings → workspace → memory →
+capabilities → graph), the Cognitive Reverse Index (capability →
+applications, so "UCH chooses the best runtime, not the user"),
+Runtime Composition (one task across runtimes — planning/
+implementation/verification/security on different harnesses, one
+organism not six products), the 11-phase Runtime Lifecycle (Boot →
+Initialize → Authenticate → Discover → Observe → Execute → Learn →
+Checkpoint → Suspend → Resume → Shutdown with UCH hooks per phase,
+extending the Cognitive BIOS), Universal Runtime Telemetry (17 named
+metrics → "Cognitive Observability"), Harness DNA ("the adapter isn't
+written, it's expressed" — genome → proteins → integration behavior
+via the expression engine), and the Universal Cognitive Bus
+(Cognitive PCIe: one bus, nine kernel services, zero point-to-point
+integrations). ~80% of the claim maps to the existing corpus
+(ADR-006 + WS-A + attach = the hypervisor; VISION §2 =
+virtualization; IDEA-0106 = the Context IR — the "biggest moat"
+claim is tracked; IDEA-0099/0102/0105 = scanner/fingerprint/CRP;
+IDEA-0028/0010 = motherboard/fabric; IDEA-0090 = the expression
+engine behind Harness DNA; IDEA-0103 = BIOS); the true delta is
+**IDEA-0118..0124** — the descriptor schema, the reverse index,
+composition, the lifecycle contract, the telemetry set, expressed
+adapters, and the bus topology rule.
+
+A seventh framing of the same universe is the **platform-effects
+intake** (2026-08-01, round 17): "the next improvements are no
+longer adding capabilities — the differentiator is platform
+effects, determinism, and engineering infrastructure; make UCH
+impossible to replace." Seventeen proposals (Ω-1..Ω-17: the
+Cognitive Virtual Machine, the Cognitive Execution Graph, the
+Cognitive Data Fabric, the Universal Entity Model, the Universal
+Relationship Engine, the Engineering Intelligence Layer, the
+Research Engine, the Architecture Engine, the Simulation Engine,
+the Runtime Observatory, Autonomous Benchmarking, Cognitive DevOps,
+the Runtime Evolution Lab, the Capability Genome Marketplace, the
+Self-Describing Platform, the Cognitive SDK Generator, and the
+closing claim that the last missing layer is not another runtime
+component but a Cognitive Engineering Discipline — "what POSIX
+became for Unix") plus a ten-item reprioritized roadmap. ~90% maps
+to the existing corpus (CVM = IDEA-0045, its RFC-0004 blocker
+cleared; data fabric = IDEA-0049; entity model = IDEA-0056;
+relationship types = IDEA-0050's pending edge taxonomy + IDEA-0086;
+engineering intelligence = ADR-003; research = SOP-08 registers;
+architecture = IDEA-0022; simulation = IDEA-0012; observatory =
+IDEA-0014/0071; benchmarking = EI runner + learning loop; DevOps =
+IDEA-0013/0081; evolution lab = IDEA-0032/0090 + WS-C; marketplace
+= IDEA-0058; self-description = IDEA-0105; SDK generation =
+IDEA-0083/0104; the discipline = Platform Zero + IDEA-0048/0094/
+0095); the true delta is **IDEA-0117 — the Cognitive Execution
+Graph**, the missing runtime shape: pause/checkpoint/resume/branch/
+merge/replay/optimize as first-class execution semantics, the
+program the CVM interprets. The ten-item roadmap is 10/10
+executed-or-tracked and confirms CVM as the next promotion.
+
 A second framing of the same universe is the **discipline ladder** — the
 eight formal disciplines from which every feature should be derivable:
 Mathematics (definitions, operators, proofs) → Physics (movement, signals,
