@@ -250,3 +250,44 @@ and UCH shifts from "an implementation" to "a programmable cognitive
 platform" — the C-to-LLVM relationship for cognition. Like every
 proposal here it stays at SOP-08 stage 1 until a spike proves it
 absorbs the problem class.
+
+## 12. The platform infrastructure intake (2026-08-01, round 9)
+
+Verdict after repo-wide mapping of the Phase Ω corpus (cognitive
+filesystem, bus, transactions, time machine, object model, query
+language, package manager, marketplace, digital twin, genome, reality
+engine, knowledge graph, universal replay, observatory, compiler,
+hypervisor, scheduler, cache hierarchy, CHAL, microkernel): ~90% already
+has ancestors executed or tracked — CFS → `src/neural-fs` (version-store,
+mounts); CBUS → neural-event-bus + IDEA-0010; transactions → WS-D
+transactional cognition; time machine → `cognitive-time-machine.ts`
+(beliefsAt / beliefTimeline / diffBeliefs); package manager → WS-P;
+twin → IDEA-0012; genome → IDEA-0008 + spec/GENOME.md + WorkspaceDNA;
+reality → IDEA-0017/0031 + sensors/effectors; knowledge graph →
+IDEA-0050; universal replay → IDEA-0047 + ADR-002; observatory →
+IDEA-0014; compiler → RFC-0004 + IDEA-0055; hypervisor → IDEA-0021
+plus the WS-A process model; kernel scheduler →
+`src/accelerators/scheduler.ts` with IDEA-0034; cache hierarchy →
+IDEA-0029 + vmem L0–Archive; CHAL →
+ADR-004 virtual processors + IDEA-0046; microkernel → ADR-006 (accepted;
+kernel shipping wave landed); evolution laboratory → IDEA-0008's
+mutate → simulate → benchmark → constitution → approve → deploy →
+observe pipeline.
+
+The true delta is 3 proposals, tracked as idea notes IDEA-0056…0058:
+
+| Phase Ω item | Idea | Delta |
+| --- | --- | --- |
+| Cognitive Object Model | IDEA-0056 | One identity + lifecycle for every cognitive object class |
+| Cognitive Query Language | IDEA-0057 | Declarative language with confidence/importance/causal predicates |
+| Cognitive Marketplace | IDEA-0058 | Governance-gated distribution of organs, genomes, constitutional packs |
+
+The round's headline is the ecosystem trio: an object model everything
+obeys, a query language everything answers, and a marketplace everything
+distributes. CQL is the most novel primitive claim — a SQL-for-cognition
+with causal operators appears in no surveyed agent-OS work; the
+marketplace's governance constraint (a pack may never weaken a Law,
+mirroring WS-P) is what keeps the ecosystem from becoming a security
+hole. On the user's 40%/60% split, the round-9 verdict is: the Phase Ω
+60% is real but ~90% already has ancestors; the missing material
+remains infrastructure (3 surface primitives), not AI features.

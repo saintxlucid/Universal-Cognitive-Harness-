@@ -201,7 +201,13 @@ the knowledge fabric + engineering intelligence graph, the
 engineering database, the skill compiler, the constitution engine,
 the driver ecosystem + interoperability certification, and the
 Cognitive Engineering Language (CEL — missions compiled through CIR
-to the CVM, making UCH programmable rather than configurable).
+to the CVM, making UCH programmable rather than configurable);
+and the 2026-08-01 platform-infrastructure intake (IDEA-0056…0058):
+the Cognitive Object Model (one identity and lifecycle for every
+cognitive object class), the Cognitive Query Language (declarative
+queries with confidence, importance, and causal predicates over every
+store), and the Cognitive Marketplace (governance-gated distribution
+of organs, genomes, and constitutional packs).
 
 A second framing of the same universe is the **discipline ladder** — the
 eight formal disciplines from which every feature should be derivable:
