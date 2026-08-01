@@ -3,14 +3,14 @@ track: cross-cutting
 status: research-draft
 version: 0.1.0
 sources:
-  - https://docs.oracle.com/javase/specs/jvms/se21/html/index.html (Lindholm, Yellin, Gollier & Ahearn, JVM Specification)
-  - https://www2.eecs.berkeley.edu/Pubs/TechRpts/1995/CSD-95-888.pdf (Leroy 2003, Java bytecode verification)
-  - https://www.w3.org/TR/wasm-core-1/ (WebAssembly Core Specification 1.0)
-  - https://www.cs.rochester.edu/u/scott/papers/1993_TOCS_TM.pdf (Herlihy & Moss 1993, transactional memory)
-  - https://dl.acm.org/doi/10.1145/62138.62144 (LeBlanc & Mellor 1987, debugging with repeated replays)
-  - https://dl.acm.org/doi/10.1145/353981.353983 (Netzer & Miller 1991, replay of concurrent programs)
-  - https://dl.acm.org/doi/10.1145/1179522.1179524 (Bergan et al. 2010, DetTrace — deterministic multithreading)
-  - https://lamport.azurewebsites.net/pubs/time-clocks.pdf (Lamport 1978, logical clocks)
+  - https://docs.oracle.com/javase/specs/jvms/se21/html/index.html (Lindholm et al., JVM Specification)
+  - https://www2.eecs.berkeley.edu/Pubs/TechRpts/1995/CSD-95-888.pdf (Leroy, bytecode verification)
+  - https://www.w3.org/TR/wasm-core-1/ (WebAssembly Core Spec 1.0)
+  - https://www.cs.rochester.edu/u/scott/papers/1993_TOCS_TM.pdf (Herlihy & Moss, transactional memory)
+  - https://dl.acm.org/doi/10.1145/62138.62144 (LeBlanc & Mellor, replay debugging)
+  - https://dl.acm.org/doi/10.1145/353981.353983 (Netzer & Miller, replay of concurrent programs)
+  - https://dl.acm.org/doi/10.1145/1179522.1179524 (Bergan et al., DetTrace)
+  - https://lamport.azurewebsites.net/pubs/time-clocks.pdf (Lamport, logical clocks)
 ---
 
 # Cognitive Virtual Machine — G1 evidence register (IDEA-0045)

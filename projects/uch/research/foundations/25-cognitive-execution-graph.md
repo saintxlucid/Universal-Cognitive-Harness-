@@ -3,13 +3,13 @@ track: cross-cutting
 status: research-draft
 version: 0.1.0
 sources:
-  - https://dl.acm.org/doi/10.1145/800314.811495 (Dennis 1974, first version of a first data flow language)
-  - https://dl.acm.org/doi/10.1145/357083.357088 (Ferrante, Ottenstein & Warren 1987, program dependence graphs)
-  - https://dl.acm.org/doi/10.1145/354401.354432 (Chandy & Lamport 1985, distributed snapshots)
-  - https://dl.acm.org/doi/10.1145/268998.266700 (Lamport 1978, time, clocks, and the ordering of events)
-  - https://dl.acm.org/doi/10.1145/62138.62144 (LeBlanc & Mellor 1987, debugging with repeated replays)
-  - https://dl.acm.org/doi/10.1145/2487568.2487571 (Rouncefield & Tolksdorf 2011, workflow systems survey)
-  - https://dl.acm.org/doi/10.1145/3342195.3387515 (Khanna & Kim 2020, speculative execution survey)
+  - https://dl.acm.org/doi/10.1145/800314.811495 (Dennis, first data flow language)
+  - https://dl.acm.org/doi/10.1145/357083.357088 (Ferrante et al., program dependence graphs)
+  - https://dl.acm.org/doi/10.1145/354401.354432 (Chandy & Lamport, distributed snapshots)
+  - https://dl.acm.org/doi/10.1145/268998.266700 (Lamport, ordering of events)
+  - https://dl.acm.org/doi/10.1145/62138.62144 (LeBlanc & Mellor, replay debugging)
+  - https://dl.acm.org/doi/10.1145/2487568.2487571 (Rouncefield & Tolksdorf, workflow systems)
+  - https://dl.acm.org/doi/10.1145/3342195.3387515 (Khanna & Kim, speculative execution)
 ---
 
 # Cognitive Execution Graph — G1 evidence register (IDEA-0117)

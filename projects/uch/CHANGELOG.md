@@ -8,6 +8,18 @@ All notable changes to UCH are documented here. Format follows
 
 ### Added
 
+- **Cognitive Virtual Machine + Execution Graph (IDEA-0045 + IDEA-0117,
+  Research + Prototype)** — `src/cognitive-plane/cvm/`: cognitive
+  bytecode envelope over the CP 17-op ISA (`bytecode.ts` —
+  perceptual/cognitive/delegated instruction classes, decode-time
+  verification with structured `CVMDecodeError`), `ModelDevice`
+  interface with capability/energy/latency certification
+  (`device.ts`), and `CvmMachine` (`machine.ts`) — deterministic
+  evaluation of perceptual/cognitive ops, delegated dispatch to
+  certified devices (models as interchangeable processors), WS-D
+  propose→verify→commit/rollback per node, tick-ordered trace,
+  `replay()` determinism reports, checkpoint/resume, branch/merge with
+  conflict detection. 24 tests green.
 - **Cognitive Compiler / CIR (RFC-0004, Accepted)** —
   `src/cognitive-compiler/`: CIR core (types, JSON encoding,
   validation, versioning — `cir.ts`), Intent→CIR frontend
