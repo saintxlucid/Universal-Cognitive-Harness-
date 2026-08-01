@@ -169,8 +169,14 @@ export { CognitiveReplay } from './cognitive-plane/replay/cognitive-replay.js';
 export type { ReplaySnapshot, ReplayOptions } from './cognitive-plane/replay/cognitive-replay.js';
 
 //   Protocol Layer — capability-based module interaction
-export { CognitiveProtocolRegistry, capabilityID } from './cognitive-plane/protocol/capability-protocol.js';
-export { createProtocolAdapter, protocolHealthCheck } from './cognitive-plane/protocol/protocol-adapter.js';
+export {
+  CognitiveProtocolRegistry,
+  capabilityID,
+} from './cognitive-plane/protocol/capability-protocol.js';
+export {
+  createProtocolAdapter,
+  protocolHealthCheck,
+} from './cognitive-plane/protocol/protocol-adapter.js';
 export type {
   CapabilityProtocol,
   CapabilityHandler,
@@ -257,7 +263,13 @@ export type {
 } from './cognitive-plane/constitution/constitution.js';
 
 //   Genome — three-layer identity model (Species → Workspace → Adaptive)
-export { SpeciesGenome, WorkspaceGenome, AdaptiveGenome } from './cognitive-plane/genome/index.js';
+export {
+  SpeciesGenome,
+  WorkspaceGenome,
+  AdaptiveGenome,
+  ExpressionEngine,
+  deriveExpressionReport,
+} from './cognitive-plane/genome/index.js';
 export type {
   GenomeLaw,
   ImmutableCommitment,
@@ -267,6 +279,14 @@ export type {
   WorkspaceGenomeConfig,
   SkillProficiency,
   ConfidenceDistribution,
+  ExpressionEnvironment,
+  Protein,
+  ProteinParams,
+  GeneExpressionRule,
+  EpigeneticMark,
+  ExpressionResult,
+  ExpressionReport,
+  ExpressionReportEntry,
 } from './cognitive-plane/genome/index.js';
 
 //   Knowledge Compiler — events→facts→knowledge→wisdom compression
@@ -395,7 +415,8 @@ export type {
   CodeGovernanceGateConfig,
   CodeGovernanceEvent,
   PrincipleId,
-} from './kernel/constitution/code-governance-gate.js';export type {
+} from './kernel/constitution/code-governance-gate.js';
+export type {
   FrameworkDefinition,
   FrameworkFamily,
   FrameworkLLMProvider,
@@ -414,7 +435,10 @@ export {
   prosCons,
   sixHats,
 } from './cognitive-plane/frameworks/decisions/decision-models.js';
-export { selectDecisionModel, classifyDecision } from './cognitive-plane/frameworks/decisions/model-selector.js';
+export {
+  selectDecisionModel,
+  classifyDecision,
+} from './cognitive-plane/frameworks/decisions/model-selector.js';
 export {
   ideal,
   fiveWhys,
@@ -430,12 +454,31 @@ export {
   paretoPrioritize,
   CAUSE_CATEGORIES,
 } from './cognitive-plane/frameworks/rca/rca.js';
-export { strategyWheel, strategyVsPlan } from './cognitive-plane/frameworks/strategy/strategy-wheel.js';
-export { planTasks, threeThreeThree } from './cognitive-plane/frameworks/productivity/productivity-os.js';
-export { validateMethodology, detectGaps, GAP_TYPES } from './cognitive-plane/frameworks/research/methodology.js';
-export { assessInformation, CRITICAL_QUESTIONS } from './cognitive-plane/frameworks/critical/critical-evaluator.js';
-export { dikwTransform, checkRepresentationInvariance } from './cognitive-plane/frameworks/knowledge/dikw.js';
-export { fuseSignals, factorRegimeNotes } from './cognitive-plane/frameworks/signals/signal-fusion.js';
+export {
+  strategyWheel,
+  strategyVsPlan,
+} from './cognitive-plane/frameworks/strategy/strategy-wheel.js';
+export {
+  planTasks,
+  threeThreeThree,
+} from './cognitive-plane/frameworks/productivity/productivity-os.js';
+export {
+  validateMethodology,
+  detectGaps,
+  GAP_TYPES,
+} from './cognitive-plane/frameworks/research/methodology.js';
+export {
+  assessInformation,
+  CRITICAL_QUESTIONS,
+} from './cognitive-plane/frameworks/critical/critical-evaluator.js';
+export {
+  dikwTransform,
+  checkRepresentationInvariance,
+} from './cognitive-plane/frameworks/knowledge/dikw.js';
+export {
+  fuseSignals,
+  factorRegimeNotes,
+} from './cognitive-plane/frameworks/signals/signal-fusion.js';
 export { auditCodePrinciples } from './cognitive-plane/frameworks/code/code-principles.js';
 
 export { CognitiveOrganism, CognitiveOrganismConfig } from './cognitive-plane/organism/organism.js';
@@ -468,9 +511,15 @@ export type { SkillDefinition, SkillInvocation } from './cognitive-memory/skill-
 export { WorkspaceBrain } from './workspace-brain/workspace-brain.js';
 export type { WorkspaceBrainConfig } from './workspace-brain/workspace-brain.js';
 export { WorkspaceKnowledgeGraph } from './workspace-graphs/knowledge-graph.js';
-export { WorkspaceDecisionGraph, type DecisionRelation } from './workspace-graphs/decision-graph.js';
+export {
+  WorkspaceDecisionGraph,
+  type DecisionRelation,
+} from './workspace-graphs/decision-graph.js';
 export { WorkspaceTaskGraph } from './workspace-graphs/task-graph.js';
-export { WorkspaceEvolutionHistory, type CycleSummary } from './workspace-graphs/evolution-history.js';
+export {
+  WorkspaceEvolutionHistory,
+  type CycleSummary,
+} from './workspace-graphs/evolution-history.js';
 export { WorkspaceDNA, type DnaMutation } from './workspace-graphs/workspace-dna.js';
 export { CognitiveKernel } from './kernel/cognitive-kernel.js';
 export type { CognitiveKernelConfig, CognitiveKernelStats } from './kernel/cognitive-kernel.js';
@@ -491,7 +540,13 @@ export type {
 
 // ── Context ─────────────────────────────────────────────────
 export { WorkspaceContextGatherer } from './context/gatherer.js';
-export type { WorkspaceContext, ProjectStructure, GitInfo, FileSystemState, EnvironmentInfo } from './context/gatherer.js';
+export type {
+  WorkspaceContext,
+  ProjectStructure,
+  GitInfo,
+  FileSystemState,
+  EnvironmentInfo,
+} from './context/gatherer.js';
 
 // ── Drivers ─────────────────────────────────────────────────
 export { FileSystemDriver } from './drivers/filesystem/filesystem-driver.js';
@@ -549,7 +604,11 @@ export type { GlobalSignals } from './cognitive-core/endocrine.js';
 
 // ── Exoskeleton (Root Orchestrator) ─────────────────────────
 export { CognitiveExoskeleton } from './exoskeleton/exoskeleton.js';
-export type { ExoskeletonConfig, ExoskeletonState, ExoskeletonTransport } from './exoskeleton/exoskeleton.js';
+export type {
+  ExoskeletonConfig,
+  ExoskeletonState,
+  ExoskeletonTransport,
+} from './exoskeleton/exoskeleton.js';
 
 // ── Suit / Litmus (Organic Code Engine) ─────────────────────
 export { CodeScorer } from './suit/litmus/code-scorer.js';
@@ -576,15 +635,35 @@ export type { UCCPOptions } from './cli/uccp.js';
 
 // ── LLM Provider ────────────────────────────────────────────
 export { LLMClient } from './llm/provider.js';
-export type { LLMConfig, LLMProviderType, CompletionParams, EmbeddingParams, MultiModalContent } from './llm/provider.js';
+export type {
+  LLMConfig,
+  LLMProviderType,
+  CompletionParams,
+  EmbeddingParams,
+  MultiModalContent,
+} from './llm/provider.js';
 export { AnthropicProvider } from './llm/anthropic-provider.js';
-export type { AnthropicModel, AnthropicMessage, AnthropicCompletionParams, AnthropicStreamChunk } from './llm/anthropic-provider.js';
+export type {
+  AnthropicModel,
+  AnthropicMessage,
+  AnthropicCompletionParams,
+  AnthropicStreamChunk,
+} from './llm/anthropic-provider.js';
 
 // ── Cognitive Accelerators + Inference Fabric ───────────────
 export { InferenceFabric, createDefaultFabric } from './accelerators/fabric.js';
 export type { ProviderHealth, DispatchOptions } from './accelerators/fabric.js';
-export { CognitiveScheduler, canonicalCacheKey, RISK_HUMAN_APPROVAL, FRUGALITY_MAX_COMPLEXITY } from './accelerators/scheduler.js';
-export type { ExecutionStrategy, ExecutionStrategyKind, ScheduledResult } from './accelerators/scheduler.js';
+export {
+  CognitiveScheduler,
+  canonicalCacheKey,
+  RISK_HUMAN_APPROVAL,
+  FRUGALITY_MAX_COMPLEXITY,
+} from './accelerators/scheduler.js';
+export type {
+  ExecutionStrategy,
+  ExecutionStrategyKind,
+  ScheduledResult,
+} from './accelerators/scheduler.js';
 export { normalizeProfile, DEFAULT_PROFILE } from './accelerators/profile.js';
 export type { CognitiveProfile, Urgency } from './accelerators/profile.js';
 export { ACCELERATORS } from './accelerators/implementations.js';
@@ -636,7 +715,12 @@ export { MCPStdioServer } from './mcp/stdio-server.js';
 
 // ── Session Management ──────────────────────────────────────
 export { SessionManager } from './session/manager.js';
-export type { SessionSnapshot, SessionEntry, SessionMemory, SessionManagerConfig } from './session/manager.js';
+export type {
+  SessionSnapshot,
+  SessionEntry,
+  SessionMemory,
+  SessionManagerConfig,
+} from './session/manager.js';
 
 // ── Git Ingestion ───────────────────────────────────────────
 export { GitIngester } from './git/ingester.js';
@@ -681,9 +765,23 @@ export type {
 
 // ── NeuralFS (Cognitive Filesystem) ────────────────────────
 export { NeuralFS } from './neural-fs/index.js';
-export { ConceptStore, ExperienceStore, SkillStore, WorldModel, ProjectStore } from './neural-fs/index.js';
+export {
+  ConceptStore,
+  ExperienceStore,
+  SkillStore,
+  WorldModel,
+  ProjectStore,
+} from './neural-fs/index.js';
 export { VersionStore, contentID, stableSerialize, captureKernelState } from './neural-fs/index.js';
-export type { FSEntry, FSEntryType, SnapshotTree, NFSObject, NFSCommit, NFSDiff, RestoreResult } from './neural-fs/index.js';
+export type {
+  FSEntry,
+  FSEntryType,
+  SnapshotTree,
+  NFSObject,
+  NFSCommit,
+  NFSDiff,
+  RestoreResult,
+} from './neural-fs/index.js';
 
 // ── Cognitive Protocol (CP) v1 — the versioned contract ────
 export {
@@ -783,7 +881,11 @@ export type {
 
 // ── Reason Graph (Layer 4) ──────────────────────────────────
 export { ReasonGraph } from './cortex_kernel/reason-graph.js';
-export type { CausalLink, DependencyChain, ContradictionReport } from './cortex_kernel/reason-graph.js';
+export type {
+  CausalLink,
+  DependencyChain,
+  ContradictionReport,
+} from './cortex_kernel/reason-graph.js';
 
 // ── Belief / Goal / Reasoning Trace Stores ──────────────────
 export { BeliefStore } from './neural-fs/belief-store.js';
@@ -791,7 +893,11 @@ export type { Belief, BeliefStatus } from './neural-fs/belief-store.js';
 export { GoalStore } from './neural-fs/goal-store.js';
 export type { Goal, GoalStatus, GoalPriority } from './neural-fs/goal-store.js';
 export { ReasoningTraceStore } from './neural-fs/reasoning-trace-store.js';
-export type { ReasoningTrace, ReasoningStep, TraceStepType } from './neural-fs/reasoning-trace-store.js';
+export type {
+  ReasoningTrace,
+  ReasoningStep,
+  TraceStepType,
+} from './neural-fs/reasoning-trace-store.js';
 
 // ── WebSocket Transport ─────────────────────────────────────
 export { WebSocketServer } from './control-plane/transport/websocket-transport.js';

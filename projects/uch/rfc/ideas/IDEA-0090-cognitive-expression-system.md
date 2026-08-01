@@ -1,6 +1,9 @@
 # IDEA-0090 — Cognitive Expression System (Proteins + Epigenetics)
 
-- **Status:** Idea (SOP-08 stage 1; no code)
+- **Status:** Research + Prototype (promoted 2026-08-01 — SOP-08 stages 2/4:
+  G1 register `research/foundations/18-cognitive-expression.md`, design
+  `design/EXPRESSION-SYSTEM.md`, reference implementation
+  `src/cognitive-plane/genome/expression/expression-engine.ts` + tests)
 - **Origin:** 2026-08-01 cognitive-microarchitecture intake (round 12) —
   "Engineering DNA Expression: Genes shouldn't be configuration. Genes
   express proteins. Proteins produce behaviors. Security Gene → Strict
@@ -89,4 +92,8 @@ synthesis`, where a protein is a runtime behavior unit — a policy
 
 - Prototype: express two genes (verification strictness, risk profile)
   across production/dev profiles; assert same genome, different
-  proteins, ledgered switch.
+  proteins, ledgered switch. — DONE 2026-08-01 (plus a third gene,
+  sleep-cadence).
+- Benchmark: cross-validate expressed params against corpus mechanisms
+  (RFC-0005 θ parity, decision-law exploration bias); then Architecture
+  Review per SOP-08.
