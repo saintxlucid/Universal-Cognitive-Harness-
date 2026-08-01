@@ -291,3 +291,135 @@ mirroring WS-P) is what keeps the ecosystem from becoming a security
 hole. On the user's 40%/60% split, the round-9 verdict is: the Phase Ω
 60% is real but ~90% already has ancestors; the missing material
 remains infrastructure (3 surface primitives), not AI features.
+
+## 13. The missing-infrastructure intake (2026-08-01, round 10)
+
+Verdict after mapping 24 infrastructure claims (what OSes, databases,
+compilers, distributed systems, CPUs, and biology have) against the
+repo: **~85% already has ancestors executed or tracked**. The claims
+land in four classes:
+
+| Class | Count | Items (terse; evidence in prose below) |
+| --- | --- | --- |
+| Executed | 11 | ABI, ISA, transactions, replay, cache, fs metadata, packages, drivers, DNA, ontology, scheduler |
+| Draft-only | 3 | compiler, IR, optimizer — one stack: CIR (RFC-0004), design-only |
+| Partial | 9 | scheduler policies, hypervisor, GC, allocator, security, networking, consensus, profiler, design |
+| Absent | 2 | kernel debugger, formal verification |
+
+Executed evidence: CP v1.0.0 is literally the syscall ABI of the
+Cognitive OS (spec/CP.md, conformance-gated) with CIC v0.1 grants on
+top; the user's 18-instruction ISA list (Observe…Rollback) maps to CP
+ops plus WS-D rollback, compression accelerator, and cognitive merge;
+WS-D transactional cognition is exactly "memory + knowledge + genome +
+signals + beliefs commit together, rollback on failed verification";
+replay spans the ledger, cognitive-replay, the time machine, and UER.
+The user's closing stack (SDK → Runtime → Compiler → IR → VM → Kernel →
+Microkernel → fabrics) has every rung present *in some form* — which
+makes the missing rungs more visible, not less.
+
+The true delta is 9 proposals, tracked as idea notes IDEA-0059…0067:
+
+| Proposal | Idea | Gap it closes |
+| --- | --- | --- |
+| Cognitive Kernel Debugger | IDEA-0059 | Pause/step/inspect/mutate/resume live cognition |
+| Cognitive Garbage Collector | IDEA-0060 | Unified reclamation across all object classes |
+| Cognitive Formal Verification | IDEA-0061 | Model-check reasoning graphs against the Laws |
+| Cognitive Security Architecture | IDEA-0062 | One boundary for poisoning/injection/hijacking |
+| Cognitive Resource Allocator | IDEA-0063 | Grants for attention/tokens/depth/confidence |
+| Multi-UCH Networking | IDEA-0064 | Op-replication + conflict resolution between UCHs |
+| Cognitive Consensus Layer | IDEA-0065 | Calibrated voting, fusion, evidence weighting |
+| Cognitive Reasoning Profiler | IDEA-0066 | Per-run token/depth/hit-rate/energy profiles |
+| Organ Design System | IDEA-0067 | Organ lifecycle, signal archetypes, patterns |
+
+The round's headline: the intake's own framing — "these are missing
+sciences" — is half right and half a promotion. The truly missing
+sciences are **three**: the compiler stack (IR → optimizer → execution
+graph, which the corpus has only as CIR draft), the **kernel debugger**
+(grep confirms zero breakpoint semantics in src/), and **formal
+verification**. The other twenty-one are either already executed (ABI,
+ISA, transactions, replay, packages, drivers, DNA, ontology) or
+partials whose delta is recorded above. The strategic consequence is
+exactly the user's closing claim: the next major investment is not more
+capabilities — it is promoting RFC-0004 (CIR) to Specification and
+building the compiler reference implementation, because CVM, CEL,
+instruction optimization, and formal verification are all stacked on
+that one block.
+
+## 14. The microscopic-infrastructure intake (2026-08-01, round 11)
+
+Verdict after mapping the 15-category corpus (capability negotiation,
+feature flags, versioned cognition, deprecation, health/watchdogs/
+self-healing/quarantine/safe mode, cognitive SRE, universal lifecycle,
+contracts, failure taxonomy, intent, lineage, human factors, cognitive
+UX, memory hygiene, plugin governance, deterministic engineering,
+taste, specification repository) against the repo: **~55% already has
+ancestors executed or tracked** — but the intake's own framing holds:
+these are not features, they are the microscopic layer that
+distinguishes an OS from a framework, and the missing half is
+infrastructure, not AI.
+
+Executed/tracked evidence: capability negotiation already exists at
+workspace level (`src/workspace-manifest/negotiation.ts` — version +
+capability/driver negotiation at attach; the TLS analog at exactly one
+level); versioning covers specs (spec/VERSION.md), genomes (WS-C
+VersionedStore), and laws (numbers immutable) with a 'deprecated'
+lifecycle state in capability-protocol.ts and deprecation warnings in
+genome.ts; health has WS-E's 12 SMART metrics with band logic plus the
+fast-path status/health/memory routines; quarantine is substantially
+executed (WS-P package quarantine + immune-organ antibodies);
+watchdogs exist only for transports (SSE/A2A heartbeats) and the
+parahippocampal poisoning watchdog — not for organ liveness; metrics
+are abundant but scattered (budgets, SMART, benchmark runners, ADR-004
+profiles, the round-10 profiler IDEA-0066) with zero SLO semantics;
+lifecycles exist but disjoint (SOP-08's 13 RFC stages, IDEA-0056
+object lifecycle, IDEA-0067 organ lifecycle, WS-C versioning);
+contracts exist as prose and verdicts (MANIFESTO §6, conformance,
+compliance, IDEA-0019); failure classes exist for physics (RFC-0005's
+four families) and engineering concepts (tier-08), not faculties;
+intent has its IR half (CIR draft, CEL) but no intent envelope;
+lineage fragments span ledger provenance, UER, the time machine, and
+the decision journal; deterministic engineering is enforced as process
+(organic-code 6-gate, DOE SOPs, GSD) with twin/benchmark/UER as
+substrates; taste is already scored — the Organic Score rubric covers
+six of the seven qualities; and the spec-first direction is a settled
+platform decision (Platform Zero, conformance, spec-version gate,
+IDEA-0048). Grep-proven absents: feature flags (0 matches), SLO/
+service-level semantics (0), safe mode (0), deprecation *engine* (only
+a state and warnings), organ-level watchdogs, and machine-readable
+specs.
+
+The true delta is 16 proposals, tracked as idea notes IDEA-0068…0083:
+
+| Category | Idea | Delta |
+| --- | --- | --- |
+| Capability Negotiation & Discovery | IDEA-0068 | Workspace-level negotiate exists; no cognitive-level handshake, no discovery queries |
+| Feature Flags + Versioned Cognition + Deprecation | IDEA-0069 | Zero flag semantics; versions cover specs/genomes/laws, not beliefs/strategies; deprecation is a state, not an engine |
+| Organ Health, Watchdogs & Safe Mode | IDEA-0070 | Diagnostics bands exist; no per-organ health machine, no liveness watchdogs, no safe-mode boot |
+| Cognitive SLOs | IDEA-0071 | Metrics scattered; no named-quantity catalog with targets, error budgets, escalation |
+| Universal Lifecycle Engine | IDEA-0072 | SOP-08/0056/0067/WS-C are disjoint machines; no Extinct terminal state, no lifecycle registry |
+| Contracts Registry | IDEA-0073 | MANIFESTO §6 + conformance are prose/verdicts; no nine-field structured contract records |
+| Failure Taxonomy | IDEA-0074 | RFC-0005 classes physics failures; no ten-faculty runtime classes with per-class response |
+| Intent Objects | IDEA-0075 | CIR/CEL are the IR half; no intent envelope (goal/success/risk/evidence) compiling into them |
+| Knowledge Lineage Service | IDEA-0076 | Ledger/UER/journal fragmentation; no uniform five-question answer surface |
+| Human Factors Model | IDEA-0077 | Anthropology models teams; no per-user workflow-optimization profile |
+| Cognitive UX Charter | IDEA-0078 | Six felt properties unnamed, unmeasured, uncontracted; no interrupt protocol |
+| Memory Hygiene Engine | IDEA-0079 | Sleep/vmem/compressor exist per-organ; no orchestrated hygiene pipeline, no conflict policy |
+| Plugin Trust Scoring | IDEA-0080 | WS-P is binary, marketplace certifies listings; no six-axis scorecard for the organism to decide |
+| Deterministic Engineering Chain | IDEA-0081 | Discipline is process (organic-code/DOE/GSD); no chain contract with mandatory evidence artifacts |
+| Engineering Taste | IDEA-0082 | Organic Score already scores six of seven; rubric is code not spec; no taste accumulation |
+| Specification Repository | IDEA-0083 | Platform Zero direction + prose spec/ + version gate; no machine-readable specs, no generated implementations |
+
+The round's headline is the intake's last claim: the **Specification
+Repository**. The corpus chose spec-first (Platform Zero — "the
+specification is the source of truth") but stopped at prose: specs are
+markdown read by humans and enforced by tests, not machine-readable
+data that implementations are generated from. That last step is the
+keystone — contracts (0073), SLOs (0071), the failure taxonomy (0074),
+lifecycles (0072), and the taste rubric (0082) all become data in the
+repository — and it is also the natural continuation of round-10's
+headline: promoting RFC-0004 (CIR) to Specification becomes the
+repository's proof case, with the compiler *generated from the spec*
+rather than handwritten. Verdict on the intake's own verdict: roughly
+half is already in flight; the missing half is dominated by the
+repository and the reliability layer (flags, health, SLOs, safe mode),
+not by new organs.

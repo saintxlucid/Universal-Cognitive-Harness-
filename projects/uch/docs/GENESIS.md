@@ -207,7 +207,50 @@ the Cognitive Object Model (one identity and lifecycle for every
 cognitive object class), the Cognitive Query Language (declarative
 queries with confidence, importance, and causal predicates over every
 store), and the Cognitive Marketplace (governance-gated distribution
-of organs, genomes, and constitutional packs).
+of organs, genomes, and constitutional packs);
+and the 2026-08-01 missing-infrastructure intake (IDEA-0059…0067):
+the Cognitive Kernel Debugger (breakpoints inside reasoning — pause,
+inspect, mutate, resume), the Cognitive Garbage Collector (unified
+reclamation across memory, knowledge, graph, signal, skill, and
+experiment classes), Cognitive Formal Verification (model-checking
+reasoning graphs against the 32 Laws, with counterexample traces),
+the Cognitive Security Architecture (one inspection boundary for
+memory poisoning, prompt injection, identity hijacking, and false
+evidence), the Cognitive Resource Allocator (grants for attention,
+tokens, reasoning depth, confidence, and bandwidth), Multi-UCH
+Cognitive Networking (op-replication, vector clocks, conflict
+resolution between organisms), the Cognitive Consensus Layer
+(calibrated voting, confidence fusion, evidence weighting), the
+Cognitive Reasoning Profiler (per-run token flow, depth, hit-rates,
+verification cost, energy), and the Cognitive Organ Design System
+(canonical organ lifecycle, signal archetypes, pattern library);
+and the 2026-08-01 microscopic-infrastructure intake (IDEA-0068…0083):
+cognitive capability negotiation + discovery (TLS-style dialect
+agreement over the CIC envelope), feature flags + versioned cognition +
+a deprecation engine (every organ, skill, genome, belief, and reasoning
+strategy individually enabled, versioned, and retired with grace),
+organ health + watchdogs + safe mode (per-organ health states,
+liveness probes, restart-restore-replay self-healing, recovery boot),
+cognitive SLOs (named reasoning observables with targets and error
+budgets), a universal lifecycle engine (Idea → Research → Prototype →
+Experiment → Production → Legacy → Archive → Extinct for everything),
+a cognitive contracts registry (nine-field behavioral contracts like
+RFCs), a cognitive failure taxonomy (ten faculty failure classes, each
+handled differently), intent objects (goal/constraints/success/
+failure/priority/deadline/stakeholders/risk/evidence that everything
+downstream compiles from), a knowledge lineage service (who created,
+changed, verified — what depends on it), a human factors model
+(workflow optimization, not profiling), a cognitive UX charter
+(predictability, interruptibility, explainability, trust, calm,
+transparency), a memory hygiene engine (duplicate/conflict detection,
+aging, compression, normalization, summarization, evidence refresh,
+relationship repair), plugin trust scoring (six-axis scorecards),
+a deterministic engineering chain (plan → simulation → verification →
+execution → validation → evidence → replay), engineering taste
+(elegance and simplicity made measurable), and the Specification
+Repository (machine-readable specs for every primitive, with
+implementations generated from them — the shift from software project
+to specification-first cognitive platform).
 
 A second framing of the same universe is the **discipline ladder** — the
 eight formal disciplines from which every feature should be derivable:
