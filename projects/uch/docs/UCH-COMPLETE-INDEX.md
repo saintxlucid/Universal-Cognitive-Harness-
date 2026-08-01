@@ -252,6 +252,8 @@ The entire public API (~200 exports). Sections: Control Plane → Cognitive Plan
 | `diagnostics/metrics.ts` + `health.ts` | 12 SMART-for-cognition metrics (memoryFragmentation…verificationCoverage) with warn/critical bands (energyEfficiency higher-is-better inversion), `diagnose()` worst-wins aggregation + remediation hints. |
 | `merge/cognitive-merge.ts` | ★ `mergeCognition` — two belief sets → disjoint union; genuine conflicts (|Δconfidence| > 0.15, verdict/evidence mismatch) DETECTED + reported, never auto-resolved; deterministic, inputs never mutated. |
 | `packages/manifest.ts` + `registry.ts` | `validatePackage` (name/semver/entry-hash via sha256/requires/no-absolute-path) + `PackageRegistry` (offline install/verify/remove/list, tamper detection; **policy entries land in `policy-quarantine/`, never applied — no package auto-modifies the Constitution**). |
+| `memory/hygiene/memory-hygiene.ts` | ★ `MemoryHygieneEngine` — memory hygiene pipeline (IDEA-0079): classify every item (duplicate/stale/conflicting/aging/oversized/normal), dedupe+conflict proposals, live-id reachability, journaled hygiene actions. |
+| `packages/trust/plugin-trust.ts` | ★ `TrustRegistry` + `decide` — six-axis plugin trust scorecards (IDEA-0080): provenance/scope/behavior/dependencies/age/verification, decision bands allow→deny (with sandbox/monitoring), policy-gated, score history. |
 | `neural-fs/mounts.ts` | `MountTable` — longest-prefix mount resolution, `canAccess` authority intersection (mount ∩ grant, mirrors ProjectionEngine), `CP_VERBS` (CP ops → FS verb families). |
 
 ### 5.3 Exoskeleton Core — `src/exoskeleton/`, `src/aether/`, `src/nervous-system/`, `src/metabolism/`, `src/connectome/`, `src/basal_ganglia/`, `src/hippocampus/`, `src/neocortex/`, `src/sleep_cycle/`, `src/cortex_kernel/`
@@ -279,7 +281,7 @@ The entire public API (~200 exports). Sections: Control Plane → Cognitive Plan
 | `cortex_kernel/reason-graph.ts` | `ReasonGraph`: causal links, dependency chains, contradiction reports. |
 | `cortex_kernel/integrator.ts` | `CortexKernel` + `ConsciousnessGate`: integration of cortex layers, insights. |
 
-### 5.4 Cognitive Plane — `src/cognitive-plane/` (47 files, 6,034 lines)
+### 5.4 Cognitive Plane — `src/cognitive-plane/` (79 source files, 11,776 lines)
 
 | Subdir / file | Purpose & key exports |
 |---|---|
@@ -313,6 +315,16 @@ The entire public API (~200 exports). Sections: Control Plane → Cognitive Plan
 | `persistence/trace-persistence.ts` | `TracePersistence`: JSONL trace file persistence (`.uccp/traces.jsonl`). |
 | `protocol/capability-protocol.ts` | `CognitiveProtocolRegistry`, `CapabilityProtocol/Handler/Result`, `capabilityID`. |
 | `protocol/protocol-adapter.ts` | `createProtocolAdapter`, `protocolHealthCheck`. |
+| `protocol/capability-negotiation.ts` | ★ TLS-style dialect negotiation (IDEA-0068): `parseSemver/compareSemver`, `negotiateDialects` (version+capability intersection, fallback), `findProviders` discovery, `dialectKey`. |
+| `protocol/feature-flags.ts` | ★ `FeatureFlagRegistry` (IDEA-0069): per-organ flag rules, sticky bucketing, versioned capabilities, `classifyBump` (semver change kind), `transitionDeprecation` (deprecated→sunset→removed). |
+| `health/health-registry.ts` | ★ `HealthRegistry` (IDEA-0070): per-organ health states (alive→healthy→degraded→recovering→failed→sleeping), watchdog liveness probes + restart-restore-replay, `bootPlan` safe mode (kernel+constitution minimal boot). |
+| `contracts/contracts-registry.ts` | ★ `ContractRegistry` (IDEA-0073): behavioral contracts (outputs/side-effects/never-fails/envelopes), `probeContract` conformance verdicts, timing/resource envelope parsers. |
+| `failure/failure-taxonomy.ts` | ★ 10-faculty failure taxonomy (IDEA-0074): detection signals, severity, canonical response (retry/reverify/quarantine/veto/degrade/rehomeostat), never-retry classes, `recordFailure` + rate tracking. |
+| `intent/intent-objects.ts` | ★ `IntentEnvelope` (IDEA-0075): goal/constraints/success/failure/priority/deadline/stakeholders/risk/evidence; `normalizeIntent`, `compileIntent` (success predicate + deadline pressure). |
+| `lifecycle/lifecycle-engine.ts` | ★ `LifecycleRegistry` (IDEA-0072): Idea→Research→Prototype→Experiment→Production→Legacy→Archive→Extinct stages with per-stage evidence gates + transition journal. |
+| `lineage/lineage-service.ts` | ★ `LineageService` (IDEA-0076): the five lineage questions (origin/changelog/verification/dependents/lineage) for any object; extinct stubs retained. |
+| `human-factors/human-factors.ts` | `HumanFactorsRegistry` (IDEA-0077): workflow-optimization profile fields (work style/feedback/context/interruption/verification preferences), privacy-governed. |
+| `ux/ux-charter.ts` | ★ UX charter (IDEA-0078): six felt qualities (calm/explainable/…), `charterStatus` scoring, interrupt preemption rules, `isExplainable` ledger-path check. |
 | `evolution/benchmark-engine.ts` | `BenchmarkEngine`: `Benchmarkable` metric runs. |
 | `evolution/experiment-engine.ts` | `ExperimentEngine`: designs/trials/results, min-sample guard. |
 | `evolution/mutation-engine.ts` | `MutationEngine`: proposals, apply/rollback, mutable subsystem registry. |
@@ -472,6 +484,16 @@ The entire public API (~200 exports). Sections: Control Plane → Cognitive Plan
 | `chunkers/index.ts` | Barrel. |
 | `cli/index.ts` | ★ CLI entry (see §10.1). |
 | `cli/uccp.ts` | ★ `UCCPServer`: HTTP server, port 3100 — routes `/health`, `/mcp` (POST), `/sse` (GET), `/messages` (POST), `/api/status`, `/api/token`, `/api/suit/litmus`, `/api/suit/instinct`, `/api/aether`, `/api/aether/observe`; CORS; w/ circuit breaker + threat engine + cortex modules. |
+
+### 5.12 Round-11 microscopic infrastructure (IDEA-0068…0083; `src/protocol/spec-repository/`, `src/engineering-intelligence/{slo,chain,taste}/`, `src/cognitive-plane/{protocol,health,contracts,failure,intent,lifecycle,lineage,human-factors,ux}/`)
+
+| File | Purpose & key exports |
+|---|---|
+| `protocol/spec-repository/spec-repository.ts` | ★ `SpecRepository` (IDEA-0083): machine-readable spec families (isa/contract/law/protocol/skill), schema validation, `generateTsTypes` reference-implementation codegen. |
+| `engineering-intelligence/slo/cognitive-slos.ts` | ★ `SloMonitor` + `COGNITIVE_SLO_CATALOG` (IDEA-0071): named cognitive observables with green/yellow/red bands (ratio/latency/throughput/roi), rolling window tracking. |
+| `engineering-intelligence/chain/engineering-chain.ts` | ★ Deterministic engineering chain (IDEA-0081): plan→simulate→verify→execute→validate→evidence→replay completeness check, replayability + ordering predicates. |
+| `engineering-intelligence/taste/taste.ts` | ★ Engineering taste rubric (IDEA-0082): seven qualities (elegant/simple/composable/minimal/readable/maintainable/beautiful), `assessTaste` verdict with `TASTE_GATE` = 0.9, author taste history. |
+| `research/foundations/09…17` | G1 evidence registers for waves 0068–0083 (capability negotiation, feature flags, organ health, SLOs, lifecycle, contracts, failure taxonomy, intent objects, knowledge lineage). |
 
 ---
 
