@@ -1,4 +1,5 @@
 import { NeuralEventBus } from '../event-bus/neural-event-bus.js';
+import { join } from 'node:path';
 import { AetherCore, type AetherConfig } from '../aether/aether-core.js';
 import { Consciousness } from '../aether/consciousness.js';
 import { CognitiveKernel } from '../kernel/cognitive-kernel.js';
@@ -7,6 +8,7 @@ import { ExecutiveBrain } from '../executive-brain/executive-brain.js';
 import { TraceRecorder } from '../cognitive-plane/trace-engine/trace-recorder.js';
 import { CognitiveReplay } from '../cognitive-plane/replay/cognitive-replay.js';
 import { TracePersistence } from '../cognitive-plane/persistence/trace-persistence.js';
+import { PersistenceProvider } from '../cognitive-plane/persistence/persistence-provider.js';
 import { SignalStore } from '../cognitive-plane/signals/signal-store.js';
 import { PolicyEngine } from '../control-plane/policies.js';
 import { Auth } from '../control-plane/auth/auth.js';
@@ -57,6 +59,9 @@ export class CognitiveCore {
   readonly replay: CognitiveReplay;
   readonly signals: SignalStore;
   readonly persistence: TracePersistence;
+  /** Organism-wide store coordinator — every registered Storable organ is
+   * loaded at boot and flushed on an interval + shutdown (W-02). */
+  readonly organismPersistence: PersistenceProvider;
   readonly immuneSystem: ImmuneSystem;
   readonly endocrineSystem: EndocrineSystem;
   readonly sleepCycle: SleepCycle;
@@ -94,14 +99,20 @@ export class CognitiveCore {
     });
     this.executive = new ExecutiveBrain({ eventBus: this.eventBus });
 
-    this.traceRecorder = new TraceRecorder(this.eventBus);
+    this.traceRecorder = new TraceRecorder(this.eventBus, {
+      onTrace: (trace) => this.persistence.append(trace),
+    });
     this.replay = new CognitiveReplay(this.traceRecorder.ledger);
     this.signals = new SignalStore(this.traceRecorder.ledger);
     this.persistence = new TracePersistence(config.traceFile ?? '.uccp/traces.jsonl');
 
     this.policies = config.policies ?? new PolicyEngine();
     this.auth = config.auth ?? new Auth();
-    this.immuneSystem = new ImmuneSystem(this.policies, this.auth, config.reflexEngine ?? new ReflexEngine());
+    this.immuneSystem = new ImmuneSystem(
+      this.policies,
+      this.auth,
+      config.reflexEngine ?? new ReflexEngine(),
+    );
     this.endocrineSystem = new EndocrineSystem(this.nervousSystem, this.consciousness);
     this.sleepCycle = new SleepCycle(
       this.nervousSystem,
@@ -113,7 +124,22 @@ export class CognitiveCore {
     this.connectome = new Connectome();
     this.hippocampus = new Hippocampus(this.kernel);
     this.neocortex = new Neocortex();
-    this.cortexKernel = new CortexKernel(this.consciousness, this.kernel, this.executive, this.eventBus);
+    this.cortexKernel = new CortexKernel(
+      this.consciousness,
+      this.kernel,
+      this.executive,
+      this.eventBus,
+    );
+
+    this.organismPersistence = new PersistenceProvider({
+      baseDir: this.persistenceBaseDir(),
+      files: {
+        connectome: 'connectome.json',
+        signals: 'signals.json',
+      },
+    });
+    this.organismPersistence.register('connectome', this.connectome, 'connectome.json');
+    this.organismPersistence.register('signals', this.signals, 'signals.json');
 
     this.metabolism.registerComponent('exoskeleton', { cpu: 5000, tokens: 500000 });
     this.metabolism.registerComponent('aether');
@@ -127,28 +153,45 @@ export class CognitiveCore {
     this.wireConnectome();
   }
 
+  /** Where the organism-wide store snapshots live, relative to the workspace
+   * root (not the process CWD — W-07). */
+  private persistenceBaseDir(): string {
+    return join(this.config.workspaceRoot, '.uccp', 'persist', 'organism');
+  }
+
   private registerAetherSubsystems(): void {
     this.aether.register('endocrine', {
       name: 'endocrine',
-      tick: async () => { await this.endocrineSystem.tick(); },
+      tick: async () => {
+        await this.endocrineSystem.tick();
+      },
       status: () => this.endocrineSystem.getStatus(),
     });
     this.aether.register('immune', {
       name: 'immune',
-      tick: async () => { await this.immuneSystem.tick(); },
+      tick: async () => {
+        await this.immuneSystem.tick();
+      },
       status: () => this.immuneSystem.getStatus(),
     });
     this.aether.register('hippocampus', {
       name: 'hippocampus',
-      tick: async () => { await this.hippocampus.tick(); },
+      tick: async () => {
+        await this.hippocampus.tick();
+      },
       status: () => this.hippocampus.getStatus(),
     });
   }
 
   private wireNervousSystem(): void {
-    this.nervousSystem.subscribe('cortex', async (signal) => {
-      this.consciousness.observe('working', `Signal: ${signal.type}`, signal.source);
-    }, undefined, 'consciousness-feed');
+    this.nervousSystem.subscribe(
+      'cortex',
+      async (signal) => {
+        this.consciousness.observe('working', `Signal: ${signal.type}`, signal.source);
+      },
+      undefined,
+      'consciousness-feed',
+    );
   }
 
   private wireConnectome(): void {
@@ -161,7 +204,12 @@ export class CognitiveCore {
           type?: ConnectionType;
           description?: string;
         };
-        if (typeof from !== 'string' || typeof to !== 'string' || from.length === 0 || to.length === 0) {
+        if (
+          typeof from !== 'string' ||
+          typeof to !== 'string' ||
+          from.length === 0 ||
+          to.length === 0
+        ) {
           return;
         }
         this.connectome.link(
@@ -176,11 +224,36 @@ export class CognitiveCore {
     );
 
     const seeds: Array<{ from: string; to: string; type: ConnectionType; description: string }> = [
-      { from: 'eventBus', to: 'traceRecorder', type: 'event-driven', description: 'Events flow from bus to recorder' },
-      { from: 'traceRecorder', to: 'signals', type: 'data-flow', description: 'Trace ledger feeds signal detection' },
-      { from: 'eventBus', to: 'endocrine', type: 'event-driven', description: 'Events trigger neuromodulation updates' },
-      { from: 'aether', to: 'consciousness', type: 'control', description: 'Aether orchestrates consciousness layers' },
-      { from: 'fsDriver', to: 'eventBus', type: 'event-driven', description: 'Filesystem changes propagate as events' },
+      {
+        from: 'eventBus',
+        to: 'traceRecorder',
+        type: 'event-driven',
+        description: 'Events flow from bus to recorder',
+      },
+      {
+        from: 'traceRecorder',
+        to: 'signals',
+        type: 'data-flow',
+        description: 'Trace ledger feeds signal detection',
+      },
+      {
+        from: 'eventBus',
+        to: 'endocrine',
+        type: 'event-driven',
+        description: 'Events trigger neuromodulation updates',
+      },
+      {
+        from: 'aether',
+        to: 'consciousness',
+        type: 'control',
+        description: 'Aether orchestrates consciousness layers',
+      },
+      {
+        from: 'fsDriver',
+        to: 'eventBus',
+        type: 'event-driven',
+        description: 'Filesystem changes propagate as events',
+      },
     ];
     for (const seed of seeds) {
       void this.nervousSystem.emit(
@@ -192,6 +265,8 @@ export class CognitiveCore {
   async start(): Promise<void> {
     this.persistence.open();
     await this.persistence.loadInto(this.traceRecorder.ledger);
+    await this.organismPersistence.loadAll();
+    this.organismPersistence.startAutoSave();
     this.aether.start();
     this.metabolism.start();
 
@@ -201,12 +276,12 @@ export class CognitiveCore {
     });
     await this.nervousSystem.emit(sig);
 
-    this.aether.observeThought('meta', 'Cognitive Core booted', 'cognitive-core', [
-      'startup',
-    ]);
+    this.aether.observeThought('meta', 'Cognitive Core booted', 'cognitive-core', ['startup']);
   }
 
   async stop(): Promise<void> {
+    this.organismPersistence.stopAutoSave();
+    await this.organismPersistence.persistAll();
     this.metabolism.stop();
     this.aether.stop();
     await this.persistence.close();

@@ -11,6 +11,7 @@ export class PersistenceProvider {
   private baseDir = '.uccp';
   private filePaths = new Map<string, string>();
   private loaded = false;
+  private timer: ReturnType<typeof setInterval> | null = null;
 
   constructor(config?: Partial<PersistenceConfig>) {
     if (config?.baseDir) this.baseDir = config.baseDir;
@@ -68,7 +69,30 @@ export class PersistenceProvider {
     return store.load(this.resolve(name));
   }
 
-  isLoaded(): boolean { return this.loaded; }
+  isLoaded(): boolean {
+    return this.loaded;
+  }
 
-  storeNames(): string[] { return [...this.stores.keys()]; }
+  storeNames(): string[] {
+    return [...this.stores.keys()];
+  }
+
+  /** Periodically flush every registered store. Fires every `intervalMs`
+   * (default 30s); failures are isolated per store by persistAll. */
+  startAutoSave(intervalMs = 30000): void {
+    if (this.timer) return;
+    this.timer = setInterval(() => {
+      void this.persistAll();
+    }, intervalMs);
+    this.timer.unref?.();
+  }
+
+  /** Stop the periodic flush. A final explicit persistAll() is still the
+   * caller's responsibility at shutdown. */
+  stopAutoSave(): void {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
 }
