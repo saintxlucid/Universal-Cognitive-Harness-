@@ -1412,6 +1412,222 @@ surface-widening: it gives the runtime decision precedent, closes
 the evidence → outcome loop the decision law (IDEA-0034) needs for
 reweighting, and is the record substrate IDEA-0040/0042 presuppose.
 The spec-first gate, the microkernel boundary, and the driver
-contract need no new machinery — they are ratified governance. As
+contract need no new machinery - they are ratified governance. As
 with every prior round: SOP-08 stage 1, zero code, zero spec edits;
 the freeze + CADR await ratification with the next commit wave.
+
+## 25. The cognitive-kernel intake (2026-08-01, round 21)
+
+**User decision (vision intake, "every framework is solving one stage
+of cognition, not the whole thing - stop thinking 'which framework
+do I use?' and ask 'what cognitive operation am I currently
+performing?'")**: the next leap is architectural: a 12-layer engine
+stack (Reality -> Observation -> Understanding -> Truth -> Research ->
+Diagnosis -> Decision -> Strategy -> Innovation -> Execution ->
+Learning -> Meta-Cognition, over Memory / Knowledge Graph / Reality
+Graph) in which every collected framework becomes a specialized
+cognitive organ; a Reality Layer ("everything becomes Entity, Relation,
+Property, Constraint, Event, Goal, Observation, Evidence, Assumption,
+Hypothesis, Decision - NOT markdown, NOT text, NOT code - then export
+into Markdown, JSON, Graph, Mermaid, Database, Mindmap, Flowchart,
+Code, Documents"); a Cognitive Primitive Library of 26 atomic
+operations (Observe, Compare, Classify, ... Abduce, Simulate,
+Challenge, Forget, Adapt) under which all frameworks decompose;
+Framework DNA (search by metadata - failure modes, compatible /
+conflicting frameworks, primitives - not by name); an Uncertainty
+Engine, Assumption Engine, Contradiction Engine, Perspective Engine
+(13 views re-rendering the same reality), First Principles Engine,
+Systems Thinking Engine, Simulation Engine, Reflection Engine; an
+Intelligence Scheduler that arbitrates engine demands ("research wants
+more evidence, decision wants action - who wins?"); and one stated
+missing capability: Epistemic State Management - every conclusion
+carries a state (Observed -> Hypothesized -> Supported -> Strongly
+Supported -> Validated -> Accepted -> Deprecated -> Refuted) with
+evidence, confidence, provenance, and revision history, so stale or
+weak conclusions are never treated as permanent truth. The North Star:
+"Intelligence is not one algorithm. It is the orchestration of many
+cognitive processes, each operating on progressively richer
+representations of reality."
+
+**Verdict after corpus mapping (verified 2026-08-01)**: ~75% already
+executed or tracked. The engine stack is ADR-006's service topology
+with the organs as engines:
+
+- Observation -> sensors/effectors + gatherer + IDEA-0017; Understanding
+  -> IDEA-0035 quantities + context compressor + sleep cycle
+- Truth -> integrity laws + structuredFacts + provenance (round-7
+  anchor); Research -> SOP-08 registers + EI benchmark corpus
+- Diagnosis -> RFC-0005 failure physics + IDEA-0074 + rca frameworks
+  family; Decision -> IDEA-0034 decision law + decision journal +
+  registry.select context classification (Cynefin et al. in the
+  decisions family)
+- Strategy -> strategy frameworks family + IDEA-0013; Execution ->
+  IDEA-0117 execution graph + productivity/signals families (PDCA,
+  OODA) + accelerators scheduler
+- Learning -> EI learning loop (Wave E) + sleep cycle + self-evolution;
+  Meta-Cognition -> meta-critic + 22 metacognitive tools + IDEA-0032
+
+The Framework Composer claim is already EXECUTED (FrameworkComposer +
+`uch solve` + framework-run MCP in the frameworks library wave). The
+Cognitive Graph claim maps to connectome + fabric (IDEA-0050) + UER
+(0047) + CQL (0057). Uncertainty Engine -> RFC-0005 evidence mass +
+decision-law confidence + structuredFacts confidence; Assumption
+Engine -> intent objects (IDEA-0075) + dream-scan hidden-assumption
+detection; Contradiction Engine -> CIR contradiction-elimination
+pass + conflictDetector + memory-hygiene + scientific-memory
+'contradicted' + IDEA-0086; First Principles -> the 32 Laws +
+FORMAL_FOUNDATIONS + constitution (impossibility statements are first
+principles); Simulation Engine -> IDEA-0012 digital twin + CVM +
+IDEA-0013; Reflection Engine -> reflect + sleep distillation + EI
+learning loop; Intelligence Scheduler -> IDEA-0034's thinking
+scheduler + ADR-004 virtual processors + control-plane budgets; the
+Universal Cognitive Pipeline -> CIC + episodes + ADR-005 + ADR-002
+replay. Framework DNA is PARTIALLY anchored (FrameworkDefinition
+metadata: purpose / bestFor / whenNotToUse / selection flags /
+complexity / source - 7 of the 15 named fields absent).
+
+**The true delta is 7 ideas (IDEA-0132..0138)**:
+
+| Claim                                                                                                     | Idea      | Delta vs corpus                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 12-layer engine stack with operation dispatch + Innovation Engine (TRIZ/SCAMPER)                          | IDEA-0132 | Engines exist as organs/frameworks/EI but no artifact answers "what cognitive operation am I performing" and routes to the owning engine (catalog.ts classifies CP ops for the ABI, not intent); Innovation is the one layer with zero substrate (TRIZ/SCAMPER/morphological grep-absent, no innovation framework family); no engine-level cognitive-budget arbitration beyond IDEA-0034 priority |
+| Reality Layer: 12 reality classes first, every representation an export                                   | IDEA-0133 | COM (0056) gives object classes + lifecycle but no graph vocabulary (Entity/Relation/Property/Constraint are not node/edge kinds); fabric (0050) is typed artifacts, not the ground truth they represent; no artifact declares its reality source; no representation round-trip exists                                                                                                            |
+| Epistemic State Management ladder (Observed -> ... -> Refuted) - the round's headline                     | IDEA-0134 | IDEA-0072's lifecycle governs artifacts, not beliefs; confidence/evidence mass exist as numbers but no state machine with transition gates governs belief states; 'contradicted' is a flag, not a ladder position; no belief revision history                                                                                                                                                     |
+| Cognitive Primitive Library (26 atomic ops; frameworks decompose into primitives)                         | IDEA-0135 | IDEA-0023 is a 7-class element table (types, not operations); CP catalog is the runtime ABI; CIR classes are perceptual/cognitive/delegated; no framework declares its primitive pipeline                                                                                                                                                                                                         |
+| Framework DNA (input/output, assumptions, required evidence, failure modes, compatible/conflicting edges) | IDEA-0136 | FrameworkDefinition metadata lacks 7 of the 15 DNA fields; whenNotToUse is prose, not edges; no compatibility/conflict graph; selection is flag-based, not DNA-vector search                                                                                                                                                                                                                      |
+| Perspective Engine (13 views as re-renders of the same reality)                                           | IDEA-0137 | ProjectionEngine is grant containment, not views; multiAgentConsensus is multi-agent, not multi-view; no renderer registry; no cross-view round-trip integrity rule                                                                                                                                                                                                                               |
+| Systems Thinking Engine (stocks/flows/delays/leverage points/dynamic simulation)                          | IDEA-0138 | UER is post-hoc causal (static); belief propagation models no dynamics (no accumulation, rates, delays); digital twin simulates projected state, not system-dynamics models; 'leverage' effectively grep-absent from src                                                                                                                                                                          |
+
+**Verdict on the intake's verdict:** the user's North Star - "intelligence
+is the orchestration of many cognitive processes on progressively
+richer representations of reality" - is the corpus's own founding
+thesis (VISION sec 2, the frameworks-library invariant "there is no
+one best model, only the right model for the moment", ADR-006). The
+intake's genuine new material is the formalization layer, as in rounds
+14-15: each proposal turns an existing mechanism into a named,
+versioned, certifiable primitive. The two strongest are Epistemic
+State Management (IDEA-0134) - the belief-side twin of IDEA-0072,
+closing the loop RFC-0005's evidence mass and the decision law's
+confidence need to become state, not number - and the Reality Graph
+(IDEA-0133) - the Layer-0 substrate that makes the Truth graphic
+architectural. The engine stack itself is a ratification of ADR-006's
+service topology with a dispatch table, and the Innovation family gap
+is a framework-library extension, not new machinery. Consistent with
+every prior round: SOP-08 stage 1, zero code, zero spec edits
+(spec-version gate unaffected at 0.5.0); the corpus awaits ratification
+with the next commit wave.
+
+## 26. The engineering-body-of-knowledge intake (2026-08-01, round 22)
+
+The intake proposes UCH-EBOK: "not documentation, an engineering
+discipline" — the project reorganized as a ten-volume Engineering Body
+of Knowledge (I Computational Cognitive Science, II Software
+Engineering, III Systems Engineering, IV Distributed Systems, V Formal
+Methods, VI Runtime Engineering, VII Platform Engineering, VIII Safety
+& Verification, IX Human Cognitive Systems, X Governance) in which
+"LLMs become one implementation detail." Volume II details executable
+requirements (Constitution -> Requirement -> Constraint -> Verification
+Rule -> Implementation -> Evidence -> Validation; every requirement
+carries owner, rationale, assumptions, risks, acceptance criteria,
+formal invariant, verification strategy, traceability — DO-178C / ISO
+26262 / IEC 61508 adapted to cognitive software), an Organ -> Capability
+-> Signal -> Knowledge -> Memory -> Policy -> Execution -> Verification
+architecture style, component-based engineering (identity, lifecycle,
+contracts, signals, events, policies, metrics, dependencies,
+capabilities), and configuration management for the genome,
+constitution, ontology, memory schema, signal schema, reasoning
+strategies, capability packs, and verification policies. Volume III
+makes everything a system (Cognitive System -> Subsystem -> Organ ->
+Microcircuit -> Cell -> Component) with interface engineering ("don't
+define APIs, define interfaces") and four system models per subsystem
+(logical, behavioral, structural, temporal). Volume IV asks for
+consensus (conflicting memories, competing plans, verification, belief
+reconciliation), replication, event sourcing, CQRS, and distributed
+transactions. Volume V demands formalization (constitution, signals,
+memory, knowledge, confidence, attention, causality) toward Cognitive
+Logic -> Calculus -> Algebra -> Semantics. Volume VI is "cognitive
+operating system engineering" (scheduler, execution graph,
+checkpointing, replay, transactions, pipelines, interrupts, speculative
+execution, GC, residency, paging, locality, backpressure). Volumes
+VII-X demand verification with provenance (why/evidence/confidence/
+alternative/risk/verifier/timestamp; nothing enters long-term memory
+without provenance; deterministic replay of reasoning episodes,
+architectural decisions, research sessions, memory mutations, policy
+changes as a flagship feature), cognitive quality metrics (knowledge
+accuracy, architecture quality, decision stability, memory precision,
+hallucination resistance, verification coverage, knowledge reuse,
+engineering value, cost efficiency, time to confidence), safe evolution
+(Experiment -> Benchmark -> Verification -> Simulation -> Security ->
+Approval -> Promotion; nothing mutates production directly), and
+structured research (Question -> Hypothesis -> Literature -> Evidence ->
+Contradictions -> Consensus -> Knowledge Graph -> Verification ->
+Publication). Closing move: organize the repository around engineering
+artifacts (/constitution /specifications /rfcs /formal-models
+/reference-architecture /reference-runtime /conformance-tests
+/benchmarks /safety-cases /threat-models /verification /simulation /sdk
+/reference-implementations /docs) — "a specification ecosystem with one
+reference implementation," the POSIX/LLVM/WebAssembly pattern. (The
+intake enumerates two different volume lists; the canonical I-X list
+above is used, with the later Verification / Quality Engineering /
+Evolution / Research headings folded into volumes VIII and X.)
+
+**Verdict after corpus mapping (verified 2026-08-01)**: ~85% already
+executed or tracked — every named mechanism has a home:
+
+- Volume I -> the 32 Laws + RFC-0005 physics + FORMAL_FOUNDATIONS +
+  research registers; Volume II -> SOP-08 + engineering-constitution +
+  conformance corpus + WS-C configuration management + IDEA-0090
+  expression (configuration as cognition); Volume III -> ADR-006
+  microkernel + organism anatomy + WS-E health + IDEA-0072 lifecycle
+- Volume IV -> ADR-002 event ledger (event sourcing) + WS-D
+  transactions + WS-I consensus + IDEA-0088 locking (savepoints,
+  optimistic concurrency, version vectors) + IDEA-0130 replication
+  (tracked, blocked on persistence write-path) + IDEA-0086 belief
+  reconciliation; Volume V -> FORMAL_FOUNDATIONS I-VIII + RFC-0005
+  calculus + IDEA-0026 mathematics + IDEA-0035 information theory
+- Volume VI -> ADR-006 + CVM + IDEA-0117 execution graph +
+  scheduler + vmem paging + IDEA-0030 speculation + IDEA-0084/0085
+  interrupts + backpressure + IDEA-0087 locality + replay/time-machine/
+  UER/profiler; Volume VII -> STACK + spec/VERSION + IDEA-0095 ABI +
+  conformance + certification + IDEA-0048/0083/0127
+- Volume VIII -> provenance (lineage-service, CIC envelope,
+  traceparent) + deterministic replay (ADR-002/UER) + certification
+  corpus (WS-3) + organic-score vetoes; Volume IX -> psychology laws +
+  IDEA-0092 + human-factors model + UX charter + cognitive rights
+  (Constitution Art. IX); Volume X -> RFC-0000 + SOP-08 + amendment
+  governance
+
+The CSE discipline claim is IDEA-0024 (round 1), already tracked; the
+seven core domains are a cataloging refinement. "LLMs become one
+implementation detail" ratifies the corpus's founding premise (CIR's
+delegated instruction class, ADR-004's interchangeable providers). The
+specification-ecosystem shift is already the standing decision
+(Platform Zero, spec-version gate, conformance-first); the intake names
+the artifact layout.
+
+**The true delta is 3 ideas (IDEA-0139..0141)**:
+
+| Claim                                                                                                                                                                        | Idea      | Delta vs corpus                                                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| UCH-EBOK: ten-volume engineering body of knowledge + artifact-first repository layout + CSE as a new discipline                                                              | IDEA-0139 | The five-book canon is narrative/governance, not discipline corpora; nothing names the ten-volume organization; safety-cases / threat-models / simulation / formal-models have no first-class artifact homes; the layout is proposed but unadopted — restructure is a high-churn governance decision, not executed                   |
+| Executable requirements: nine-field requirement artifacts + Constitution -> Requirement -> Constraint -> Verification Rule -> Implementation -> Evidence -> Validation chain | IDEA-0140 | SOP-08 governs RFCs, the constitution governs laws, the conformance corpus maps spec sections to suites; no artifact class is a requirement with formal invariant + verification strategy + acceptance criteria, and no bidirectional traceability links requirement to implementation to evidence; user stories explicitly rejected |
+| Interface engineering (seven named cognitive interfaces, immutable) + four-view system models (logical / behavioral / structural / temporal)                                 | IDEA-0141 | Interfaces exist as runtime contracts (ABI, CP ops, contracts registry, driver compliance) but no normative interface taxonomy with "implementations change, interfaces don't"; organs lack four-view (MBSE) models as deliverables; the temporal view has no per-organ form (ticks + trace ledger exist)                            |
+
+**Verdict on the intake's verdict:** the reframing is the delta, not the
+machinery. The strongest genuinely-new material is the formalization
+layer, as in rounds 14-15: executable requirements (IDEA-0140) — the
+round's headline — turns the conformance corpus into the executable
+tail of a requirement chain, and the systems-engineering discipline
+(IDEA-0141) makes interface taxonomy + four-view models per-organ
+deliverables. The quality metrics are largely anchored (IDEA-0035/0071/
+0128 + WS-E; "Time to Confidence" is the one new named quantity), the
+evolution pipeline is SOP-08 + organic gates + WS-C, the research
+pipeline is the SOP-08 registers + EI benchmark ("Publication" is a
+small stage extension), and the runtime volume is nearly fully
+executed. The artifact-first layout (IDEA-0139) is the round's proposal
+but explicitly NOT executed: restructure is a high-churn governance
+decision (IDEA-0024), and the volume-to-artifact mapping index is the
+first deliverable if ratified. Consistent with every prior round:
+SOP-08 stage 1, zero code, zero spec edits (spec-version gate
+unaffected at 0.5.0); the corpus awaits ratification with the next
+commit wave.

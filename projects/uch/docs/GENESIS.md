@@ -556,6 +556,62 @@ the evidence → outcome loop the decision law (IDEA-0034) needs.
 The freeze itself is ratified governance (Platform Zero + the
 round-19 objective amendment), not new machinery.
 
+An eleventh framing of the same universe is the **cognitive-kernel
+intake** (2026-08-01, round 21): "every framework is solving one stage
+of cognition, not the whole thing" — the 12-layer engine stack
+(Reality → Observation → Understanding → Truth → Research → Diagnosis
+→ Decision → Strategy → Innovation → Execution → Learning →
+Meta-Cognition over Memory / Knowledge Graph / Reality Graph),
+operation dispatch ("what cognitive operation am I currently
+performing?"), Epistemic State Management (every conclusion carries
+Observed → … → Refuted with evidence, confidence, provenance, and
+revision history), the 26-op Cognitive Primitive Library, Framework
+DNA (search by metadata, not name), and the Intelligence Scheduler.
+~75% maps to the corpus (ADR-006 microkernel + organs; the frameworks
+library 10 families / 34 frameworks with the EXECUTED FrameworkComposer
+(`uch solve`); ADR-003 EI + IDEA-0034 decision law = the thinking
+scheduler; RFC-0005 evidence mass; IDEA-0023 elements; connectome +
+fabric + UER; IDEA-0072 lifecycle; CIC + episodes); the true delta is
+**IDEA-0132..0138** — the engine-stack dispatch + the Innovation family
+gap (TRIZ/SCAMPER grep-absent), the Reality Graph substrate
+(representations as exports, round-trip), Epistemic State Management
+(the belief-side twin of IDEA-0072 — the round's headline), the
+Cognitive Primitive Library, Framework DNA (compatibility/conflict
+graph), the Perspective Engine (13 views), and the Systems Thinking
+Engine (stocks/flows/delays/leverage points).
+
+A twelfth framing of the same universe is the **engineering-body-of-
+knowledge intake** (2026-08-01, round 22): "not documentation, an
+engineering discipline" — UCH-EBOK, a ten-volume body of knowledge
+(Computational Cognitive Science, Software Engineering, Systems
+Engineering, Distributed Systems, Formal Methods, Runtime Engineering,
+Platform Engineering, Safety & Verification, Human Cognitive Systems,
+Governance) in which LLMs are one implementation detail; executable
+requirements (DO-178C / ISO 26262 / IEC 61508 discipline: Constitution
+→ Requirement → Constraint → Verification Rule → Implementation →
+Evidence → Validation, with owner / rationale / assumptions / risks /
+acceptance criteria / formal invariant / verification strategy /
+traceability per requirement), interface engineering ("define
+interfaces, not APIs") with four system models per subsystem (logical,
+behavioral, structural, temporal), distributed-systems rigor
+(consensus, replication, event sourcing, CQRS, transactions), formal
+methods, cognitive OS engineering, verification with provenance and
+deterministic replay, cognitive quality metrics, safe evolution,
+structured research, and the artifact-first repository layout
+(specification ecosystem with one reference implementation, the
+POSIX/LLVM/WebAssembly pattern). ~85% maps to the corpus (ADR-006
+kernel; CVM + execution graph; WS-D transactions + IDEA-0088; ADR-002
+ledger + replay + time machine + UER; FORMAL_FOUNDATIONS + RFC-0005 +
+IDEA-0026/0035; IDEA-0095 ABI + conformance + certification corpus;
+SOP-08 lifecycle + organic gates + WS-C; provenance + profiler + SLOs;
+IDEA-0024's CSE discipline claim); the true delta is **IDEA-0139..0141**
+— the EBOK canon and artifact-first layout proposal (restructure NOT
+executed, a high-churn governance decision), the executable-requirements
+artifact class (the strongest delta: requirements compile to
+verification rules the conformance corpus runs), and the
+systems-engineering discipline (interface taxonomy + four-view models
+per organ).
+
 ---
 
 ## Chapter 4 — Market Analysis
