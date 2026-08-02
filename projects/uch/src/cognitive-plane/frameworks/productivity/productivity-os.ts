@@ -53,10 +53,20 @@ export interface TaskPlannerOutput {
   /** GTD-style two-minute rule results. */
   twoMinuteActions: string[];
   /** Smart goal template. */
-  smartGoal: { specific: boolean; measurable: boolean; achievable: boolean; relevant: boolean; timeBound: boolean; gaps: string[] };
+  smartGoal: {
+    specific: boolean;
+    measurable: boolean;
+    achievable: boolean;
+    relevant: boolean;
+    timeBound: boolean;
+    gaps: string[];
+  };
 }
 
-const EISENHOWER_MAP: Record<string, { do: boolean; schedule: boolean; delegate: boolean; delete: boolean }> = {
+const EISENHOWER_MAP: Record<
+  string,
+  { do: boolean; schedule: boolean; delegate: boolean; delete: boolean }
+> = {
   'important|urgent': { do: true, schedule: false, delegate: false, delete: false },
   'important|not-urgent': { do: false, schedule: true, delegate: false, delete: false },
   'not-important|urgent': { do: false, schedule: false, delegate: true, delete: false },
@@ -65,7 +75,12 @@ const EISENHOWER_MAP: Record<string, { do: boolean; schedule: boolean; delegate:
 
 export function planTasks(input: TaskPlannerInput): TaskPlannerOutput {
   const tasks = input.tasks;
-  const eisenhower = { do: [] as string[], schedule: [] as string[], delegate: [] as string[], delete: [] as string[] };
+  const eisenhower = {
+    do: [] as string[],
+    schedule: [] as string[],
+    delegate: [] as string[],
+    delete: [] as string[],
+  };
   for (const t of tasks) {
     if (t.urgency && t.importance) {
       const cell = EISENHOWER_MAP[`${t.importance}|${t.urgency}`];
@@ -101,12 +116,14 @@ export function planTasks(input: TaskPlannerInput): TaskPlannerOutput {
   let frogCandidate: string | null = null;
   if (frog && (frog.resistance ?? 0) > 0.5) {
     const topMitTask = topMit ? tasks.find((t) => t.name === topMit) : null;
-    frogCandidate =
-      topMitTask && (topMitTask.resistance ?? 0) > 0.5 ? topMit : frog.name;
+    frogCandidate = topMitTask && (topMitTask.resistance ?? 0) > 0.5 ? topMit : frog.name;
   }
 
   const focusMin = Math.round((input.focusHours ?? 4) * 60);
-  const focusTasks = [...mostImportantTasks, ...vitalFew.filter((v) => !mostImportantTasks.includes(v))].slice(0, 4);
+  const focusTasks = [
+    ...mostImportantTasks,
+    ...vitalFew.filter((v) => !mostImportantTasks.includes(v)),
+  ].slice(0, 4);
   const perTask = focusTasks.length > 0 ? Math.round(focusMin / focusTasks.length) : 0;
   let cursor = 9;
   const timeBlocks = focusTasks.map((task) => {
@@ -120,7 +137,8 @@ export function planTasks(input: TaskPlannerInput): TaskPlannerOutput {
   const batches = clusterShortTasks(tasks.filter((t) => (t.durationMin ?? Infinity) <= 15));
 
   const goal = input.tasks[0]?.notes ?? '';
-  const ACTION_VERBS = /\b(complete|build|fix|create|reduce|increase|improve|ship|write|implement|deliver|learn|finish|launch|migrate|add|remove|optimize|refactor|land)\b/i;
+  const ACTION_VERBS =
+    /\b(complete|build|fix|create|reduce|increase|improve|ship|write|implement|deliver|learn|finish|launch|migrate|add|remove|optimize|refactor|land)\b/i;
   const smartGoal = {
     specific: ACTION_VERBS.test(goal) && /(what|to|using|with|by)/i.test(goal),
     measurable: /\d|percent|count|number|reduce|increase/.test(goal),
@@ -150,11 +168,51 @@ export function planTasks(input: TaskPlannerInput): TaskPlannerOutput {
 
 /* ── Batching helper ─────────────────────────────────────────────── */
 
-const BATCH_STOP = new Set(['the', 'a', 'an', 'to', 'for', 'with', 'in', 'on', 'at', 'and', 'my', 'our', 'your', 'all', 'of']);
+const BATCH_STOP = new Set([
+  'the',
+  'a',
+  'an',
+  'to',
+  'for',
+  'with',
+  'in',
+  'on',
+  'at',
+  'and',
+  'my',
+  'our',
+  'your',
+  'all',
+  'of',
+]);
 const BATCH_VERBS = new Set([
-  'send', 'reply', 'update', 'check', 'review', 'fix', 'create', 'write', 'read',
-  'call', 'email', 'fill', 'file', 'schedule', 'prepare', 'organize', 'clean',
-  'set', 'make', 'do', 'log', 'track', 'add', 'remove', 'print', 'buy', 'order',
+  'send',
+  'reply',
+  'update',
+  'check',
+  'review',
+  'fix',
+  'create',
+  'write',
+  'read',
+  'call',
+  'email',
+  'fill',
+  'file',
+  'schedule',
+  'prepare',
+  'organize',
+  'clean',
+  'set',
+  'make',
+  'do',
+  'log',
+  'track',
+  'add',
+  'remove',
+  'print',
+  'buy',
+  'order',
 ]);
 
 /** Group short tasks (<= 15 min) into batches by their leading theme keyword. */
@@ -172,7 +230,9 @@ export function clusterShortTasks(tasks: Task[]): { name: string; tasks: string[
     }
     groups.get(key)!.push(t.name);
   }
-  return order.map((key) => ({ name: key, tasks: groups.get(key)! })).filter((g) => g.tasks.length >= 2);
+  return order
+    .map((key) => ({ name: key, tasks: groups.get(key)! }))
+    .filter((g) => g.tasks.length >= 2);
 }
 
 /* ── 3-3-3 method ────────────────────────────────────────────────── */
@@ -197,5 +257,203 @@ export function threeThreeThree(input: ThreeThreeThreeInput): ThreeThreeThreeRes
     structure: deep,
     commitments: [...urgent, ...maintenance],
     warning: input.urgentTasks.length > 3 ? 'more than 3 urgent tasks — reprioritize' : null,
+  };
+}
+
+/* ── GTD workflow (Getting Things Done) ──────────────────────────── */
+
+export interface GtdItem {
+  name: string;
+  /** Whether the item requires a next action (false = reference material). */
+  actionable?: boolean;
+  /** Estimated minutes; <= 2 triggers the two-minute rule. */
+  durationMin?: number;
+  /** Delegate target; presence routes the item to the delegate bucket. */
+  delegateTo?: string;
+  /** Defer context (e.g. '@waiting', 'next-week'); presence routes to the defer bucket. */
+  deferredTo?: string;
+}
+
+export type GtdAction = 'do' | 'delegate' | 'defer' | 'delete' | 'reference';
+
+export interface GtdVerdict {
+  name: string;
+  action: GtdAction;
+  reason: string;
+}
+
+export interface GtdWorkflowResult {
+  /** Capture — everything enters the inbox. */
+  inbox: string[];
+  /** Clarify — each item receives exactly one verdict. */
+  clarified: GtdVerdict[];
+  /** Organize — buckets by verdict. */
+  organized: Record<GtdAction, string[]>;
+  /** Review — the next-action queue: do first, then deferred in input order. */
+  nextActions: string[];
+  reviewPrompt: string;
+}
+
+/**
+ * GTD workflow engine: Capture → Clarify → Organize → Review → Do.
+ * The deterministic clarify rule mirrors David Allen's guidance:
+ * - non-actionable reference material → reference archive
+ * - non-actionable everything else → delete
+ * - actionable and <= 2 minutes → do now (two-minute rule)
+ * - actionable with a delegate target → delegate
+ * - actionable with a defer context → defer
+ * - actionable otherwise → do (the next action)
+ */
+export function gtdWorkflow(items: GtdItem[]): GtdWorkflowResult {
+  const inbox = items.map((i) => i.name);
+  const organized: Record<GtdAction, string[]> = {
+    do: [],
+    delegate: [],
+    defer: [],
+    delete: [],
+    reference: [],
+  };
+  const clarified: GtdVerdict[] = [];
+
+  for (const item of items) {
+    let action: GtdAction;
+    let reason: string;
+    if (!item.actionable && item.name.toLowerCase().includes('reference')) {
+      action = 'reference';
+      reason = 'non-actionable reference material';
+    } else if (!item.actionable) {
+      action = 'delete';
+      reason = 'non-actionable — no next action, no reference value';
+    } else if ((item.durationMin ?? Infinity) <= 2) {
+      action = 'do';
+      reason = 'two-minute rule — do it immediately';
+    } else if (item.delegateTo) {
+      action = 'delegate';
+      reason = `delegate to ${item.delegateTo}`;
+    } else if (item.deferredTo) {
+      action = 'defer';
+      reason = `defer to ${item.deferredTo}`;
+    } else {
+      action = 'do';
+      reason = 'next action — the only one who can do it';
+    }
+    organized[action].push(item.name);
+    clarified.push({ name: item.name, action, reason });
+  }
+
+  const nextActions = [...organized.do, ...organized.defer];
+
+  return {
+    inbox,
+    clarified,
+    organized,
+    nextActions,
+    reviewPrompt:
+      'weekly review: empty the inbox, re-clarify deferred items, prune the delete bucket, and keep only trusted next actions',
+  };
+}
+
+/* ── Pomodoro scheduler ──────────────────────────────────────────── */
+
+export interface PomodoroTask {
+  name: string;
+  /** Minutes of focused work needed; converted to whole pomodoros. */
+  minutes?: number;
+  /** Explicit pomodoro count; overrides minutes. */
+  pomodoros?: number;
+}
+
+export interface PomodoroSession {
+  task: string;
+  index: number;
+  startMin: number;
+  endMin: number;
+}
+
+export interface PomodoroBreak {
+  index: number;
+  startMin: number;
+  endMin: number;
+  long: boolean;
+}
+
+export interface PomodoroPlanInput {
+  tasks: PomodoroTask[];
+  sessionMin?: number;
+  breakMin?: number;
+  longBreakMin?: number;
+  /** Long break after every N sessions. */
+  longBreakEvery?: number;
+}
+
+export interface PomodoroPlanResult {
+  sessions: PomodoroSession[];
+  breaks: PomodoroBreak[];
+  focusMinutes: number;
+  totalMinutes: number;
+  warning: string | null;
+}
+
+/**
+ * Pomodoro scheduler: converts tasks into whole 25-minute (configurable)
+ * focus sessions with 5-minute breaks and a long break after every 4
+ * sessions. Deterministic — no clock, no randomness; replay-safe.
+ */
+export function planPomodoros(input: PomodoroPlanInput): PomodoroPlanResult {
+  const sessionMin = input.sessionMin ?? 25;
+  const breakMin = input.breakMin ?? 5;
+  const longBreakMin = input.longBreakMin ?? 15;
+  const longBreakEvery = input.longBreakEvery ?? 4;
+
+  const plans = input.tasks.map((t) => ({
+    name: t.name,
+    count: t.pomodoros ?? Math.max(1, Math.round((t.minutes ?? sessionMin) / sessionMin)),
+  }));
+  const totalSessions = plans.reduce((acc, p) => acc + p.count, 0);
+  if (totalSessions === 0) {
+    return {
+      sessions: [],
+      breaks: [],
+      focusMinutes: 0,
+      totalMinutes: 0,
+      warning: 'no pomodoros to schedule — provide tasks with minutes or pomodoros',
+    };
+  }
+
+  const sessions: PomodoroSession[] = [];
+  const breaks: PomodoroBreak[] = [];
+  let cursor = 0;
+  let sessionIndex = 0;
+
+  for (const plan of plans) {
+    for (let i = 0; i < plan.count; i++) {
+      sessionIndex += 1;
+      sessions.push({
+        task: plan.name,
+        index: sessionIndex,
+        startMin: cursor,
+        endMin: cursor + sessionMin,
+      });
+      cursor += sessionMin;
+      const long = sessionIndex % longBreakEvery === 0;
+      breaks.push({
+        index: sessionIndex,
+        startMin: cursor,
+        endMin: cursor + (long ? longBreakMin : breakMin),
+        long,
+      });
+      cursor += long ? longBreakMin : breakMin;
+    }
+  }
+
+  const focusMinutes = sessions.length * sessionMin;
+  const breakMinutes = breaks.reduce((acc, b) => acc + (b.endMin - b.startMin), 0);
+
+  return {
+    sessions,
+    breaks,
+    focusMinutes,
+    totalMinutes: focusMinutes + breakMinutes,
+    warning: null,
   };
 }

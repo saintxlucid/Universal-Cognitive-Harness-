@@ -9,7 +9,12 @@
  * The registry's `select` implements the decision-about-decisions layer.
  */
 
-export { FrameworkRegistry, createFrameworkRegistry, createFrameworkCatalog, FRAMEWORK_CATALOG_VERSION } from './registry.js';
+export {
+  FrameworkRegistry,
+  createFrameworkRegistry,
+  createFrameworkCatalog,
+  FRAMEWORK_CATALOG_VERSION,
+} from './registry.js';
 export type {
   FrameworkDefinition,
   FrameworkFamily,
@@ -105,7 +110,13 @@ export type {
   StrategyVsPlanResult,
 } from './strategy/strategy-wheel.js';
 
-export { planTasks, threeThreeThree } from './productivity/productivity-os.js';
+export {
+  planTasks,
+  threeThreeThree,
+  gtdWorkflow,
+  planPomodoros,
+  clusterShortTasks,
+} from './productivity/productivity-os.js';
 export type {
   Task,
   TaskPlannerInput,
@@ -114,6 +125,15 @@ export type {
   Importance,
   ThreeThreeThreeInput,
   ThreeThreeThreeResult,
+  GtdItem,
+  GtdAction,
+  GtdVerdict,
+  GtdWorkflowResult,
+  PomodoroTask,
+  PomodoroSession,
+  PomodoroBreak,
+  PomodoroPlanInput,
+  PomodoroPlanResult,
 } from './productivity/productivity-os.js';
 
 export { validateMethodology, detectGaps, GAP_TYPES } from './research/methodology.js';
@@ -129,7 +149,10 @@ export type {
   GapAnalysisResult,
 } from './research/methodology.js';
 
-export { assessInformation, QUESTIONS as CRITICAL_QUESTIONS } from './critical/critical-evaluator.js';
+export {
+  assessInformation,
+  QUESTIONS as CRITICAL_QUESTIONS,
+} from './critical/critical-evaluator.js';
 export type {
   CriticalQuestionId,
   QuestionCheck,
@@ -180,8 +203,4 @@ export type {
 } from './journal/decision-journal.js';
 
 export { FrameworkComposer } from './composer/composer.js';
-export type {
-  SolveProfile,
-  SolveStageResult,
-  SolveResult,
-} from './composer/composer.js';
+export type { SolveProfile, SolveStageResult, SolveResult } from './composer/composer.js';
