@@ -1,6 +1,11 @@
 # IDEA-0131 — Cognitive Architecture Decision Records (CADRs)
 
-- **Status:** Idea (SOP-08 stage 1 — no code)
+- **Status:** Research + Prototype (SOP-08 stages 2/4 — register
+  `research/foundations/27-cognitive-decision-records.md`, design
+  `design/COGNITIVE-DECISION-RECORDS.md`, prototype
+  `src/cognitive-plane/decisions/cadr.ts` — append-only ledger,
+  transition-fold status, consultation + outcome closure; index
+  wiring deferred to landing wave)
 - **Origin:** 2026-08-01 inflection intake (round 20) — "every major
   cognitive decision becomes an immutable, queryable record... the
   runtime consults these records instead of relying on inferred
