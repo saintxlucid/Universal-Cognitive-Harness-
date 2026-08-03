@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  ConformanceRunner,
-  defineFixture,
-  pass,
-  fail,
-} from './conformance-runner.js';
+import { ConformanceRunner, defineFixture, pass, fail } from './conformance-runner.js';
 import {
   ThreatMitigationEngine,
   T01UnauthorizedMemoryAccessMitigation,
@@ -21,7 +16,7 @@ import {
   T12TimingSideChannelMitigation,
   T13TokenExhaustionMitigation,
   T14SessionHijackingMitigation,
-} from '../kernel/cic/threat-mitigations.js';
+} from '../kernel/cic/mitigations/index.js';
 import { ImmuneSystem } from '../cognitive-core/immune.js';
 import { PolicyEngine } from '../control-plane/policies.js';
 import { ReflexEngine } from '../suit/instinct/reflex-engine.js';
@@ -42,8 +37,7 @@ function createPolicyEngine(): PolicyEngine {
 const fixtureT01 = defineFixture({
   id: 'T01',
   name: 'T01: Unauthorized Memory Access',
-  description:
-    'Simulate cross-namespace access and detect unauthorized memory access',
+  description: 'Simulate cross-namespace access and detect unauthorized memory access',
   category: 'security',
   run: async () => {
     const mit = new T01UnauthorizedMemoryAccessMitigation();
@@ -55,9 +49,7 @@ const fixtureT01 = defineFixture({
 
     const detected = await mit.detect(createImmuneSystem(), createPolicyEngine());
     if (!detected) {
-      return fail('T01', [
-        'detect() returned false — expected true after 3 unauthorized accesses',
-      ]);
+      return fail('T01', ['detect() returned false — expected true after 3 unauthorized accesses']);
     }
 
     const result = await mit.mitigate(createImmuneSystem(), createPolicyEngine());
@@ -80,8 +72,7 @@ const fixtureT01 = defineFixture({
 const fixtureT02 = defineFixture({
   id: 'T02',
   name: 'T02: Cross-Project Contamination',
-  description:
-    'Simulate cross-project retrieve and detect scope violation',
+  description: 'Simulate cross-project retrieve and detect scope violation',
   category: 'security',
   run: async () => {
     const mit = new T02CrossProjectContaminationMitigation();
@@ -119,8 +110,7 @@ const fixtureT02 = defineFixture({
 const fixtureT03 = defineFixture({
   id: 'T03',
   name: 'T03: Privilege Escalation',
-  description:
-    'Simulate read-only client sending mutate and detect escalation',
+  description: 'Simulate read-only client sending mutate and detect escalation',
   category: 'security',
   run: async () => {
     const mit = new T03PrivilegeEscalationMitigation();
@@ -160,8 +150,7 @@ const fixtureT03 = defineFixture({
 const fixtureT04 = defineFixture({
   id: 'T04',
   name: 'T04: Consent Bypass',
-  description:
-    'Simulate observation without consent and detect consent bypass',
+  description: 'Simulate observation without consent and detect consent bypass',
   category: 'security',
   run: async () => {
     const mit = new T04ConsentBypassMitigation();
@@ -198,8 +187,7 @@ const fixtureT04 = defineFixture({
 const fixtureT05 = defineFixture({
   id: 'T05',
   name: 'T05: Data Exfiltration',
-  description:
-    'Simulate oversized retrieve operation and detect exfiltration',
+  description: 'Simulate oversized retrieve operation and detect exfiltration',
   category: 'security',
   run: async () => {
     const mit = new T05DataExfiltrationMitigation();
@@ -246,8 +234,7 @@ const fixtureT05 = defineFixture({
 const fixtureT06 = defineFixture({
   id: 'T06',
   name: 'T06: Runaway Process',
-  description:
-    'Simulate runaway cognitive process and verify circuit breaker opens',
+  description: 'Simulate runaway cognitive process and verify circuit breaker opens',
   category: 'security',
   run: async () => {
     const mit = new T06RunawayProcessMitigation();
@@ -257,9 +244,7 @@ const fixtureT06 = defineFixture({
 
     const detected = await mit.detect(createImmuneSystem(), createPolicyEngine());
     if (!detected) {
-      return fail('T06', [
-        'detect() returned false — expected true when circuit breaker is open',
-      ]);
+      return fail('T06', ['detect() returned false — expected true when circuit breaker is open']);
     }
 
     const result = await mit.mitigate(createImmuneSystem(), createPolicyEngine());
@@ -267,21 +252,15 @@ const fixtureT06 = defineFixture({
       return fail('T06', ['mitigate() did not apply']);
     }
     if (!result.evidence.includes('circuit-breaker reset')) {
-      return fail('T06', [
-        'mitigate() evidence missing circuit-breaker reset',
-      ]);
+      return fail('T06', ['mitigate() evidence missing circuit-breaker reset']);
     }
 
     // Verify the circuit was force-closed and timeouts cleared
     if (mit.getCircuitBreaker().getState() !== 'closed') {
-      return fail('T06', [
-        'circuit breaker should be closed after mitigation',
-      ]);
+      return fail('T06', ['circuit breaker should be closed after mitigation']);
     }
     if (mit.getActiveProcesses() !== 0) {
-      return fail('T06', [
-        'active process count should be 0 after mitigation',
-      ]);
+      return fail('T06', ['active process count should be 0 after mitigation']);
     }
 
     return pass('T06', { stats: { activeProcesses: mit.getActiveProcesses() } });
@@ -293,8 +272,7 @@ const fixtureT06 = defineFixture({
 const fixtureT07 = defineFixture({
   id: 'T07',
   name: 'T07: Cascading Policy Failure',
-  description:
-    'Record multiple policy failures and detect cascade risk',
+  description: 'Record multiple policy failures and detect cascade risk',
   category: 'security',
   run: async () => {
     const mit = new T07CascadingPolicyMitigation();
@@ -345,9 +323,7 @@ const fixtureT07 = defineFixture({
       return fail('T07', ['mitigate() did not apply']);
     }
     if (!result.evidence.some((e) => e.includes('policy-circuit-opened'))) {
-      return fail('T07', [
-        'mitigate() evidence missing policy-circuit-opened',
-      ]);
+      return fail('T07', ['mitigate() evidence missing policy-circuit-opened']);
     }
 
     return pass('T07', { stats: mit.getStats() });
@@ -367,24 +343,18 @@ const fixtureT08 = defineFixture({
     // First submission should succeed
     const firstAttempt = mit.isOperationReplay('txn-001');
     if (firstAttempt) {
-      return fail('T08', [
-        'first submission of operation ID should not be a replay',
-      ]);
+      return fail('T08', ['first submission of operation ID should not be a replay']);
     }
 
     // Second submission of same ID should be detected as replay
     const secondAttempt = mit.isOperationReplay('txn-001');
     if (!secondAttempt) {
-      return fail('T08', [
-        'second submission of same operation ID should be detected as replay',
-      ]);
+      return fail('T08', ['second submission of same operation ID should be detected as replay']);
     }
 
     const detected = await mit.detect(createImmuneSystem(), createPolicyEngine());
     if (!detected) {
-      return fail('T08', [
-        'detect() returned false — expected true after replay was detected',
-      ]);
+      return fail('T08', ['detect() returned false — expected true after replay was detected']);
     }
 
     const result = await mit.mitigate(createImmuneSystem(), createPolicyEngine());
@@ -404,8 +374,7 @@ const fixtureT08 = defineFixture({
 const fixtureT09 = defineFixture({
   id: 'T09',
   name: 'T09: Consolidation Poisoning',
-  description:
-    'Submit low-confidence evidence and detect consolidation poisoning risk',
+  description: 'Submit low-confidence evidence and detect consolidation poisoning risk',
   category: 'security',
   run: async () => {
     const mit = new T09ConsolidationPoisoningMitigation();
@@ -425,9 +394,7 @@ const fixtureT09 = defineFixture({
       return fail('T09', ['mitigate() did not apply']);
     }
     if (!result.evidence.some((e) => e.includes('consolidation-demoted'))) {
-      return fail('T09', [
-        'mitigate() evidence missing consolidation-demoted',
-      ]);
+      return fail('T09', ['mitigate() evidence missing consolidation-demoted']);
     }
     if (!mit.isConsolidationDemoted('poisoned-cons')) {
       return fail('T09', ['consolidation should be demoted after mitigation']);
@@ -442,8 +409,7 @@ const fixtureT09 = defineFixture({
 const fixtureT10 = defineFixture({
   id: 'T10',
   name: 'T10: Retention Policy Bypass',
-  description:
-    'Create object past retention window and detect retention bypass',
+  description: 'Create object past retention window and detect retention bypass',
   category: 'security',
   run: async () => {
     const mit = new T10RetentionPolicyMitigation();
@@ -481,8 +447,7 @@ const fixtureT10 = defineFixture({
 const fixtureT11 = defineFixture({
   id: 'T11',
   name: 'T11: Hard-Delete Without Audit',
-  description:
-    'Attempt hard-delete without audit logging and detect the skip',
+  description: 'Attempt hard-delete without audit logging and detect the skip',
   category: 'security',
   run: async () => {
     const mit = new T11HardDeleteWithoutAuditMitigation();
@@ -490,9 +455,7 @@ const fixtureT11 = defineFixture({
     // Record a deletion without audit — should be intercepted
     const allowed = mit.recordDeletion('doc-1', 'document', 'user-a', false);
     if (allowed) {
-      return fail('T11', [
-        'deletion without audit should be intercepted (return false)',
-      ]);
+      return fail('T11', ['deletion without audit should be intercepted (return false)']);
     }
 
     const detected = await mit.detect(createImmuneSystem(), createPolicyEngine());
@@ -525,9 +488,7 @@ const fixtureT11 = defineFixture({
     // Deletion with audit should pass through
     const withAudit = mit.recordDeletion('doc-2', 'document', 'user-b', true);
     if (!withAudit) {
-      return fail('T11', [
-        'deletion with audit should be allowed (return true)',
-      ]);
+      return fail('T11', ['deletion with audit should be allowed (return true)']);
     }
 
     return pass('T11', { stats: mit.getStats() });
@@ -539,8 +500,7 @@ const fixtureT11 = defineFixture({
 const fixtureT12 = defineFixture({
   id: 'T12',
   name: 'T12: Timing Side Channel',
-  description:
-    'Record response times with high variance and detect timing side channel',
+  description: 'Record response times with high variance and detect timing side channel',
   category: 'security',
   run: async () => {
     const mit = new T12TimingSideChannelMitigation();
@@ -568,9 +528,7 @@ const fixtureT12 = defineFixture({
     // Verify noise injection produces values in the configured range
     const noise = mit.injectNoise();
     if (noise < 5 || noise > 25) {
-      return fail('T12', [
-        `injectNoise() returned ${noise} — expected between 5 and 25`,
-      ]);
+      return fail('T12', [`injectNoise() returned ${noise} — expected between 5 and 25`]);
     }
 
     return pass('T12', { stats: mit.getStats() });
@@ -601,9 +559,7 @@ const fixtureT13 = defineFixture({
 
     const detected = await mit.detect(createImmuneSystem(), createPolicyEngine());
     if (!detected) {
-      return fail('T13', [
-        'detect() returned false — expected true after token exhaustion',
-      ]);
+      return fail('T13', ['detect() returned false — expected true after token exhaustion']);
     }
 
     const result = await mit.mitigate(createImmuneSystem(), createPolicyEngine());
@@ -626,9 +582,7 @@ const fixtureT13 = defineFixture({
       mitLegit.recordTokenIssue('legit-source', true);
     }
     if (mitLegit.getBlockedSources().includes('legit-source')) {
-      return fail('T13', [
-        'successful token issues should not result in blocking',
-      ]);
+      return fail('T13', ['successful token issues should not result in blocking']);
     }
 
     return pass('T13', { stats: mit.getStats() });
@@ -640,8 +594,7 @@ const fixtureT13 = defineFixture({
 const fixtureT14 = defineFixture({
   id: 'T14',
   name: 'T14: Session Hijacking',
-  description:
-    'Switch client identity mid-session and detect hijacking',
+  description: 'Switch client identity mid-session and detect hijacking',
   category: 'security',
   run: async () => {
     const mit = new T14SessionHijackingMitigation();
@@ -655,9 +608,7 @@ const fixtureT14 = defineFixture({
     // Verify with a different identity — should fail and mark hijacked
     const valid = mit.verifySession('sess-1', 'user-b');
     if (valid) {
-      return fail('T14', [
-        'verifySession() should return false for mismatched identity',
-      ]);
+      return fail('T14', ['verifySession() should return false for mismatched identity']);
     }
     if (mit.isSessionValid('sess-1')) {
       return fail('T14', ['session should be invalid after identity mismatch']);
@@ -665,9 +616,7 @@ const fixtureT14 = defineFixture({
 
     const detected = await mit.detect(createImmuneSystem(), createPolicyEngine());
     if (!detected) {
-      return fail('T14', [
-        'detect() returned false — expected true after session hijack',
-      ]);
+      return fail('T14', ['detect() returned false — expected true after session hijack']);
     }
 
     const result = await mit.mitigate(createImmuneSystem(), createPolicyEngine());
@@ -748,11 +697,10 @@ describe('ThreatMitigationEngine integration', () => {
   });
 
   it('start and stop cycle timer cleanly', () => {
-    const engine = new ThreatMitigationEngine(
-      createImmuneSystem(),
-      createPolicyEngine(),
-      { autoMitigate: false, cycleIntervalMs: 50 },
-    );
+    const engine = new ThreatMitigationEngine(createImmuneSystem(), createPolicyEngine(), {
+      autoMitigate: false,
+      cycleIntervalMs: 50,
+    });
 
     engine.start();
     expect(engine.getStats().autoMitigate).toBe(false);
@@ -760,11 +708,10 @@ describe('ThreatMitigationEngine integration', () => {
   });
 
   it('getHistory returns recent mitigation results', async () => {
-    const engine = new ThreatMitigationEngine(
-      createImmuneSystem(),
-      createPolicyEngine(),
-      { autoMitigate: true, cycleIntervalMs: 100 },
-    );
+    const engine = new ThreatMitigationEngine(createImmuneSystem(), createPolicyEngine(), {
+      autoMitigate: true,
+      cycleIntervalMs: 100,
+    });
 
     await engine.tick();
     const history = engine.getHistory(5);
@@ -772,10 +719,7 @@ describe('ThreatMitigationEngine integration', () => {
   });
 
   it('supports registering custom mitigations', () => {
-    const engine = new ThreatMitigationEngine(
-      createImmuneSystem(),
-      createPolicyEngine(),
-    );
+    const engine = new ThreatMitigationEngine(createImmuneSystem(), createPolicyEngine());
 
     const customId = 'T99' as const;
     engine.register({
