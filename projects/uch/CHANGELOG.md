@@ -73,6 +73,24 @@ All notable changes to UCH are documented here. Format follows
 - Security audit wave 2026-07-31: 8/8 findings fixed (command injection,
   path traversal, denylist bypass, tool containment) — see BUG-REPORT.md.
 
+### Changed
+
+- **W-04 interface decomposition (foundation-hardening wave 3)** —
+  three monoliths split into one-module-per-concern layouts, public
+  surfaces unchanged:
+  - `src/kernel/cic/threat-mitigations.ts` (1273 lines) →
+    `src/kernel/cic/mitigations/` — `t01.ts`…`t14.ts` (one module per
+    threat), `engine.ts`, `types.ts`, `index.ts`; `cic/index.ts` now
+    re-exports `./mitigations/index.js`.
+  - `src/mcp/stdio-server.ts` (1315 lines) → JSON-RPC shell (275 lines)
+    + `src/mcp/tools/` — `core-tools.ts`, `framework-tools.ts`,
+    `package-tools.ts`, `types.ts` (`Tool`/`ToolRegistrar`/`MCPToolContext`).
+  - `src/cli/index.ts` (1001 lines, R-7 cc debt) → dispatch shell
+    (138 lines) + command modules in `src/cli/` — `server-commands`,
+    `memory-commands`, `skill-commands`, `governance-commands`,
+    `framework-commands`, `package-command`, `cir-command`,
+    `productivity-commands`, `profile-command`, `context.ts`, `help.ts`.
+
 ### Added
 
 - **Engineering Intelligence layer (ADR-003, waves A–D)** — 150-concept

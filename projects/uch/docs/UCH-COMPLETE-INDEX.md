@@ -106,7 +106,9 @@ projects/uch/
 │   ├── agentic/                      # Full agentic engine (tools, permissions, query loop, tasks...)
 │   ├── basal_ganglia/                # ActionSelector (action selection)
 │   ├── chunkers/                     # Recursive + semantic text chunkers
-│   ├── cli/                          # CLI entry (index.ts) + UCCPServer (HTTP/SSE)
+│   ├── cli/                          # CLI dispatch shell (index.ts) + command modules
+│   │                                 #   (server/memory/skill/governance/framework/package/
+│   │                                 #   cir/productivity/profile) + UCCPServer (HTTP/SSE)
 │   ├── coding/                       # Code toolkit: index, editor, runner, diff-review, skills
 │   ├── cognitive-brain/              # Conscience + MemoryPipeline
 │   ├── cognitive-memory/             # SkillRegistry
@@ -132,7 +134,8 @@ projects/uch/
 │   ├── kernel/                       # ★ CognitiveKernel: memory system, retrieval, storage,
 │   │                                 #   constitution, concept-genome, CIC, facts (35 files)
 │   ├── llm/                          # LLMClient (openai/anthropic/google/auto) + AnthropicProvider
-│   ├── mcp/                          # MCPStdioServer (24 tools, JSON-RPC over stdio)
+│   ├── mcp/                          # MCPStdioServer shell (JSON-RPC over stdio) + tools/
+│   │                                 #   (core/package/framework registration modules, 47 tools)
 │   ├── memory/                       # ProgressiveMemorySearch (3-layer)
 │   ├── metabolism/                   # Metabolism (energy budgeting) + metabolic-profile
 │   ├── neocortex/                    # Neocortex (pattern learner)
@@ -238,8 +241,8 @@ The entire public API (~200 exports). Sections: Control Plane → Cognitive Plan
 |---|---|
 | `cortex/neuromodulation.ts` | `Neuromodulation`: ACh learning_rate, NE exploration_rate, 5-HT discount_factor, DA reward_sensitivity; `update(ContextState)` adjusts by novelty/horizon/uncertainty/reward history. |
 | `concept-genome/concept-genome.ts` | ★ Concept DNA: `ConceptDNA` (identity, purpose, relationships, dependencies, evolution, evidence), `GeneMarker`, `MutationEvent`, `FusionProposal`, similarity/compare, encode/decode, stats. |
+| `cic/mitigations/` | ★ `ThreatMitigationEngine` + 14 mitigations T01–T14, one module per threat (`t01.ts`…`t14.ts`), `types.ts` contracts, `index.ts` re-exports (decomposed from `cic/threat-mitigations.ts`, W-04). |
 | `cic/circuit-breaker.ts` | `CircuitBreaker` closed/open/half-open (threshold 5, cooldown 30 s, 3 probes); `CircuitBreakerOpenError/TimeoutError`. |
-| `cic/threat-mitigations.ts` | `ThreatMitigationEngine` + 14 mitigations T01–T14 (unauthorized access, cross-project contamination, privilege escalation, consent bypass, data exfiltration, runaway process, cascading policy, replay, consolidation poisoning, retention, hard-delete audit, timing side channel, token exhaustion, session hijacking). |
 | `facts/facts-fence.ts` | Markdown fact fence (`<!--- uch:facts:begin -->`), `FactRow` kinds (event/preference/commitment/belief/fact), visibility, notability; `parseFactsFence/renderFactsFence`, expiry, trajectory + regression flagging. |
 
 **ADR-006 kernel services (`kernel/process/`, `kernel/memory/vmem/`, `kernel/organism/`, `kernel/transactional/`, `kernel/diagnostics/`, `kernel/merge/`, `kernel/packages/` — added 2026-08-01 per `design/COGNITIVE-KERNEL-SHIPPING.md`):**
@@ -432,7 +435,7 @@ The entire public API (~200 exports). Sections: Control Plane → Cognitive Plan
 | `interface/cli-transport.ts` | `CLITransport`: command-line transport. |
 | `interface/ipc-transport.ts` | `IPCTransport` (EventEmitter-based, message channels). |
 | `interface/a2a-transport.ts` | `A2ATransport`: Agent-to-Agent messages, handshake/heartbeat. |
-| `mcp/stdio-server.ts` | ★ `MCPStdioServer`: JSON-RPC 2.0 over stdio, **25 tools**: observe, remember, recall, session-save/load/list/handoff, git-ingest, plan, reflect, learn, critique, status, sm-store/sm-recall/sm-facts, constitution-check, summarize, extract-concepts, schedule, principles-check, organic-score, gap-analysis, mem-search, mem-get. |
+| `mcp/stdio-server.ts` | ★ `MCPStdioServer`: JSON-RPC 2.0 over stdio shell; tool handlers live in `mcp/tools/` — `core-tools.ts`, `framework-tools.ts`, `package-tools.ts` (registration modules, W-04). **47 tools**: observe, remember, recall, session-save/load/list/handoff, git-ingest, plan, reflect, learn, critique, status, sm-store/sm-recall/sm-facts, constitution-check, summarize, extract-concepts, schedule, principles-check, organic-score, gap-analysis, mem-search, mem-get, engineering-review, code-audit, rca, framework-catalog/select/run/stats, package-install/list/update/revoke/audit/attach, decide, strategy, plan-day, dikw, evaluate-info, compose-signals, research-gap, research-methodology. |
 
 ### 5.10 Drivers — `src/drivers/` (7 files)
 
