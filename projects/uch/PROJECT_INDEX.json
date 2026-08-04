@@ -2,95 +2,215 @@
   "schema_version": "1.0",
   "project": "uch",
   "name": "Universal Cognitive Harness",
-  "version": "0.2.0",
-  "generated_at": "2026-07-31T21:50:00.000Z",
-  "indexed_commit": "e520a15f2e07a83cec9849088f45d069eb0d2996",
-  "indexed_commit_date": "2026-07-31",
+  "version": "0.3.0",
+  "spec_version": "0.5.1",
+  "generated_at": "2026-08-01T10:40:00.000Z",
+  "indexed_commit": "b6229ec6a396c600839d01f4a0a5a5b118625908",
+  "indexed_commit_date": "2026-08-01",
+  "indexed_commit_subject": "docs(uch): vision intake round 9 - Phase Omega platform infrastructure (IDEA-0056..0058)",
+  "previous_indexed_commit": "e520a15f2e07a83cec9849088f45d069eb0d2996",
+  "commits_since_last_index": 22,
   "staleness_threshold_days": 7,
-  "next_refresh_due": "2026-08-07",
+  "next_refresh_due": "2026-08-08",
   "drift": {
-    "dirty_entries": 144,
-    "modified_src_files": 26,
-    "staged_renames": ["src/exoskeleton/immune.ts -> src/cognitive-core/immune.ts", "src/exoskeleton/endocrine.ts -> src/cognitive-core/endocrine.ts"]
+    "dirty_entries": 0,
+    "note": "working tree clean for projects/uch; prior 144 dirty entries resolved by fc196e4 publish wave"
   },
   "metrics": {
-    "src_files": 504,
-    "src_lines": 81439,
-    "test_files": 134,
-    "tests_total": 2152,
-    "tests_failed_stable": 2,
-    "tests_failed_intermittent_max": 12,
-    "src_areas_total": 51,
-    "src_areas_without_inline_tests": 26,
-    "docs_files": 66,
-    "commit_count": 18,
+    "src_files": 579,
+    "src_lines": 91364,
+    "test_files": 161,
+    "tests_total": 2518,
+    "tests_failed": 2,
+    "failed_files": ["src/__tests__/agent-integration.test.ts"],
+    "src_areas_total": 52,
+    "test_files_mega_dir": 87,
+    "docs_files_total": 177,
+    "docs_files": 19,
+    "design_files": 37,
+    "spec_files": 8,
+    "research_files": 20,
+    "planning_files": 30,
+    "rfc_files": 63,
+    "idea_notes": 58,
+    "commit_count": 40,
+    "commits_since_last_index": 22,
     "authors": ["saintxlucid"],
-    "estimated_tokens_src": "1.2M-1.6M"
+    "estimated_tokens_src": "1.3M-1.7M"
   },
   "entry_points": [
-    { "path": "src/index.ts", "kind": "library", "fan_out": 146 },
-    { "path": "src/cli/index.ts", "kind": "cli", "commands": 33 },
-    { "path": "src/cli/uccp.ts", "kind": "server", "protocol": "UCCP HTTP/SSE (legacy)" },
-    { "path": "src/mcp/stdio-server.ts", "kind": "server", "protocol": "MCP STDIO" },
+    { "path": "src/index.ts", "kind": "library", "fan_out": 147 },
+    { "path": "src/cli/index.ts", "kind": "cli", "commands": 30, "fan_out": 37 },
+    {
+      "path": "src/cli/uccp.ts",
+      "kind": "server",
+      "protocol": "UCCP HTTP/SSE (legacy)",
+      "fan_out": 38
+    },
+    { "path": "src/mcp/stdio-server.ts", "kind": "server", "protocol": "MCP STDIO", "fan_out": 34 },
     { "path": "src/agent/boot.ts", "kind": "agent-bootstrap" },
-    { "path": "src/agent/plugin.ts", "kind": "agent-plugin", "fan_out": 16 }
+    { "path": "src/agent/plugin.ts", "kind": "agent-plugin", "fan_out": 18 },
+    { "path": "src/cognitive-core/cognitive-core.ts", "kind": "orchestrator", "fan_out": 24 }
   ],
   "layers": [
-    { "name": "kernel", "path": "src/kernel", "files": 47, "role": "memory stores, retrieval, constitution, organic score" },
-    { "name": "exoskeleton", "path": "src/exoskeleton", "files": 2, "role": "root orchestrator (51 deps)" },
-    { "name": "cognitive-plane", "path": "src/cognitive-plane", "files": 66, "role": "trace engine, frameworks, integrity, replay" },
-    { "name": "control-plane", "path": "src/control-plane", "files": 19, "role": "auth, secrets, budgets, telemetry, transport" },
-    { "name": "agentic", "path": "src/agentic", "files": 43, "role": "agent middleware, tools, subagents, failover" },
-    { "name": "engineering-intelligence", "path": "src/engineering-intelligence", "files": 19, "role": "150 concepts / 10 tiers, veto gates" },
-    { "name": "workspace-graphs", "path": "src/workspace-graphs", "files": 6, "role": "knowledge/decision/task graphs, DNA" }
+    {
+      "name": "kernel",
+      "path": "src/kernel",
+      "role": "memory stores, retrieval, constitution, process model, vmem, transactions, packages, diagnostics"
+    },
+    { "name": "exoskeleton", "path": "src/exoskeleton", "role": "root orchestrator (51 deps)" },
+    {
+      "name": "cognitive-core",
+      "path": "src/cognitive-core",
+      "role": "immune/endocrine organs (relocated from exoskeleton)"
+    },
+    {
+      "name": "cognitive-plane",
+      "path": "src/cognitive-plane",
+      "role": "trace engine, frameworks (34), replay incl. time-machine + UER"
+    },
+    {
+      "name": "control-plane",
+      "path": "src/control-plane",
+      "role": "auth, secrets, budgets, telemetry, packages (gate/grants/semver)"
+    },
+    {
+      "name": "agentic",
+      "path": "src/agentic",
+      "role": "agent middleware, tools, subagents, failover"
+    },
+    {
+      "name": "engineering-intelligence",
+      "path": "src/engineering-intelligence",
+      "role": "150 concepts / 10 tiers, veto gates, failure physics, decision law"
+    },
+    {
+      "name": "workspace-graphs",
+      "path": "src/workspace-graphs",
+      "role": "knowledge/decision/task graphs, DNA"
+    },
+    {
+      "name": "aether",
+      "path": "src/aether",
+      "role": "consciousness (12 fan-in - fastest-growing coupling point)"
+    }
   ],
   "dependencies": {
     "external": [
       { "name": "openai", "version": "^7.2.0", "scope": "runtime" },
       { "name": "@opentelemetry/api", "version": "^1.9.1", "scope": "runtime" },
+      { "name": "glob", "version": "^11.1.0", "scope": "runtime" },
       { "name": "typescript", "version": "^5.8.0", "scope": "dev" },
-      { "name": "vitest", "version": "^3.0.0", "scope": "dev" },
-      { "name": "eslint", "version": "^9.0.0", "scope": "dev" },
-      { "name": "@vitest/coverage-v8", "version": "^3.2.7", "scope": "dev" }
+      { "name": "vitest", "version": "^4.1.10", "scope": "dev" },
+      { "name": "eslint", "version": "^10.8.0", "scope": "dev" },
+      { "name": "@vitest/coverage-v8", "version": "^4.1.10", "scope": "dev" }
     ],
-    "audit_status": "pending (offline)",
-    "internal_edges": 1145,
-    "internal_files_analyzed": 370,
+    "audit_status": "clean (8 high cleared by fix 26f6e2b)",
+    "internal_edges": 1251,
+    "internal_files_analyzed": 417,
     "bottlenecks": [
-      { "path": "src/event-bus/neural-event-bus.ts", "fan_in": 40, "fan_out": 0 },
+      { "path": "src/event-bus/neural-event-bus.ts", "fan_in": 43, "fan_out": 0 },
+      {
+        "path": "src/cognitive-plane/persistence/persistence-engine.ts",
+        "fan_in": 32,
+        "fan_out": 0
+      },
       { "path": "src/kernel/cognitive-kernel.ts", "fan_in": 32, "fan_out": 14 },
-      { "path": "src/cognitive-plane/persistence/persistence-engine.ts", "fan_in": 25, "fan_out": 0 }
+      { "path": "src/engineering-intelligence/types.ts", "fan_in": 24, "fan_out": 0 },
+      { "path": "src/agentic/types.ts", "fan_in": 19, "fan_out": 0 }
     ],
     "hubs": [
-      { "path": "src/index.ts", "fan_out": 146, "instability": 1.0 },
+      { "path": "src/index.ts", "fan_out": 147, "instability": 1.0 },
       { "path": "src/exoskeleton/exoskeleton.ts", "fan_out": 51, "instability": 0.86 },
-      { "path": "src/cli/uccp.ts", "fan_out": 38, "instability": 0.95 }
+      { "path": "src/cli/uccp.ts", "fan_out": 38, "instability": 0.95 },
+      { "path": "src/cli/index.ts", "fan_out": 37, "instability": 1.0 },
+      { "path": "src/mcp/stdio-server.ts", "fan_out": 34, "instability": 0.92 },
+      { "path": "src/agentic/index.ts", "fan_out": 29, "instability": 0.97 },
+      { "path": "src/cognitive-core/cognitive-core.ts", "fan_out": 24, "instability": 0.89 }
     ],
     "circular_dependencies": [
-      { "cycle": "agent/boot -> agent/plugin -> executive-brain -> engineering-intelligence/index -> benchmark/runner -> index", "risk": "low", "kind": "barrel-cycle" },
-      { "cycle": "cli/index -> exoskeleton -> cortex_kernel/integrator <-> attention-cortex", "risk": "high", "kind": "module-cycle" },
-      { "cycle": "cli/index -> exoskeleton -> cortex_kernel/integrator <-> executive-cortex", "risk": "high", "kind": "module-cycle" },
-      { "cycle": "cli/index -> exoskeleton -> cortex_kernel/integrator <-> meta-brain", "risk": "high", "kind": "module-cycle" }
+      {
+        "cycle": "agent/boot -> agent/plugin -> executive-brain -> engineering-intelligence/index -> benchmark/runner -> index",
+        "risk": "low",
+        "kind": "barrel-cycle"
+      },
+      {
+        "cycle": "cli/index -> exoskeleton -> cortex_kernel/integrator <-> attention-cortex",
+        "risk": "high",
+        "kind": "module-cycle"
+      },
+      {
+        "cycle": "cli/index -> exoskeleton -> cortex_kernel/integrator <-> executive-cortex",
+        "risk": "high",
+        "kind": "module-cycle"
+      },
+      {
+        "cycle": "cli/index -> exoskeleton -> cortex_kernel/integrator <-> meta-brain",
+        "risk": "high",
+        "kind": "module-cycle"
+      },
+      {
+        "cycle": "kernel/process/index <-> kernel/process/join",
+        "risk": "low",
+        "kind": "barrel-cycle"
+      }
     ]
   },
   "risk_flags": [
-    { "id": "RF-1", "description": "cortex_kernel/integrator.ts genuine circular deps", "severity": "high" },
-    { "id": "RF-2", "description": "Flaky suite: reflex-gate determinism test compares duration_ms (structurally broken); framework-journal merge intermittent", "severity": "medium" },
-    { "id": "RF-3", "description": "Bus factor 1, 18/18 commits single author", "severity": "medium" },
-    { "id": "RF-4", "description": "exoskeleton.ts 51-dependency hub with zero inline tests", "severity": "medium" },
-    { "id": "RF-5", "description": "68 test files in src/__tests__ mega-dir; 26 areas lack co-located tests", "severity": "low" },
-    { "id": "RF-6", "description": "144 dirty working-tree entries invalidate co-change analysis", "severity": "low" }
+    {
+      "id": "RF-1",
+      "description": "cortex_kernel/integrator.ts genuine circular deps (3 module cycles)",
+      "severity": "high"
+    },
+    {
+      "id": "RF-2",
+      "description": "2 committed known failures: agent-integration.test.ts middleware 'Genome' stage + adapter.wear missing",
+      "severity": "medium"
+    },
+    {
+      "id": "RF-3",
+      "description": "Bus factor 1: 40/40 commits single author",
+      "severity": "medium"
+    },
+    {
+      "id": "RF-4",
+      "description": "exoskeleton.ts 51-dep hub + index.ts 147 re-exports with zero inline tests",
+      "severity": "medium"
+    },
+    {
+      "id": "RF-5",
+      "description": "87 test files in src/__tests__ mega-dir; 26 areas lack co-located tests",
+      "severity": "low"
+    },
+    {
+      "id": "RF-6",
+      "description": "aether/consciousness.ts 12 fan-in - fastest-growing coupling point",
+      "severity": "low"
+    },
+    {
+      "id": "RF-7",
+      "description": "Ingester flake (3 tests) under full parallel load on shared os.tmpdir - passes alone",
+      "severity": "low"
+    }
   ],
   "secrets_scan": {
     "status": "clean",
-    "matches": [{ "path": "src/coding/__tests__/coding-tools.test.ts", "line": 305, "note": "test-fixture placeholder only" }]
+    "matches": [
+      {
+        "path": "src/coding/__tests__/coding-tools.test.ts",
+        "line": 305,
+        "note": "test-fixture placeholder only"
+      }
+    ]
   },
-  "changelog_summary": "ADR-001 attachment governance; ADR-002 OTel trace engine; Phase-01 workspace graph organs; agentic resilience suite; Mnemosyne; kernel physiology; CP v1; Engineering Intelligence tiers I-X",
+  "changelog_summary": "ADR-006 kernel shipping wave (process/vmem/versioning/transactions/diagnostics/mounts/merge/packages); RFC-0005 failure physics + held-out corpus + Acceptance; IDEA-0034 decision law, IDEA-0047 UER graph, IDEA-0045 CVM design; frameworks phases 3-4 (34 frameworks, solve, journal); security audit 8/8 fixes + eslint10/vitest4; vision corpus IDEA-0001..0058, RFC-0000..0005; sensors/effectors + driver compliance; spec 0.2.0 -> 0.3.0",
   "commands": {
     "test": "npx vitest run",
     "typecheck": "npx tsc --noEmit",
     "lint": "npx eslint src/",
     "build": "npx tsc",
-    "cli": "node dist/cli/index.js"
+    "cli": "node dist/cli/index.js",
+    "deps-graph": "node X:\\DAIRA\\.tmp\\opencode\\uch-deps.mjs projects/uch/src",
+    "spec-version": "npm run check:spec-version"
   }
 }

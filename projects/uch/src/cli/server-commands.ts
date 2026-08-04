@@ -23,9 +23,9 @@ export async function handleMcp(ctx: CliContext): Promise<void> {
     constitution,
   } = ctx;
   if (llm.isAvailable) {
-    console.error('UCH MCP Server v0.2.0 — LLM: enabled');
+    console.error('UCH MCP Server v0.3.0 — LLM: enabled');
   } else {
-    console.error('UCH MCP Server v0.2.0 — LLM: disabled (set OPENAI_API_KEY)');
+    console.error('UCH MCP Server v0.3.0 — LLM: disabled (set OPENAI_API_KEY)');
   }
   console.error('Connect via STDIO transport');
   const server = new MCPStdioServer({
@@ -97,7 +97,7 @@ export async function handleManifest(ctx: CliContext): Promise<void> {
     const manifest = createManifest({
       name,
       purpose: 'Workspace cognitive configuration',
-      minUchVersion: '0.2.0',
+      minUchVersion: '0.3.0',
       capabilities: [
         { name: 'memory', enabled: true },
         { name: 'knowledge', enabled: true },
@@ -143,7 +143,7 @@ export async function handleStatus(ctx: CliContext): Promise<void> {
   console.log(
     JSON.stringify(
       {
-        version: '0.2.0',
+        version: '0.3.0',
         llm: llm.isAvailable ? `${llm.provider}:${llm.modelName}` : 'none',
         embedder: embedder.available ? 'enabled' : 'local-fallback',
         memory: {

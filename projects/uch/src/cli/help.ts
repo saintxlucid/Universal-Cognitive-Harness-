@@ -5,7 +5,7 @@
  */
 
 export function printHelp(): void {
-  console.log(`UCH — Universal Cognitive Harness v0.2.0
+  console.log(`UCH — Universal Cognitive Harness v0.3.0
 
 USAGE:
   uch                          Start MCP STDIO server (for AI tool integration)
@@ -59,6 +59,7 @@ USAGE:
   uch cir execute "<goal>"     Compile + optimize + execute (replay substitution, deterministic subset)
   uch cir benchmark            Run the RFC-0004 §14 deterministic benchmark corpus (six contracts)
   uch profile [file] [--verbose]  Cognitive Profiler: per-stage attribution + metrics over a trace ledger
+  uch daemon [--once] [--ticks N] Run the persistent brain without a pilot (standalone CognitiveCore; --once exits after N sleep cycles)
   uch help                     Show this help
 
 ENVIRONMENT:

@@ -1,6 +1,6 @@
 {
   "name": "uch",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Universal Cognitive Harness — persistent cognitive runtime any IDE, agent, or AI runtime can plug into",
   "license": "MIT",
   "type": "module",
@@ -21,7 +21,7 @@
     "harness"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "tsc",

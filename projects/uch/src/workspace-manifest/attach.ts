@@ -7,12 +7,16 @@ import {
 } from '../cognitive-runtime/capability-registry.js';
 import { GrantEngine, type CapabilityGrant } from '../cognitive-runtime/grants.js';
 import { EventGovernance } from '../control-plane/event-governance.js';
-import { ProjectionEngine, type WorkspaceProjection, type WorkspaceState } from '../control-plane/projections.js';
+import {
+  ProjectionEngine,
+  type WorkspaceProjection,
+  type WorkspaceState,
+} from '../control-plane/projections.js';
 import { discoverManifest, type DiscoveryResult } from './discovery.js';
 import { negotiateVersion, type WorkspaceManifest } from './manifest.js';
 import { negotiate } from './negotiation.js';
 
-export const UCH_RUNTIME_VERSION = '0.2.0';
+export const UCH_RUNTIME_VERSION = '0.3.0';
 
 export const STANDARD_CAPABILITIES = [
   'memory',
@@ -73,7 +77,10 @@ export interface AttachOptions {
   /** Workspace state tree used to compute the authorized projection. */
   workspaceState?: WorkspaceState;
   /** Driver factory map: id → (eventBus, config) => Driver. */
-  driverFactories?: Record<string, (eventBus: NeuralEventBus, config?: Record<string, unknown>) => Driver>;
+  driverFactories?: Record<
+    string,
+    (eventBus: NeuralEventBus, config?: Record<string, unknown>) => Driver
+  >;
 }
 
 export interface AttachmentResult {
@@ -122,7 +129,8 @@ export interface AttachmentSession {
  * activation, never hidden interception.
  */
 export async function attach(options?: AttachOptions): Promise<AttachmentResult> {
-  const opts: Required<Pick<AttachOptions, 'agent_id' | 'user_id' | 'runtimeVersion'>> & AttachOptions = {
+  const opts: Required<Pick<AttachOptions, 'agent_id' | 'user_id' | 'runtimeVersion'>> &
+    AttachOptions = {
     agent_id: options?.agent_id ?? 'uch-client',
     user_id: options?.user_id ?? 'default',
     runtimeVersion: options?.runtimeVersion ?? UCH_RUNTIME_VERSION,
@@ -204,12 +212,13 @@ export async function attach(options?: AttachOptions): Promise<AttachmentResult>
     },
   });
 
-  const projection = opts.workspaceState !== undefined
-    ? new ProjectionEngine({ capabilityRegistry }).project(grant, {
-        ...opts.workspaceState,
-        workspace_id,
-      })
-    : undefined;
+  const projection =
+    opts.workspaceState !== undefined
+      ? new ProjectionEngine({ capabilityRegistry }).project(grant, {
+          ...opts.workspaceState,
+          workspace_id,
+        })
+      : undefined;
 
   const governance = opts.governance ?? new EventGovernance({ eventBus, grantEngine });
   const lifecycleInput = {
@@ -223,8 +232,16 @@ export async function attach(options?: AttachOptions): Promise<AttachmentResult>
     payload: {} as Record<string, unknown>,
   };
 
-  const opened = { ...lifecycleInput, event_id: `att-opened-${session_id}`, type: 'workspace:opened' as const };
-  const attached = { ...lifecycleInput, event_id: `att-attached-${session_id}`, type: 'agent:attached' as const };
+  const opened = {
+    ...lifecycleInput,
+    event_id: `att-opened-${session_id}`,
+    type: 'workspace:opened' as const,
+  };
+  const attached = {
+    ...lifecycleInput,
+    event_id: `att-attached-${session_id}`,
+    type: 'agent:attached' as const,
+  };
   opened.payload = {
     workspace_id,
     name: discovery.manifest.workspace.name,
@@ -267,7 +284,11 @@ export async function attach(options?: AttachOptions): Promise<AttachmentResult>
 
 export async function detach(
   result: AttachmentResult,
-  options?: { eventBus?: NeuralEventBus; driverRegistry?: DriverRegistry; grantEngine?: GrantEngine },
+  options?: {
+    eventBus?: NeuralEventBus;
+    driverRegistry?: DriverRegistry;
+    grantEngine?: GrantEngine;
+  },
 ): Promise<void> {
   if (!result.attached) return;
 

@@ -22,10 +22,15 @@ import { generateSpanId } from './cognitive-trace.js';
 
 export type { ParsedTraceparent } from './traceparent.js';
 export { parseTraceparent, serializeTraceparent } from './traceparent.js';
-export { generateTraceId, generateSpanId, normalizeTraceId, normalizeSpanId } from './cognitive-trace.js';
+export {
+  generateTraceId,
+  generateSpanId,
+  normalizeTraceId,
+  normalizeSpanId,
+} from './cognitive-trace.js';
 
 const TRACER_NAME = 'uccp';
-const TRACER_VERSION = '0.2.0';
+const TRACER_VERSION = '0.3.0';
 
 const KIND_MAP: Record<SpanKind, OtelSpanKind> = {
   internal: OtelSpanKind.INTERNAL,

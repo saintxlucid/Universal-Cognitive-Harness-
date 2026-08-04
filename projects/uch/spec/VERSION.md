@@ -1,21 +1,23 @@
 # UCH Specification Corpus — Versioning & Stability Policy
 
 **Specification:** `spec/` — LAWS_OF_COGNITIVE_PHYSICS, GENOME,
-FORMAL_FOUNDATIONS, CP, CONSTITUTION, COGNITIVE_ONTOLOGY,
+EXPRESSION, FORMAL_FOUNDATIONS, CP, CONSTITUTION, COGNITIVE_ONTOLOGY,
 COGNITIVE_BIOLOGY, CIR, VERSION
-**Version:** 0.4.0
+**Version:** 0.5.1
 **Status:** Draft (0.x — no compatibility promise yet)
-**Last updated:** 2026-08-01
+**Last updated:** 2026-08-04
 
 ---
 
 ## 0. Changelog
 
-| Date | Version | Change | RFC |
-| --- | --- | --- | --- |
-| 2026-08-01 | 0.3.0 → 0.4.0 | New normative spec: spec/CIR.md — Cognitive Intermediate Representation (instruction model, classes, pipeline, 17-pass optimizer, gates, versioning, trace contract), promoted from design/CIR.md at RFC-0004 Acceptance | RFC-0004 |
-| 2026-08-01 | 0.2.0 → 0.3.0 | FORMAL_FOUNDATIONS Part VIII promoted from draft to normative (Cognitive Physics: quantities/units, conservation, failure physics I(b) = confidence − evidenceMass with held-out-validated θ = 0.5, cognitive calculus) | RFC-0005 |
-| 2026-08-01 | 0.1.0 → 0.2.0 | 13 new laws (Laws 20–32) added in five families; Constitution extended with Articles IX–XI (Cognitive Rights, Cognitive Responsibilities, Immutability of the Core); specification governance declared (RFC-0000) | RFC-0000 |
+| Date       | Version       | Change                                                                                                                                                                                                                                                          | RFC      |
+| ---------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| 2026-08-04 | 0.5.0 → 0.5.1 | Version declaration refresh: VERSION.md materialized 2026-08-03, declared date reconciled with file mtime; no normative spec change                                                                                                                             | —        |
+| 2026-08-01 | 0.4.0 → 0.5.0 | New normative spec: spec/EXPRESSION.md — Cognitive Expression System (genes → proteins → behavior; expression rules, epigenetic marks, environment fallback, derivation + benchmark contract), promoted from design/EXPRESSION-SYSTEM.md at RFC-0006 Acceptance | RFC-0006 |
+| 2026-08-01 | 0.3.0 → 0.4.0 | New normative spec: spec/CIR.md — Cognitive Intermediate Representation (instruction model, classes, pipeline, 17-pass optimizer, gates, versioning, trace contract), promoted from design/CIR.md at RFC-0004 Acceptance                                        | RFC-0004 |
+| 2026-08-01 | 0.2.0 → 0.3.0 | FORMAL_FOUNDATIONS Part VIII promoted from draft to normative (Cognitive Physics: quantities/units, conservation, failure physics I(b) = confidence − evidenceMass with held-out-validated θ = 0.5, cognitive calculus)                                         | RFC-0005 |
+| 2026-08-01 | 0.1.0 → 0.2.0 | 13 new laws (Laws 20–32) added in five families; Constitution extended with Articles IX–XI (Cognitive Rights, Cognitive Responsibilities, Immutability of the Core); specification governance declared (RFC-0000)                                               | RFC-0000 |
 
 ---
 
@@ -25,7 +27,7 @@ The `spec/` corpus is a **versioned contract set**: the Laws of Cognitive
 Physics, the genome shape, the protocol ABI, the constitution, and the
 cognitive ontology. Each document already carries its own version where it
 is a contract (CP 1.0.0, CIC envelope, …). This policy version the corpus
-*as a whole*, so consumers and CI can answer one question: **is the
+_as a whole_, so consumers and CI can answer one question: **is the
 specification corpus newer than what I last verified against?**
 
 ## 2. Versioning model
@@ -41,10 +43,10 @@ declared date.
 
 ## 3. Bump rules
 
-| Bump | Applies to |
-| --- | --- |
-| **patch** | Additive documentation changes: clarifications, corrected wording, expanded examples, no normative change |
-| **minor** | New protocols, contracts, or normative sections added to the corpus; existing contracts unchanged |
+| Bump      | Applies to                                                                                                                     |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **patch** | Additive documentation changes: clarifications, corrected wording, expanded examples, no normative change                      |
+| **minor** | New protocols, contracts, or normative sections added to the corpus; existing contracts unchanged                              |
 | **major** | Breaking contract changes: an existing protocol op, envelope shape, law, or schema stops being honored as previously specified |
 
 A change that touches a contract's normative meaning is never a patch, even
@@ -52,14 +54,14 @@ if the diff looks small.
 
 ## 4. Stability ladder
 
-| Version | Ladder | Meaning |
-| --- | --- | --- |
-| `0.x` | **Draft** | Contracts are being shaped; consumers must pin to exact versions |
-| `1.0.0` | **Stable** | The corpus promises: no breaking change without a major bump; majors are announced and co-published where feasible |
-| `2+` | **Evolving** | Stable with a documented migration path per major |
+| Version | Ladder       | Meaning                                                                                                            |
+| ------- | ------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `0.x`   | **Draft**    | Contracts are being shaped; consumers must pin to exact versions                                                   |
+| `1.0.0` | **Stable**   | The corpus promises: no breaking change without a major bump; majors are announced and co-published where feasible |
+| `2+`    | **Evolving** | Stable with a documented migration path per major                                                                  |
 
 `0.x` makes no compatibility promise: any change may be breaking, and the
-bump rules in §3 apply only to the *shape of the history*, not to what
+bump rules in §3 apply only to the _shape of the history_, not to what
 `0.x` owes consumers.
 
 ## 5. CI intent

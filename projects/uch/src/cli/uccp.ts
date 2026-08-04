@@ -44,9 +44,28 @@ export interface UCCPOptions {
   workspaceName: string;
   workspaceRoot: string;
   httpPort?: number;
+  /** Host to bind the HTTP server to. Loopback (`127.0.0.1`) by default. */
+  host?: string;
   configPath?: string;
   traceFile?: string;
+  /** Credential gate for non-loopback binding. Not provided => the server
+   *  refuses to bind a non-loopback host (fail-closed). When provided, also
+   *  gates token minting at POST /api/token (x-api-key header). */
   apiKey?: string;
+}
+
+// Fail-closed HTTP hardening (security audit BUG-001/002/003).
+const MAX_BODY_BYTES = 1_048_576;
+const BODY_TIMEOUT_MS = 30_000;
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1']);
+
+/** True when an Origin refers to a loopback host (CORS + DNS-rebinding guard). */
+function isLoopbackOrigin(origin: string): boolean {
+  try {
+    return LOOPBACK_HOSTS.has(new URL(origin).hostname);
+  } catch {
+    return false;
+  }
 }
 
 export class UCCPServer {
@@ -95,10 +114,15 @@ export class UCCPServer {
       workspaceName: options.workspaceName,
       workspaceRoot: options.workspaceRoot,
       httpPort: options.httpPort ?? 3100,
+      host: options.host ?? '127.0.0.1',
       configPath: options.configPath ?? 'uccp.config.json',
       traceFile: options.traceFile ?? join(options.workspaceRoot, '.uccp', 'traces.jsonl'),
-      apiKey: options.apiKey ?? 'dev-key',
+      apiKey: options.apiKey ?? '',
     };
+
+    if (!LOOPBACK_HOSTS.has(this.options.host) && !this.options.apiKey) {
+      throw new Error('UCCP HTTP requires an API key when not bound to loopback');
+    }
 
     this.eventBus = new NeuralEventBus();
     this.aether = new AetherCore(this.eventBus, { tickIntervalMs: 5000 });
@@ -333,13 +357,17 @@ export class UCCPServer {
       'learn',
       'critique',
     ]);
-    // Register the configured apiKey so it can be used with POST /api/token
-    this.auth.registerApiKey(this.options.apiKey, {
-      agentId: 'admin',
-      agentType: 'cli',
-      name: 'CLI Admin',
-      permissions: ['*'],
-    });
+    // A configured API key additionally gates token minting at POST /api/token.
+    // Registering it here keeps createToken() authoritative; loopback-only
+    // servers without a key leave the endpoint closed (every mint attempt 401s).
+    if (this.options.apiKey) {
+      this.auth.registerApiKey(this.options.apiKey, {
+        agentId: 'uccp-server',
+        agentType: 'server',
+        name: 'UCCP Server',
+        permissions: ['*'],
+      });
+    }
   }
 
   async start(): Promise<void> {
@@ -363,10 +391,12 @@ export class UCCPServer {
       0.9,
     );
 
-    console.log(`UCCP Server started on port ${this.options.httpPort}`);
+    console.log(`UCCP Server started on port ${this.options.httpPort} (host ${this.options.host})`);
     console.log(`  Workspace: ${this.options.workspaceName} (${this.options.workspaceId})`);
     console.log(`  Trace file: ${this.options.traceFile}`);
-    console.log(`  API Key: ${this.options.apiKey}`);
+    console.log(
+      `  Auth: ${this.options.apiKey ? 'api key configured' : 'loopback only (no api key)'}`,
+    );
   }
 
   getSuitStatus(): Record<string, unknown> {
@@ -410,13 +440,107 @@ export class UCCPServer {
     console.log('UCCP Server stopped');
   }
 
+  /** Identity is optional: unauthenticated requests pass (loopback dev), but
+   *  any credential that IS presented must be valid. Absence is allowed;
+   *  an invalid credential fails closed with 401. */
+  private rejectInvalidCredentials(req: http.IncomingMessage, res: http.ServerResponse): boolean {
+    const authHeader = req.headers['authorization'];
+    let token = typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '') : '';
+    if (!token) {
+      const url = new URL(req.url ?? '/', 'http://localhost');
+      token = url.searchParams.get('access_token') ?? '';
+    }
+    if (!token) return true;
+    const result = this.auth.verifyToken(token);
+    if (!result.valid) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: result.error }));
+      return false;
+    }
+    return true;
+  }
+
+  /** Bounded request-body reader. On oversize it writes 413, destroys the
+   *  socket, resolves ''; callers must `if (res.writableEnded) return;`. */
+  private readBody(req: http.IncomingMessage, res: http.ServerResponse): Promise<string> {
+    return new Promise((resolve) => {
+      let body = '';
+      let bytes = 0;
+      const cleanup = (): void => {
+        req.removeListener('data', onData);
+        req.removeListener('end', onEnd);
+        req.removeListener('error', onError);
+        req.removeListener('timeout', onTimeout);
+      };
+      const onData = (chunk: Buffer): void => {
+        bytes += chunk.length;
+        if (bytes > MAX_BODY_BYTES) {
+          cleanup();
+          req.destroy();
+          res.writeHead(413, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Payload too large' }));
+          resolve('');
+          return;
+        }
+        body += chunk.toString('utf-8');
+      };
+      const onEnd = (): void => {
+        cleanup();
+        resolve(body);
+      };
+      const onError = (): void => {
+        cleanup();
+        resolve(body);
+      };
+      const onTimeout = (): void => {
+        cleanup();
+        req.destroy();
+        if (!res.writableEnded) {
+          res.writeHead(408, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Request body timeout' }));
+        }
+        resolve('');
+      };
+      req.on('data', onData);
+      req.on('end', onEnd);
+      req.on('error', onError);
+      req.setTimeout(BODY_TIMEOUT_MS, onTimeout);
+    });
+  }
+
+  private async readJsonBody(
+    req: http.IncomingMessage,
+    res: http.ServerResponse,
+  ): Promise<Record<string, unknown> | null> {
+    const body = await this.readBody(req, res);
+    if (res.writableEnded) return null;
+    try {
+      return body ? (JSON.parse(body) as Record<string, unknown>) : null;
+    } catch {
+      return null;
+    }
+  }
+
   private startHttpServer(): void {
     this.httpServer = http.createServer(async (req, res) => {
-      res.setHeader('Access-Control-Allow-Origin', '*');
+      // CORS is contained to loopback origins (the server binds loopback by
+      // default): a remote page must not be able to read responses via a
+      // DNS-rebinding trick, so `*` is never emitted for real requests and
+      // non-loopback Origins get no CORS headers at all (browsers then block
+      // reading). Origin-less preflights are exempted in the OPTIONS branch.
+      const origin = typeof req.headers['origin'] === 'string' ? req.headers['origin'] : null;
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      if (origin && isLoopbackOrigin(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+      }
 
       if (req.method === 'OPTIONS') {
+        // Origin-less preflights (curl, Node http clients) answer `*`: an
+        // empty 204 leaks no data, and browser preflights always send an
+        // Origin, so the loopback containment above still holds.
+        if (!origin) res.setHeader('Access-Control-Allow-Origin', '*');
         res.writeHead(204);
         res.end();
         return;
@@ -425,22 +549,6 @@ export class UCCPServer {
       const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
       const pathname = url.pathname;
 
-      const readJsonBody = async (): Promise<Record<string, unknown> | null> => {
-        return new Promise((resolve) => {
-          let body = '';
-          req.on('data', (chunk: string) => {
-            body += chunk;
-          });
-          req.on('end', () => {
-            try {
-              resolve(body ? JSON.parse(body) : null);
-            } catch {
-              resolve(null);
-            }
-          });
-        });
-      };
-
       if (pathname === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(
@@ -448,6 +556,38 @@ export class UCCPServer {
             status: 'ok',
             uptime: process.uptime(),
             traces: this.traceRecorder.ledger.count(),
+          }),
+        );
+        return;
+      }
+
+      // Identity is optional (public by default); an invalid credential fails
+      // closed, an absent one passes through for loopback development.
+      if (!this.rejectInvalidCredentials(req, res)) return;
+
+      // Token minting is gated by the configured x-api-key; with no key
+      // configured every mint attempt is rejected. The key check happens in
+      // the Auth store so the literal configured value is authoritative.
+      if (pathname === '/api/token' && req.method === 'POST') {
+        await this.readBody(req, res);
+        if (res.writableEnded) return;
+        const apiKey = req.headers['x-api-key'];
+        if (typeof apiKey !== 'string' || apiKey.length === 0) {
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Missing x-api-key header' }));
+          return;
+        }
+        const minted = this.auth.createToken(apiKey);
+        if (!minted.token) {
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: minted.error ?? 'Invalid API key' }));
+          return;
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(
+          JSON.stringify({
+            token: minted.token.token,
+            expiresAt: minted.token.expiresAt.toISOString(),
           }),
         );
         return;
@@ -463,29 +603,26 @@ export class UCCPServer {
           return;
         }
 
-        let body = '';
-        req.on('data', (chunk: string) => {
-          body += chunk;
-        });
-        req.on('end', async () => {
-          let isNotification = false;
-          try {
-            const message = JSON.parse(body) as { id?: string | number };
-            isNotification = !Object.prototype.hasOwnProperty.call(message, 'id');
-          } catch {
-            // The transport returns the MCP parse-error response.
-          }
+        const body = await this.readBody(req, res);
+        if (res.writableEnded) return;
 
-          const result = await this.mcpSse.handleMessage('streamable-http', body);
-          if (isNotification) {
-            res.writeHead(202);
-            res.end();
-            return;
-          }
+        let isNotification = false;
+        try {
+          const message = JSON.parse(body) as { id?: string | number };
+          isNotification = !Object.prototype.hasOwnProperty.call(message, 'id');
+        } catch {
+          // The transport returns the MCP parse-error response.
+        }
 
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(result);
-        });
+        const result = await this.mcpSse.handleMessage('streamable-http', body);
+        if (isNotification) {
+          res.writeHead(202);
+          res.end();
+          return;
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(result);
         return;
       }
 
@@ -516,15 +653,12 @@ export class UCCPServer {
           return;
         }
 
-        let body = '';
-        req.on('data', (chunk: string) => {
-          body += chunk;
-        });
-        req.on('end', async () => {
-          const result = await this.mcpSse.handleMessage(clientId, body);
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(result);
-        });
+        const body = await this.readBody(req, res);
+        if (res.writableEnded) return;
+
+        const result = await this.mcpSse.handleMessage(clientId, body);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(result);
         return;
       }
 
@@ -541,7 +675,8 @@ export class UCCPServer {
           return;
         }
         const op = pathname.slice('/cp/v1/'.length);
-        const body = await readJsonBody();
+        const body = await this.readJsonBody(req, res);
+        if (res.writableEnded) return;
         const response = await handleCPHTTP(this.protocol, { ...(body ?? {}), op });
         res.writeHead(response.success ? 200 : 400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(response));
@@ -578,26 +713,9 @@ export class UCCPServer {
         return;
       }
 
-      if (pathname === '/api/token' && req.method === 'POST') {
-        const apiKey = req.headers['x-api-key'] as string;
-        if (!apiKey) {
-          res.writeHead(401);
-          res.end(JSON.stringify({ error: 'Missing x-api-key header' }));
-          return;
-        }
-        const result = this.auth.createToken(apiKey);
-        if (result.error) {
-          res.writeHead(401);
-          res.end(JSON.stringify({ error: result.error }));
-          return;
-        }
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ token: result.token?.token, expiresAt: result.token?.expiresAt }));
-        return;
-      }
-
       if (pathname === '/api/suit/litmus' && req.method === 'POST') {
-        const body = await readJsonBody();
+        const body = await this.readJsonBody(req, res);
+        if (res.writableEnded) return;
         const profile = (body?.profile ?? body) as FileProfile | undefined;
         if (!profile || typeof profile.path !== 'string') {
           res.writeHead(400);
@@ -617,7 +735,8 @@ export class UCCPServer {
       }
 
       if (pathname === '/api/suit/instinct' && req.method === 'POST') {
-        const body = await readJsonBody();
+        const body = await this.readJsonBody(req, res);
+        if (res.writableEnded) return;
         const context = (body?.context ?? body) as ReflexContext | undefined;
         if (!context || typeof context.name !== 'string') {
           res.writeHead(400);
@@ -643,7 +762,8 @@ export class UCCPServer {
       }
 
       if (pathname === '/api/aether/observe' && req.method === 'POST') {
-        const body = await readJsonBody();
+        const body = await this.readJsonBody(req, res);
+        if (res.writableEnded) return;
         if (!body || typeof body.content !== 'string') {
           res.writeHead(400);
           res.end(JSON.stringify({ error: 'Missing content in body' }));
@@ -664,7 +784,7 @@ export class UCCPServer {
       res.end(JSON.stringify({ error: 'Not found' }));
     });
 
-    this.httpServer.listen(this.options.httpPort);
+    this.httpServer.listen(this.options.httpPort, this.options.host);
   }
 }
 
@@ -676,9 +796,12 @@ function main(): void {
   const workspaceName =
     args.find((a) => a.startsWith('--workspace-name='))?.split('=')[1] ?? 'Default Workspace';
   const port = args.find((a) => a.startsWith('--port='))?.split('=')[1] ?? '3100';
+  const host = args.find((a) => a.startsWith('--host='))?.split('=')[1] ?? '127.0.0.1';
   const configPath =
     args.find((a) => a.startsWith('--config='))?.split('=')[1] ?? 'uccp.config.json';
-  const apiKey = args.find((a) => a.startsWith('--api-key='))?.split('=')[1] ?? 'dev-key';
+  // No default key: binding to a non-loopback host without an explicit
+  // --api-key is rejected by the constructor (fail-closed).
+  const apiKey = args.find((a) => a.startsWith('--api-key='))?.split('=')[1] ?? '';
 
   const configLoader = ConfigLoader.fromFile(configPath);
   configLoader.merge(ConfigLoader.fromEnv().get());
@@ -688,6 +811,7 @@ function main(): void {
     workspaceName,
     workspaceRoot,
     httpPort: parseInt(port),
+    host,
     configPath,
     apiKey,
   });

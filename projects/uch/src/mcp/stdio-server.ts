@@ -161,7 +161,7 @@ export class MCPStdioServer {
         id: msg.id,
         result: {
           protocolVersion: '2025-03-26',
-          serverInfo: { name: 'uch', version: '0.2.0' },
+          serverInfo: { name: 'uch', version: '0.3.0' },
           capabilities: { tools: {}, resources: {}, prompts: {} },
         },
       });

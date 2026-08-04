@@ -4,10 +4,27 @@ All notable changes to UCH are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-08-04
+
+### Fixed
+
+- Restored `POST /api/token` minting endpoint (x-api-key gated) with exact
+  `Missing x-api-key header` 401 contract (UC-1076).
+- Server auth is public-by-default: absent credential passes, invalid
+  credential rejects 401 (UC-1076).
+- Digital-twin simulations deterministic per twin instance (fixed epoch
+  clock) (UC-1076).
+- Docker-gated `uccp-server.test.ts` reconciled with the live server
+  contract (public-by-default status).
+- Version aligned: package 0.2.0 → 0.3.0; spec corpus 0.5.0 → 0.5.1
+  (declaration refresh, no normative change).
+
 ## [Unreleased]
 
 ### Added
 
+- Phase 04: CognitiveCore brain/suit separation — persistent core (zero
+  LLM), detachment semantics, `uch daemon`.
 - **Cognitive Virtual Machine + Execution Graph (IDEA-0045 + IDEA-0117,
   Research + Prototype)** — `src/cognitive-plane/cvm/`: cognitive
   bytecode envelope over the CP 17-op ISA (`bytecode.ts` —
@@ -83,8 +100,8 @@ All notable changes to UCH are documented here. Format follows
     threat), `engine.ts`, `types.ts`, `index.ts`; `cic/index.ts` now
     re-exports `./mitigations/index.js`.
   - `src/mcp/stdio-server.ts` (1315 lines) → JSON-RPC shell (275 lines)
-    + `src/mcp/tools/` — `core-tools.ts`, `framework-tools.ts`,
-    `package-tools.ts`, `types.ts` (`Tool`/`ToolRegistrar`/`MCPToolContext`).
+    - `src/mcp/tools/` — `core-tools.ts`, `framework-tools.ts`,
+      `package-tools.ts`, `types.ts` (`Tool`/`ToolRegistrar`/`MCPToolContext`).
   - `src/cli/index.ts` (1001 lines, R-7 cc debt) → dispatch shell
     (138 lines) + command modules in `src/cli/` — `server-commands`,
     `memory-commands`, `skill-commands`, `governance-commands`,
@@ -171,6 +188,53 @@ All notable changes to UCH are documented here. Format follows
   lineage, human factors, UX charter, memory hygiene, plugin trust scoring,
   spec repository (+ EI chain/slo/taste). 17 research G1 registers
   (`research/foundations/09..17`).
+- **Foundation hardening waves W-01/W-02** — trace ledger persistence
+  write-path (`onTrace` sink wired into `CognitiveCore` + `UCCPServer`;
+  `TracePersistence` re-entrancy guard, EISDIR degradation, backpressure)
+  and the organism persistence registry (per-store persist/restore by name
+  for the 20+ `Storable` organs under `.uccp/persist`).
+- **Central event metadata registry (W-08)** —
+  `src/event-bus/event-registry.ts`: one table holds every event type's
+  trace span shape + cognitive trace category + nervous-system signal
+  priority; `TraceRecorder` and `signalPriorityForType` now derive from it,
+  so adding an event type no longer requires edits across four files.
+  Unknown/extension types receive generic metadata replicating legacy
+  behavior.
+- **Cognitive ABI (IDEA-0095)** — `src/cognitive-plane/abi/`: the
+  six-method kernel-to-organ boundary contract (observe/process/verify/
+  checkpoint/restore/heal), optional-subset rule, append-only ABI violation
+  ledger, and a deterministic conformance probe issuing organ certificates
+  (driver-compliance twin).
+- **Cognitive Binary Interface (IDEA-0126)** — `src/cognitive-plane/cbi/`:
+  portable `.cog` artifact schema with major-version compatibility,
+  validation, and behavior/knowledge/relationship sections.
+- **Universal Entity + Relationship Fabric (IDEA-0056/0050)** —
+  `src/cognitive-plane/entity/`: self-describing cognitive objects with
+  provenance, typed relationship edges, snapshot + query surface.
+- **Cognitive Architecture Decision Records (IDEA-0131)** —
+  `src/cognitive-plane/decisions/cadr.ts`: searchable decision records
+  (problem/decision/rationale/status) with class-matching lookup.
+- **Framework DNA (IDEA-0136)** — `src/cognitive-plane/frameworks/dna/`:
+  metadata-vector search over the framework catalog with per-hit reasons
+  (complements registry.select).
+- **CAL runtime profile + discovery (round 14/16)** —
+  `src/cognitive-runtime/cal-profile.ts` + `runtime-discovery.ts`: runtime
+  capability profiles and a fingerprinting discovery service
+  (`runtime:discovery_completed` event).
+- **Expression system benchmark (RFC-0006)** —
+  `src/cognitive-plane/genome/expression/expression-benchmark.ts`: labeled
+  corpus + suite runner (threshold stability, exploration actions).
+- **CP instruction catalog microarchitecture policy** —
+  `src/protocol/catalog.ts`: per-op lane/residency/checkpoint/speculative/
+  lease metadata for all 17 CP ops.
+- **Cognitive Profiler (IDEA-0128)** — `src/cognitive-plane/profiler/`:
+  deterministic session attribution over ADR-002 traces (Dapper span-tree
+  semantics, ten metrics with honest coverage flags, cross-session
+  aggregation). P1, 17 tests.
+- **UER P2 ingestion (IDEA-0047)** — `src/cognitive-plane/replay/uer-ingest.ts`:
+  ADR-002 ledger span ingestion (traceparent spine, entity derivation) +
+  git history ingestion (commit DAG, artifact touches); pure/deterministic
+  parsers.
 
 ## [0.2.0] — 2026-07-31
 
