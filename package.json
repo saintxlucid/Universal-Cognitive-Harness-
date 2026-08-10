@@ -44,7 +44,7 @@
     "lint-staged": "^15.5.2",
     "openai": "^7.1.0",
     "prettier": "^3.3.4",
-    "turbo": "^2.0.0",
+    "turbo": "^2.10.8",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.65.0"
   }
